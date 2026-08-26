@@ -1,0 +1,10 @@
+{
+  "name": "cogneris-api-examples",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runnable Cogneris API examples generated from OpenAPI",
+  "scripts": {
+    "generate": "node scripts/generate-postman.mjs",
+    "test": "python3 -m unittest discover -s tests -p 'test_*.py'"
+  }
+}

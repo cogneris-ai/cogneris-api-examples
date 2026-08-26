@@ -1,0 +1,4005 @@
+{
+  "item": [
+    {
+      "name": "Document",
+      "description": "",
+      "item": [
+        {
+          "name": "extraction",
+          "description": "",
+          "item": [
+            {
+              "name": "Extract structured fields from a document",
+              "request": {
+                "name": "Extract structured fields from a document",
+                "description": {
+                  "content": "Extracts structured fields from a single document using the templates\nconfigured for your tenant. The platform selects the best template for the\nuploaded document.\n",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "Document",
+                    "extraction"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) The document to extract from.",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                        "type": "text/plain"
+                      },
+                      "key": "ComplementaryPrompt",
+                      "value": "<string>",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "classifier",
+          "description": "",
+          "item": [
+            {
+              "name": "Classify one or more documents",
+              "request": {
+                "name": "Classify one or more documents",
+                "description": {
+                  "content": "Detects the document type against the classes configured for your tenant.\nRepeat the `files` field to classify several documents in one call.\n",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "Document",
+                    "classifier"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) One or more files to classify.",
+                        "type": "text/plain"
+                      },
+                      "key": "files",
+                      "value": "<binary>,<binary>",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "zero-shot",
+          "description": "",
+          "item": [
+            {
+              "name": "Discover fields without a template",
+              "request": {
+                "name": "Discover fields without a template",
+                "description": {
+                  "content": "Reports the fields the model can find in a document you have no template\nfor, each with a confidence score.\n",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "Document",
+                    "zero-shot"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) ",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "type": "file"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "crop",
+          "description": "",
+          "item": [
+            {
+              "name": "Crop pages to the document",
+              "request": {
+                "name": "Crop pages to the document",
+                "description": {
+                  "content": "Trims pages down to the document itself — useful when the source is a photo\nor a scan with a border, a desk or a second page in frame.\n",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "Document",
+                    "crop"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) ",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "type": "file"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "split",
+          "description": "",
+          "item": [
+            {
+              "name": "Split a bundle into its documents",
+              "request": {
+                "name": "Split a bundle into its documents",
+                "description": {
+                  "content": "Breaks one file into the documents it contains, returning a detected type and\npage range per segment. Accepts files up to 500 MB — well above the 10 MB\nlimit that applies to the other document endpoints. PDFs work best; other\nsupported formats are accepted but usually return a single segment.\n",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "Document",
+                    "split"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) ",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "type": "file"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "facematch",
+          "description": "",
+          "item": [
+            {
+              "name": "Match a selfie against identity documents",
+              "request": {
+                "name": "Match a selfie against identity documents",
+                "description": {},
+                "url": {
+                  "path": [
+                    "Document",
+                    "facematch"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) The selfie to compare.",
+                        "type": "text/plain"
+                      },
+                      "key": "selfie",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "(Required) One or more identity documents to compare against.",
+                        "type": "text/plain"
+                      },
+                      "key": "documents",
+                      "value": "<binary>,<binary>",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "The service envelope. `data.metadata` is shaped by the template or operation\nthat ran, so its fields vary by document type.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Request Entity Too Large",
+                  "code": 413,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Extension outside the supported list.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unsupported Media Type",
+                  "code": 415,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                },
+                {
+                  "name": "Over 50 requests in the current 1-minute window for this key.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Too Many Requests",
+                  "code": 429,
+                  "header": [],
+                  "cookie": [],
+                  "_postman_previewlanguage": "text"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "api",
+      "description": "",
+      "item": [
+        {
+          "name": "v1",
+          "description": "",
+          "item": [
+            {
+              "name": "document-jobs",
+              "description": "",
+              "item": [
+                {
+                  "name": "Submit an asynchronous document job",
+                  "request": {
+                    "name": "Submit an asynchronous document job",
+                    "description": {
+                      "content": "Queues a long-running operation. Answers `202` with a `Location` header\npointing at the job and a `Retry-After` hint. Poll that URL, or subscribe to\nwebhooks and let the completion event come to you.\n",
+                      "type": "text/plain"
+                    },
+                    "url": {
+                      "path": [
+                        "api",
+                        "v1",
+                        "document-jobs"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "Job accepted.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Accepted",
+                      "code": 202,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "URL of the created job.",
+                            "type": "text/plain"
+                          },
+                          "key": "Location",
+                          "value": "<string>"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Suggested seconds to wait before polling.",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "body": "{\n  \"jobId\": \"<uuid>\",\n  \"status\": \"Succeeded\",\n  \"statusUrl\": \"<string>\",\n  \"retryAfterSeconds\": \"<integer>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    },
+                    {
+                      "name": "Over 50 requests in the current 1-minute window for this key.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                },
+                {
+                  "name": "List document jobs",
+                  "request": {
+                    "name": "List document jobs",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "v1",
+                        "document-jobs"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "",
+                            "type": "text/plain"
+                          },
+                          "key": "limit",
+                          "value": "100"
+                        }
+                      ],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {},
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "Jobs for the tenant.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "limit",
+                              "value": "100"
+                            }
+                          ],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"jobs\": [\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"Split\",\n      \"status\": \"Cancelled\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    },\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"ZeroShot\",\n      \"status\": \"Failed\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "limit",
+                              "value": "100"
+                            }
+                          ],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    },
+                    {
+                      "name": "Over 50 requests in the current 1-minute window for this key.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "limit",
+                              "value": "100"
+                            }
+                          ],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                },
+                {
+                  "name": "{jobId}",
+                  "description": "",
+                  "item": [
+                    {
+                      "name": "Get a document job",
+                      "request": {
+                        "name": "Get a document job",
+                        "description": {},
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "document-jobs",
+                            ":jobId"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": [
+                            {
+                              "type": "any",
+                              "value": "<uuid>",
+                              "key": "jobId",
+                              "disabled": false,
+                              "description": {
+                                "content": "(Required) ",
+                                "type": "text/plain"
+                              }
+                            }
+                          ]
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "The job.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "document-jobs",
+                                ":jobId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "jobId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Crop\",\n  \"status\": \"Processing\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "document-jobs",
+                                ":jobId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "jobId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "No job with that id in this tenant.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "document-jobs",
+                                ":jobId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "jobId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "Over 50 requests in the current 1-minute window for this key.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "document-jobs",
+                                ":jobId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "jobId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Too Many Requests",
+                          "code": 429,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    },
+                    {
+                      "name": "cancel",
+                      "description": "",
+                      "item": [
+                        {
+                          "name": "Cancel a document job",
+                          "request": {
+                            "name": "Cancel a document job",
+                            "description": {},
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "document-jobs",
+                                ":jobId",
+                                "cancel"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "jobId",
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  }
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {},
+                            "auth": null
+                          },
+                          "response": [
+                            {
+                              "name": "Cancellation requested.",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "document-jobs",
+                                    ":jobId",
+                                    "cancel"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [],
+                                  "variable": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "(Required) ",
+                                        "type": "text/plain"
+                                      },
+                                      "type": "any",
+                                      "value": "<uuid>",
+                                      "key": "jobId"
+                                    }
+                                  ]
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": {
+                                      "content": "Added as a part of security scheme: bearer",
+                                      "type": "text/plain"
+                                    },
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "method": "POST",
+                                "body": {}
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Crop\",\n  \"status\": \"Processing\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            },
+                            {
+                              "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "document-jobs",
+                                    ":jobId",
+                                    "cancel"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [],
+                                  "variable": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "(Required) ",
+                                        "type": "text/plain"
+                                      },
+                                      "type": "any",
+                                      "value": "<uuid>",
+                                      "key": "jobId"
+                                    }
+                                  ]
+                                },
+                                "header": [
+                                  {
+                                    "description": {
+                                      "content": "Added as a part of security scheme: bearer",
+                                      "type": "text/plain"
+                                    },
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "method": "POST",
+                                "body": {}
+                              },
+                              "status": "Unauthorized",
+                              "code": 401,
+                              "header": [],
+                              "cookie": [],
+                              "_postman_previewlanguage": "text"
+                            },
+                            {
+                              "name": "No job with that id in this tenant.",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "document-jobs",
+                                    ":jobId",
+                                    "cancel"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [],
+                                  "variable": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "(Required) ",
+                                        "type": "text/plain"
+                                      },
+                                      "type": "any",
+                                      "value": "<uuid>",
+                                      "key": "jobId"
+                                    }
+                                  ]
+                                },
+                                "header": [
+                                  {
+                                    "description": {
+                                      "content": "Added as a part of security scheme: bearer",
+                                      "type": "text/plain"
+                                    },
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "method": "POST",
+                                "body": {}
+                              },
+                              "status": "Not Found",
+                              "code": 404,
+                              "header": [],
+                              "cookie": [],
+                              "_postman_previewlanguage": "text"
+                            },
+                            {
+                              "name": "Over 50 requests in the current 1-minute window for this key.",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "document-jobs",
+                                    ":jobId",
+                                    "cancel"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [],
+                                  "variable": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "(Required) ",
+                                        "type": "text/plain"
+                                      },
+                                      "type": "any",
+                                      "value": "<uuid>",
+                                      "key": "jobId"
+                                    }
+                                  ]
+                                },
+                                "header": [
+                                  {
+                                    "description": {
+                                      "content": "Added as a part of security scheme: bearer",
+                                      "type": "text/plain"
+                                    },
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "method": "POST",
+                                "body": {}
+                              },
+                              "status": "Too Many Requests",
+                              "code": 429,
+                              "header": [],
+                              "cookie": [],
+                              "_postman_previewlanguage": "text"
+                            }
+                          ],
+                          "event": [],
+                          "protocolProfileBehavior": {
+                            "disableBodyPruning": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "portal",
+              "description": "",
+              "item": [
+                {
+                  "name": "forms",
+                  "description": "",
+                  "item": [
+                    {
+                      "name": "List the forms available to the tenant",
+                      "request": {
+                        "name": "List the forms available to the tenant",
+                        "description": {
+                          "content": "Returns every intake form configured for your tenant, so you can resolve the\n`formId` a magic link needs. Forms are created in the dashboard, not here.\n\nThe response is a bare array, not the document-endpoint envelope, and it is\nnot paginated.\n",
+                          "type": "text/plain"
+                        },
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "portal",
+                            "forms"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "The tenant's forms.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "forms"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "[\n  {\n    \"formId\": \"<long>\",\n    \"formName\": \"<string>\",\n    \"formDescription\": \"<string,null>\"\n  },\n  {\n    \"formId\": \"<long>\",\n    \"formName\": \"<string>\",\n    \"formDescription\": \"<string,null>\"\n  }\n]",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "forms"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The key is valid but lacks the scope this endpoint requires —\n`portal.forms.read` to read, `portal.magiclinks.write` to create. The missing\nscope is named in the response.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "forms"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Over 50 requests in the current 1-minute window for this key.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "forms"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Too Many Requests",
+                          "code": 429,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The Portal service is unreachable. Marked retryable — back off and try again.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "forms"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Bad Gateway",
+                          "code": 502,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "available-channels",
+                  "description": "",
+                  "item": [
+                    {
+                      "name": "List the send channels this environment can use",
+                      "request": {
+                        "name": "List the send channels this environment can use",
+                        "description": {
+                          "content": "The channels available for delivering a magic link. This is a property of the\nenvironment — it follows the delivery credentials configured there — rather\nthan a per-tenant or per-plan entitlement, so it may be shorter than expected.\n\nWhatsApp additionally requires a Meta-approved template and respects the\n24-hour service window.\n",
+                          "type": "text/plain"
+                        },
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "portal",
+                            "available-channels"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "The enabled channels.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "available-channels"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"channels\": [\n    \"email\",\n    \"whatsapp\"\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "available-channels"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The key is valid but lacks the scope this endpoint requires —\n`portal.forms.read` to read, `portal.magiclinks.write` to create. The missing\nscope is named in the response.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "available-channels"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Over 50 requests in the current 1-minute window for this key.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "available-channels"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Too Many Requests",
+                          "code": 429,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The Portal service is unreachable. Marked retryable — back off and try again.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "available-channels"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Bad Gateway",
+                          "code": 502,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "magic-link",
+                  "description": "",
+                  "item": [
+                    {
+                      "name": "Create a magic link",
+                      "request": {
+                        "name": "Create a magic link",
+                        "description": {
+                          "content": "Creates a link to an intake form for a named recipient and, when `sendChannel`\nis set, dispatches it on that channel. Omit `sendChannel` to create the link\nwithout sending anything and deliver it yourself.\n\nSend a stable `Idempotency-Key` to make retries safe: a repeat resolves to the\nsame link rather than creating a second one or charging twice.\n\n`url` is returned **only on the first create**. The raw token is never stored\nin readable form, so an idempotent replay returns the same `id` with `url`\nabsent — persist it from the original `201`.\n",
+                          "type": "text/plain"
+                        },
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "portal",
+                            "magic-link"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "disabled": false,
+                            "description": {
+                              "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                              "type": "text/plain"
+                            },
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "The link was created.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Created",
+                          "code": 201,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"id\": \"<long>\",\n  \"url\": \"<string,null>\",\n  \"sent\": \"<boolean>\",\n  \"sendChannel\": \"whatsapp\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "A field failed validation — a missing `formId` or `name`, a `sendChannel`\noutside the allowed set, or a channel whose matching contact field is absent.\nThe offending field is named in `errors[].field`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "Billing quota exhausted. `detail` carries the reason and, where one applies, an upgrade URL.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Payment Required",
+                          "code": 402,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The key is valid but lacks the scope this endpoint requires —\n`portal.forms.read` to read, `portal.magiclinks.write` to create. The missing\nscope is named in the response.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "No such form",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "Over 50 requests in the current 1-minute window for this key.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Too Many Requests",
+                          "code": 429,
+                          "header": [],
+                          "cookie": [],
+                          "_postman_previewlanguage": "text"
+                        },
+                        {
+                          "name": "The Portal service is unreachable. Marked retryable — back off and try again.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "portal",
+                                "magic-link"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "disabled": false,
+                                "description": {
+                                  "content": "Stable caller-supplied key that makes a retry resolve to the same link.",
+                                  "type": "text/plain"
+                                },
+                                "key": "Idempotency-Key",
+                                "value": "<string>"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "POST",
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            }
+                          },
+                          "status": "Bad Gateway",
+                          "code": 502,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string>\",\n      \"retryable\": \"<boolean>\"\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "type": "any",
+        "value": "{{bearerToken}}",
+        "key": "token"
+      }
+    ]
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-us.cogneris.ai"
+    },
+    {
+      "key": "bearerToken",
+      "value": "",
+      "type": "secret"
+    }
+  ],
+  "info": {
+    "name": "Cogneris Document AI API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —\ninto structured JSON.\n\nThis document describes the endpoints that are actually deployed. It is written\nfrom the running service (`cogneris-api-be`) rather than from a design, so what\nis listed here is what you can call.\n\n## Authentication\n\nEvery endpoint takes an API key in the `Authorization` header as\n`Bearer <key>`. Keys begin with `xtkt_live_`; the prefix is checked before the\nkey is looked up, so a malformed key fails with `401` immediately. Keys are\ntenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard\nunder **Settings → API keys**.\n\n## Uploads\n\nThe synchronous document endpoints take `multipart/form-data`. There is no\nfetch-by-URL variant — the file travels in the request body.\n\n- Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,\n  `.bmp`, `.doc`, `.docx`\n- Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB\n\n## Templates\n\nExtraction and classification are driven by the document types and templates\nconfigured for your tenant. The platform selects the template from the document\nitself, so there is no template or schema parameter on the request.\n\n## Scopes\n\nKeys carry scopes. The Portal endpoints check them and answer `403` when the\nrequired one is absent; the document endpoints accept any valid key for the\ntenant without consulting the list. `*` is a real scope meaning full access, and\nit is what a key receives when it is created without an explicit scope list.\n\n## Rate limits\n\nOne shared policy covers every surface in this document, Portal included:\n**50 requests per API key per fixed 1-minute window**. It is a fixed window\nrather than a token bucket, so the allowance resets on the minute instead of\nrefilling gradually. Requests over the limit receive `429`.\n\n## Response envelope\n\nSuccessful responses from the **document** endpoints share one wrapper: `data`\nfor the payload, `meta` for the status and any messages, and `hasErrors` for a\nfast failure check.\n\nThe **Portal** endpoints do not use that wrapper. They return the payload\ndirectly, and their errors are RFC 9457 problem documents sent as\n`application/problem+json`, with a stable `code`, a `correlationId` that is also\nreturned in the `x-correlation-id` header, and a `retryable` flag. Branch on\n`code`; treat `type` as an opaque identifier.\n",
+      "type": "text/plain"
+    }
+  }
+}
