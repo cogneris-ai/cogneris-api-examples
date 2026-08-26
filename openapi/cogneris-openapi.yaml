@@ -1,0 +1,627 @@
+openapi: 3.1.0
+info:
+  title: Cogneris Document AI API
+  version: '2026-08-07'
+  summary: Turn documents into structured data.
+  description: |
+    The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —
+    into structured JSON.
+
+    This document describes the endpoints that are actually deployed. It is written
+    from the running service (`cogneris-api-be`) rather than from a design, so what
+    is listed here is what you can call.
+
+    ## Authentication
+
+    Every endpoint takes an API key in the `Authorization` header as
+    `Bearer <key>`. Keys begin with `xtkt_live_`; the prefix is checked before the
+    key is looked up, so a malformed key fails with `401` immediately. Keys are
+    tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard
+    under **Settings → API keys**.
+
+    ## Uploads
+
+    The synchronous document endpoints take `multipart/form-data`. There is no
+    fetch-by-URL variant — the file travels in the request body.
+
+    - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,
+      `.bmp`, `.doc`, `.docx`
+    - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB
+
+    ## Templates
+
+    Extraction and classification are driven by the document types and templates
+    configured for your tenant. The platform selects the template from the document
+    itself, so there is no template or schema parameter on the request.
+
+    ## Scopes
+
+    Keys carry scopes. The Portal endpoints check them and answer `403` when the
+    required one is absent; the document endpoints accept any valid key for the
+    tenant without consulting the list. `*` is a real scope meaning full access, and
+    it is what a key receives when it is created without an explicit scope list.
+
+    ## Rate limits
+
+    One shared policy covers every surface in this document, Portal included:
+    **50 requests per API key per fixed 1-minute window**. It is a fixed window
+    rather than a token bucket, so the allowance resets on the minute instead of
+    refilling gradually. Requests over the limit receive `429`.
+
+    ## Response envelope
+
+    Successful responses from the **document** endpoints share one wrapper: `data`
+    for the payload, `meta` for the status and any messages, and `hasErrors` for a
+    fast failure check.
+
+    The **Portal** endpoints do not use that wrapper. They return the payload
+    directly, and their errors are RFC 9457 problem documents sent as
+    `application/problem+json`, with a stable `code`, a `correlationId` that is also
+    returned in the `x-correlation-id` header, and a `retryable` flag. Branch on
+    `code`; treat `type` as an opaque identifier.
+servers:
+  - url: https://api-us.cogneris.ai
+    description: Production — United States (us-central1)
+  - url: https://api-eu.cogneris.ai
+    description: Production — Europe (europe-west1)
+
+security:
+  - ApiKey: []
+
+tags:
+  - name: Documents
+    description: Synchronous document processing.
+  - name: Jobs
+    description: Asynchronous document processing.
+  - name: Portal
+    description: Magic links to intake forms — ask a recipient for documents.
+
+paths:
+  /Document/extraction:
+    post:
+      tags: [Documents]
+      summary: Extract structured fields from a document
+      description: |
+        Extracts structured fields from a single document using the templates
+        configured for your tenant. The platform selects the best template for the
+        uploaded document.
+      operationId: extractDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document to extract from.
+                ComplementaryPrompt:
+                  type: string
+                  description: |
+                    Free-text instruction appended to the model prompt. Use it to ask
+                    for extra fields, enforce formatting, or narrow the scope.
+                  example: Also return the payment terms and the PO number.
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /Document/classifier:
+    post:
+      tags: [Documents]
+      summary: Classify one or more documents
+      description: |
+        Detects the document type against the classes configured for your tenant.
+        Repeat the `files` field to classify several documents in one call.
+      operationId: classifyDocuments
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files]
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: One or more files to classify.
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /Document/zero-shot:
+    post:
+      tags: [Documents]
+      summary: Discover fields without a template
+      description: |
+        Reports the fields the model can find in a document you have no template
+        for, each with a confidence score.
+      operationId: zeroShotDocument
+      requestBody:
+        $ref: '#/components/requestBodies/SingleFile'
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /Document/crop:
+    post:
+      tags: [Documents]
+      summary: Crop pages to the document
+      description: |
+        Trims pages down to the document itself — useful when the source is a photo
+        or a scan with a border, a desk or a second page in frame.
+      operationId: cropDocument
+      requestBody:
+        $ref: '#/components/requestBodies/SingleFile'
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /Document/split:
+    post:
+      tags: [Documents]
+      summary: Split a bundle into its documents
+      description: |
+        Breaks one file into the documents it contains, returning a detected type and
+        page range per segment. Accepts files up to 500 MB — well above the 10 MB
+        limit that applies to the other document endpoints. PDFs work best; other
+        supported formats are accepted but usually return a single segment.
+      operationId: splitDocument
+      requestBody:
+        $ref: '#/components/requestBodies/SingleFile'
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /Document/facematch:
+    post:
+      tags: [Documents]
+      summary: Match a selfie against identity documents
+      operationId: faceMatchDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [selfie, documents]
+              properties:
+                selfie:
+                  type: string
+                  format: binary
+                  description: The selfie to compare.
+                documents:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: One or more identity documents to compare against.
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/document-jobs:
+    post:
+      tags: [Jobs]
+      summary: Submit an asynchronous document job
+      description: |
+        Queues a long-running operation. Answers `202` with a `Location` header
+        pointing at the job and a `Retry-After` hint. Poll that URL, or subscribe to
+        webhooks and let the completion event come to you.
+      operationId: submitDocumentJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation, inputReference]
+              properties:
+                operation:
+                  $ref: '#/components/schemas/DocumentJobOperation'
+                inputReference:
+                  type: string
+                  description: Reference to the already-uploaded input.
+      responses:
+        '202':
+          description: Job accepted.
+          headers:
+            Location:
+              schema: { type: string }
+              description: URL of the created job.
+            Retry-After:
+              schema: { type: integer }
+              description: Suggested seconds to wait before polling.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId: { type: string, format: uuid }
+                  status: { $ref: '#/components/schemas/DocumentJobStatus' }
+                  statusUrl: { type: string }
+                  retryAfterSeconds: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+    get:
+      tags: [Jobs]
+      summary: List document jobs
+      operationId: listDocumentJobs
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Jobs for the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/DocumentJob' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/document-jobs/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Jobs]
+      summary: Get a document job
+      operationId: getDocumentJob
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentJob' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: No job with that id in this tenant. }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/document-jobs/{jobId}/cancel:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [Jobs]
+      summary: Cancel a document job
+      operationId: cancelDocumentJob
+      responses:
+        '200':
+          description: Cancellation requested.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentJob' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: No job with that id in this tenant. }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/portal/forms:
+    get:
+      tags: [Portal]
+      summary: List the forms available to the tenant
+      description: |
+        Returns every intake form configured for your tenant, so you can resolve the
+        `formId` a magic link needs. Forms are created in the dashboard, not here.
+
+        The response is a bare array, not the document-endpoint envelope, and it is
+        not paginated.
+      operationId: listPortalForms
+      responses:
+        '200':
+          description: The tenant's forms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PortalForm' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/PortalForbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '502': { $ref: '#/components/responses/PortalUnavailable' }
+
+  /api/v1/portal/available-channels:
+    get:
+      tags: [Portal]
+      summary: List the send channels this environment can use
+      description: |
+        The channels available for delivering a magic link. This is a property of the
+        environment — it follows the delivery credentials configured there — rather
+        than a per-tenant or per-plan entitlement, so it may be shorter than expected.
+
+        WhatsApp additionally requires a Meta-approved template and respects the
+        24-hour service window.
+      operationId: listPortalChannels
+      responses:
+        '200':
+          description: The enabled channels.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PortalChannels' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/PortalForbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '502': { $ref: '#/components/responses/PortalUnavailable' }
+
+  /api/v1/portal/magic-link:
+    post:
+      tags: [Portal]
+      summary: Create a magic link
+      description: |
+        Creates a link to an intake form for a named recipient and, when `sendChannel`
+        is set, dispatches it on that channel. Omit `sendChannel` to create the link
+        without sending anything and deliver it yourself.
+
+        Send a stable `Idempotency-Key` to make retries safe: a repeat resolves to the
+        same link rather than creating a second one or charging twice.
+
+        `url` is returned **only on the first create**. The raw token is never stored
+        in readable form, so an idempotent replay returns the same `id` with `url`
+        absent — persist it from the original `201`.
+      operationId: createPortalMagicLink
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+          description: Stable caller-supplied key that makes a retry resolve to the same link.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PortalMagicLinkRequest' }
+      responses:
+        '201':
+          description: The link was created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PortalMagicLink' }
+        '400':
+          description: |
+            A field failed validation — a missing `formId` or `name`, a `sendChannel`
+            outside the allowed set, or a channel whose matching contact field is absent.
+            The offending field is named in `errors[].field`.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '402':
+          description: Billing quota exhausted. `detail` carries the reason and, where one applies, an upgrade URL.
+        '403': { $ref: '#/components/responses/PortalForbidden' }
+        '404': { description: No such form, or it belongs to another tenant. The two are indistinguishable by design. }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '502': { $ref: '#/components/responses/PortalUnavailable' }
+
+components:
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      description: |
+        An API key prefixed `xtkt_live_`, sent as `Authorization: Bearer <key>`.
+
+  requestBodies:
+    SingleFile:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [file]
+            properties:
+              file:
+                type: string
+                format: binary
+
+  responses:
+    DocumentResult:
+      description: |
+        The service envelope. `data.metadata` is shaped by the template or operation
+        that ran, so its fields vary by document type.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+    Unauthorized:
+      description: Missing key, or one that does not begin with `xtkt_live_`.
+    PayloadTooLarge:
+      description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+    UnsupportedMediaType:
+      description: Extension outside the supported list.
+    RateLimited:
+      description: Over 50 requests in the current 1-minute window for this key.
+    PortalForbidden:
+      description: |
+        The key is valid but lacks the scope this endpoint requires —
+        `portal.forms.read` to read, `portal.magiclinks.write` to create. The missing
+        scope is named in the response.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    PortalUnavailable:
+      description: The Portal service is unreachable. Marked retryable — back off and try again.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            metadata:
+              type: object
+              description: Operation-specific payload.
+              additionalProperties: true
+            createdDate: { type: string, format: date-time }
+        meta:
+          type: object
+          properties:
+            httpStatusCode: { type: integer }
+            messages:
+              type: array
+              items: { type: string }
+        hasErrors: { type: boolean }
+
+    DocumentJobOperation:
+      type: string
+      enum: [Extraction, Classification, ZeroShot, Crop, Split]
+
+    DocumentJobStatus:
+      type: string
+      enum: [Queued, Processing, Succeeded, Failed, Cancelled]
+
+    DocumentJob:
+      type: object
+      properties:
+        jobId: { type: string, format: uuid }
+        operation: { $ref: '#/components/schemas/DocumentJobOperation' }
+        status: { $ref: '#/components/schemas/DocumentJobStatus' }
+        outputReference: { type: [string, 'null'] }
+        attemptCount: { type: integer }
+        failureCode: { type: [string, 'null'] }
+        retryable: { type: boolean }
+        startedAt: { type: [string, 'null'], format: date-time }
+        completedAt: { type: [string, 'null'], format: date-time }
+        cancellationRequestedAt: { type: [string, 'null'], format: date-time }
+        expiresAt: { type: string, format: date-time }
+
+    PortalForm:
+      type: object
+      properties:
+        formId: { type: integer, format: int64 }
+        formName: { type: string }
+        formDescription: { type: [string, 'null'] }
+
+    PortalChannels:
+      type: object
+      properties:
+        channels:
+          type: array
+          items: { $ref: '#/components/schemas/PortalSendChannel' }
+
+    PortalSendChannel:
+      type: string
+      enum: [email, sms, whatsapp]
+
+    PortalMagicLinkRequest:
+      type: object
+      required: [formId, name]
+      properties:
+        formId:
+          type: integer
+          format: int64
+          description: Target form, from `GET /api/v1/portal/forms`. Must be greater than zero.
+        name:
+          type: string
+          maxLength: 100
+          description: Recipient display name.
+        sendChannel:
+          description: |
+            Channel to deliver the link on. Omit it to create the link without
+            sending anything.
+          oneOf:
+            - $ref: '#/components/schemas/PortalSendChannel'
+            - type: 'null'
+        email:
+          type: [string, 'null']
+          description: Required when `sendChannel` is `email`.
+        phone:
+          type: [string, 'null']
+          description: Required when `sendChannel` is `sms` or `whatsapp`.
+        taxId:
+          type: [string, 'null']
+          maxLength: 20
+          description: Recipient tax id.
+        dueDays:
+          type: integer
+          default: 30
+          description: Days until the link expires. A value of zero or less is treated as 30.
+        maxAccesses:
+          type: [integer, 'null']
+          description: How many times the link may be opened. Null means unlimited; 1 makes it single-use.
+        notes:
+          type: [string, 'null']
+          description: Internal note kept against the link, never shown to the recipient.
+
+    PortalMagicLink:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The created magic link.
+        url:
+          type: [string, 'null']
+          description: |
+            The link the recipient opens. Present only on the first create — the token
+            is a one-time secret that is never stored in readable form, so an
+            idempotent replay omits this field.
+        sent:
+          type: boolean
+          description: Whether Cogneris dispatched the link. False when `sendChannel` was omitted or the send was suppressed.
+        sendChannel:
+          description: The channel actually used, when one was.
+          oneOf:
+            - $ref: '#/components/schemas/PortalSendChannel'
+            - type: 'null'
+
+    ProblemDetails:
+      type: object
+      description: RFC 9457 problem document, sent as `application/problem+json`.
+      properties:
+        type: { type: string, description: Opaque stable identifier for the error class. }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: [string, 'null'] }
+        instance: { type: string, description: The path that produced the error. }
+        code: { type: string, description: Stable machine-readable error code — branch on this. }
+        correlationId: { type: string, description: Also returned in the `x-correlation-id` header. }
+        retryable: { type: boolean }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              message: { type: string }
+              field: { type: string, description: Present on validation failures. }
+              retryable: { type: boolean }
