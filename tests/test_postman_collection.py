@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
+import tempfile
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -22,6 +27,88 @@ def requests(items: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
 class PublishedArtifactTests(unittest.TestCase):
     def test_postman_collection_is_published(self):
         self.assertTrue(COLLECTION.is_file(), f"missing {COLLECTION.relative_to(ROOT)}")
+
+    def test_generation_is_reproducible(self):
+        original = COLLECTION.read_bytes()
+        try:
+            subprocess.run(["npm", "run", "generate"], cwd=ROOT, check=True)
+            first = COLLECTION.read_bytes()
+            subprocess.run(["npm", "run", "generate"], cwd=ROOT, check=True)
+            second = COLLECTION.read_bytes()
+        finally:
+            COLLECTION.write_bytes(original)
+
+        self.assertEqual(original, first, "published collection is stale")
+        self.assertEqual(first, second, "same OpenAPI input generated different collections")
+
+    def test_live_smoke_refuses_to_run_without_a_live_key(self):
+        result = subprocess.run(
+            ["npm", "run", "smoke:live", "--", "--file", str(COLLECTION)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("COGNERIS_KEY must start with xtkt_live_", result.stderr)
+
+    def test_live_smoke_runs_the_collection_extraction_request(self):
+        received: dict[str, Any] = {}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                length = int(self.headers["Content-Length"])
+                received.update(
+                    path=self.path,
+                    authorization=self.headers.get("Authorization"),
+                    content_type=self.headers.get("Content-Type"),
+                    body=self.rfile.read(length),
+                )
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"data":{},"hasErrors":false}')
+
+            def log_message(self, _format, *_args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".txt") as document:
+                document.write(b"xtrak-954 smoke document")
+                document.flush()
+                environment = os.environ.copy()
+                environment["COGNERIS_KEY"] = "xtkt_" + "live_test_only_not_a_secret"
+                result = subprocess.run(
+                    [
+                        "npm",
+                        "run",
+                        "smoke:live",
+                        "--",
+                        "--file",
+                        document.name,
+                        "--base-url",
+                        f"http://127.0.0.1:{server.server_port}",
+                    ],
+                    cwd=ROOT,
+                    env=environment,
+                    text=True,
+                    capture_output=True,
+                )
+        finally:
+            server.shutdown()
+            thread.join()
+            server.server_close()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(received["path"], "/Document/extraction")
+        self.assertEqual(
+            received["authorization"], "Bearer xtkt_" + "live_test_only_not_a_secret"
+        )
+        self.assertTrue(received["content_type"].startswith("multipart/form-data;"))
+        self.assertIn(b"xtrak-954 smoke document", received["body"])
 
 
 class PostmanCollectionTests(unittest.TestCase):

@@ -16,6 +16,18 @@ API keys or customer data committed to this repository.
 The collection defaults to `https://api-us.cogneris.ai`. Change `baseUrl` to
 `https://api-eu.cogneris.ai` when your tenant is hosted in Europe.
 
+## Run the live extraction smoke test
+
+Use the same collection request from the command line with a valid live key and
+a non-sensitive local document. The key is read from the environment and is not
+written to the collection or printed in the output.
+
+```bash
+COGNERIS_KEY=xtkt_live_... npm run smoke:live -- --file /path/to/document.pdf
+```
+
+For an EU-hosted tenant, add `--base-url https://api-eu.cogneris.ai`.
+
 ## Regenerate from OpenAPI
 
 The source contract is [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
@@ -28,4 +40,6 @@ npm test
 ```
 
 The generator removes unstable converter IDs and adds an empty, secret-typed
-`bearerToken` collection variable. It does not add or persist credentials.
+`bearerToken` collection variable. Its converter process uses a fixed random
+seed so the same OpenAPI input produces the same committed collection. It does
+not add or persist credentials.

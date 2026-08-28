@@ -127,7 +127,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -478,7 +478,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -795,7 +795,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1108,7 +1108,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1421,7 +1421,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1749,7 +1749,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": 3108.736373164538\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -2040,7 +2040,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                      "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"<string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -2087,7 +2087,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"<string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2122,7 +2122,7 @@
                           "value": "<integer>"
                         }
                       ],
-                      "body": "{\n  \"jobId\": \"<uuid>\",\n  \"status\": \"Succeeded\",\n  \"statusUrl\": \"<string>\",\n  \"retryAfterSeconds\": \"<integer>\"\n}",
+                      "body": "{\n  \"jobId\": \"<uuid>\",\n  \"status\": \"Cancelled\",\n  \"statusUrl\": \"<string>\",\n  \"retryAfterSeconds\": \"<integer>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -2158,7 +2158,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"<string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2205,7 +2205,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Crop\",\n  \"inputReference\": \"<string>\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"<string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2314,7 +2314,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"jobs\": [\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"Split\",\n      \"status\": \"Cancelled\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    },\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"ZeroShot\",\n      \"status\": \"Failed\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    }\n  ]\n}",
+                      "body": "{\n  \"jobs\": [\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"Split\",\n      \"status\": \"Cancelled\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    },\n    {\n      \"jobId\": \"<uuid>\",\n      \"operation\": \"Extraction\",\n      \"status\": \"Cancelled\",\n      \"outputReference\": \"<string,null>\",\n      \"attemptCount\": \"<integer>\",\n      \"failureCode\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"startedAt\": \"<string,null-date-time>\",\n      \"completedAt\": \"<string,null-date-time>\",\n      \"cancellationRequestedAt\": \"<string,null-date-time>\",\n      \"expiresAt\": \"<dateTime>\"\n    }\n  ]\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -2508,7 +2508,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Crop\",\n  \"status\": \"Processing\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
+                          "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Split\",\n  \"status\": \"Queued\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -2754,7 +2754,7 @@
                                   "value": "application/json"
                                 }
                               ],
-                              "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Crop\",\n  \"status\": \"Processing\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
+                              "body": "{\n  \"jobId\": \"<uuid>\",\n  \"operation\": \"Split\",\n  \"status\": \"Queued\",\n  \"outputReference\": \"<string,null>\",\n  \"attemptCount\": \"<integer>\",\n  \"failureCode\": \"<string,null>\",\n  \"retryable\": \"<boolean>\",\n  \"startedAt\": \"<string,null-date-time>\",\n  \"completedAt\": \"<string,null-date-time>\",\n  \"cancellationRequestedAt\": \"<string,null-date-time>\",\n  \"expiresAt\": \"<dateTime>\"\n}",
                               "cookie": [],
                               "_postman_previewlanguage": "json"
                             },
@@ -3241,7 +3241,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"channels\": [\n    \"email\",\n    \"whatsapp\"\n  ]\n}",
+                          "body": "{\n  \"channels\": [\n    \"sms\",\n    \"email\"\n  ]\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -3460,7 +3460,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                          "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3517,7 +3517,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3580,7 +3580,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3637,7 +3637,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3694,7 +3694,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3755,7 +3755,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3818,7 +3818,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3875,7 +3875,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3936,7 +3936,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"sms\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
