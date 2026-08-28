@@ -5,6 +5,7 @@
   "description": "Runnable Cogneris API examples generated from OpenAPI",
   "scripts": {
     "generate": "node scripts/generate-postman.mjs",
+    "smoke:live": "node scripts/smoke-live.mjs",
     "test": "python3 -m unittest discover -s tests -p 'test_*.py'"
   }
 }

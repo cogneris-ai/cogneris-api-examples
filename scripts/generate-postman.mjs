@@ -11,6 +11,11 @@ const outputPath = path.join(
   "postman",
   "Cogneris-API.postman_collection.json",
 );
+const deterministicRandomPath = path.join(
+  root,
+  "scripts",
+  "deterministic-random.cjs",
+);
 
 function removeUnstableIds(value) {
   if (Array.isArray(value)) {
@@ -43,7 +48,13 @@ try {
       generatedPath,
       "-p",
     ],
-    { stdio: "inherit" },
+    {
+      env: {
+        ...process.env,
+        NODE_OPTIONS: `--require=${deterministicRandomPath}`,
+      },
+      stdio: "inherit",
+    },
   );
   if (conversion.status !== 0) {
     throw new Error(`OpenAPI conversion exited with ${conversion.status}`);
