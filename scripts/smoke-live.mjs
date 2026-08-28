@@ -27,8 +27,8 @@ if (!file) {
 }
 
 const absoluteFile = path.resolve(file);
-const stat = await fs.stat(absoluteFile).catch(() => undefined);
-if (!stat?.isFile()) {
+const documentBytes = await fs.readFile(absoluteFile).catch(() => undefined);
+if (!documentBytes) {
   console.error(`document does not exist: ${absoluteFile}`);
   process.exit(2);
 }
@@ -54,17 +54,28 @@ if (!fileField) {
 const form = new FormData();
 for (const field of extraction.body.formdata) {
   if (field.type === "file") {
-    form.append(field.key, new Blob([await fs.readFile(absoluteFile)]), path.basename(absoluteFile));
+    form.append(field.key, new Blob([documentBytes]), path.basename(absoluteFile));
   } else if (!field.disabled) {
     form.append(field.key, field.value ?? "");
   }
 }
 
-const collectionBaseUrl = collection.variable.find(
-  (variable) => variable.key === "baseUrl",
-)?.value;
-const baseUrl = argument("--base-url") ?? collectionBaseUrl;
-const requestUrl = `${baseUrl.replace(/\/$/, "")}/${extraction.url.path.join("/")}`;
+const baseUrl = new URL(argument("--base-url") ?? "https://api-us.cogneris.ai");
+const allowedHosts = new Set([
+  "api-us.cogneris.ai",
+  "api-eu.cogneris.ai",
+  "127.0.0.1",
+  "localhost",
+]);
+if (!allowedHosts.has(baseUrl.hostname)) {
+  console.error(`unsupported API host: ${baseUrl.hostname}`);
+  process.exit(2);
+}
+if (baseUrl.protocol !== "https:" && !["127.0.0.1", "localhost"].includes(baseUrl.hostname)) {
+  console.error("Cogneris API hosts require HTTPS");
+  process.exit(2);
+}
+const requestUrl = new URL("/Document/extraction", baseUrl);
 const response = await fetch(requestUrl, {
   method: extraction.method,
   headers: { Authorization: `Bearer ${key}` },
