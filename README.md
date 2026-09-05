@@ -13,6 +13,11 @@ API keys or customer data committed to this repository.
 4. Open **Documents → extraction → Extract structured fields from a document**,
    choose a local file in the `file` form-data field, and send the request.
 
+Optional form-data fields ship deselected, so the request sends only what the
+contract requires. `ComplementaryPrompt` is appended verbatim to the model
+prompt — select it and replace the placeholder only when you want to steer the
+extraction.
+
 The collection defaults to `https://api-us.cogneris.ai`. Change `baseUrl` to
 `https://api-eu.cogneris.ai` when your tenant is hosted in Europe.
 
@@ -21,6 +26,10 @@ The collection defaults to `https://api-us.cogneris.ai`. Change `baseUrl` to
 Use the same collection request from the command line with a valid live key and
 a non-sensitive local document. The key is read from the environment and is not
 written to the collection or printed in the output.
+
+The run fails on an error envelope returned with HTTP 200, not just on a failing
+status code, and reports the shape of the result rather than the extracted
+fields — so the output is safe to paste as evidence.
 
 ```bash
 COGNERIS_KEY=xtkt_live_... npm run smoke:live -- --file /path/to/document.pdf

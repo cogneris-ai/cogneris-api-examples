@@ -56,7 +56,8 @@
                       },
                       "key": "ComplementaryPrompt",
                       "value": "<string>",
-                      "type": "text"
+                      "type": "text",
+                      "disabled": true
                     }
                   ]
                 },
