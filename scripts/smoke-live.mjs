@@ -82,9 +82,54 @@ const response = await fetch(requestUrl, {
   body: form,
 });
 
+const rawBody = await response.text();
+
+function truncate(text) {
+  const collapsed = text.replace(/\s+/g, " ").trim();
+  return collapsed.length > 500 ? `${collapsed.slice(0, 500)}…` : collapsed;
+}
+
 if (!response.ok) {
-  console.error(`Extraction request failed with HTTP ${response.status}`);
+  console.error(
+    `Extraction request failed with HTTP ${response.status}: ${truncate(rawBody)}`,
+  );
   process.exit(1);
 }
 
-console.log(`Extraction request completed with HTTP ${response.status}`);
+// The API answers in a ServiceResponse envelope, so a refused extraction can
+// still arrive as HTTP 200 with hasErrors set. Status alone would report a
+// passing run for a call that extracted nothing.
+let envelope;
+try {
+  envelope = JSON.parse(rawBody);
+} catch {
+  console.error(
+    `Extraction returned HTTP ${response.status} with a non-JSON body: ${truncate(rawBody)}`,
+  );
+  process.exit(1);
+}
+
+if (envelope?.hasErrors) {
+  const messages = envelope?.meta?.messages ?? [];
+  console.error(
+    `Extraction returned HTTP ${response.status} with an error envelope: ${
+      messages.length ? messages.join("; ") : truncate(rawBody)
+    }`,
+  );
+  process.exit(1);
+}
+
+if (!envelope?.data) {
+  console.error(
+    `Extraction returned HTTP ${response.status} with no data in the envelope.`,
+  );
+  process.exit(1);
+}
+
+// Field names and values are extracted customer content, so the run reports
+// only their shape.
+const fieldCount = Object.keys(envelope.data.metadata ?? {}).length;
+console.log(
+  `Extraction request completed with HTTP ${response.status}: ` +
+    `envelope has data, hasErrors=false, ${fieldCount} extracted field(s).`,
+);
