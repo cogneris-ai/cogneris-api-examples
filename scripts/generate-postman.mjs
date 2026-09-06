@@ -69,6 +69,32 @@ function deselectOptionalFormFields(items) {
   return { required, optional };
 }
 
+// The converter maps a scalar `format: binary` property to Postman's file
+// type, but an array of binary falls through to a text field holding the joined
+// `<binary>` placeholder. /Document/classifier and /Document/facematch both
+// bind IFormFileCollection, so those fields are required and ship selected:
+// Postman would post the literal placeholder where the documents belong, and a
+// text row offers no file picker for a reader to correct it.
+function convertBinaryArrayFieldsToFiles(items) {
+  let converted = 0;
+
+  for (const item of items) {
+    for (const field of item.request?.body?.formdata ?? []) {
+      if (field.type === "file") continue;
+      if (!String(field.value ?? "").includes("<binary>")) continue;
+      delete field.value;
+      field.type = "file";
+      // v2.1 allows src to be a string, null or an array; an array is how the
+      // format carries a multi-file field. Empty means "reader picks the files".
+      field.src = [];
+      converted += 1;
+    }
+    converted += convertBinaryArrayFieldsToFiles(item.item ?? []);
+  }
+
+  return converted;
+}
+
 const temporaryDirectory = await fs.mkdtemp(
   path.join(os.tmpdir(), "cogneris-postman-"),
 );
@@ -112,6 +138,18 @@ try {
   if (required === 0 || optional === 0) {
     throw new Error(
       `expected both required and optional form fields, got ${required} required and ${optional} optional — the converter's "(Required)" marker changed`,
+    );
+  }
+
+  const files = convertBinaryArrayFieldsToFiles(collection.item);
+  // Positive control, same reasoning as above. This contract declares two
+  // arrays of binary. If the converter ever stops emitting the `<binary>`
+  // placeholder, none is found, and the collection would publish those fields
+  // as whatever the converter chose instead — silently, since nothing else
+  // reads them. Fail instead.
+  if (files === 0) {
+    throw new Error(
+      'no array-of-binary form field found — the converter\'s "<binary>" placeholder changed',
     );
   }
 
