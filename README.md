@@ -18,6 +18,10 @@ contract requires. `ComplementaryPrompt` is appended verbatim to the model
 prompt — select it and replace the placeholder only when you want to steer the
 extraction.
 
+**Documents → classifier** and **Documents → facematch** accept more than one
+document, so their `files` and `documents` fields are file pickers that take a
+multiple selection.
+
 The collection defaults to `https://api-us.cogneris.ai`. Change `baseUrl` to
 `https://api-eu.cogneris.ai` when your tenant is hosted in Europe.
 

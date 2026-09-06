@@ -294,6 +294,63 @@ class PostmanCollectionTests(unittest.TestCase):
         self.assertEqual(fields["ComplementaryPrompt"].get("disabled"), True)
         self.assertNotEqual(fields["file"].get("disabled"), True)
 
+    def form_field(self, path: list[str], key: str) -> dict[str, Any]:
+        request = [
+            request
+            for request in requests(self.collection["item"])
+            if request["url"].get("path") == path
+        ][0]
+        return {field["key"]: field for field in request["body"]["formdata"]}[key]
+
+    def test_multi_file_form_fields_are_file_typed(self):
+        """
+        /Document/classifier and /Document/facematch bind IFormFileCollection,
+        so the contract declares those fields as arrays of binary. The converter
+        only maps a *scalar* binary property to Postman's file type; an array
+        falls through to a text field. A text row has no file picker, so a
+        reader who follows the README cannot attach a document at all.
+        """
+        for path, key in (
+            (["Document", "classifier"], "files"),
+            (["Document", "facematch"], "documents"),
+        ):
+            with self.subTest(field=key):
+                field = self.form_field(path, key)
+                self.assertEqual(field["type"], "file", f"{key!r} is not a file field")
+                # v2.1 allows src to be a string, null or an array; an array is
+                # how the format carries a multi-file field.
+                self.assertIsInstance(field.get("src"), list)
+
+    def test_no_form_field_ships_a_binary_placeholder(self):
+        """
+        Postman sends every selected field verbatim, and these fields are
+        required, so they ship selected. An unconverted array of binary carries
+        the literal "<binary>,<binary>" — a placeholder posted where the
+        document belongs, exactly like the ComplementaryPrompt defect.
+        """
+        for request in requests(self.collection["item"]):
+            body = request.get("body") or {}
+            if body.get("mode") != "formdata":
+                continue
+            for field in body["formdata"]:
+                self.assertNotIn(
+                    "<binary>",
+                    str(field.get("value") or ""),
+                    f"field {field['key']!r} ships a binary placeholder as its value",
+                )
+
+    def test_file_form_fields_carry_no_value(self):
+        """A file field is described by src, never by value (v2.1 schema)."""
+        for request in requests(self.collection["item"]):
+            body = request.get("body") or {}
+            if body.get("mode") != "formdata":
+                continue
+            for field in body["formdata"]:
+                if field.get("type") == "file":
+                    self.assertNotIn(
+                        "value", field, f"file field {field['key']!r} carries a value"
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()

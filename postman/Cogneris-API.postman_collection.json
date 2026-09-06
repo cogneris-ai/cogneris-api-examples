@@ -415,8 +415,8 @@
                         "type": "text/plain"
                       },
                       "key": "files",
-                      "value": "<binary>,<binary>",
-                      "type": "text"
+                      "type": "file",
+                      "src": []
                     }
                   ]
                 },
@@ -1678,8 +1678,8 @@
                         "type": "text/plain"
                       },
                       "key": "documents",
-                      "value": "<binary>,<binary>",
-                      "type": "text"
+                      "type": "file",
+                      "src": []
                     }
                   ]
                 },
