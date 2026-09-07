@@ -1,0 +1,151 @@
+# Terraform-managed security pipeline for dependency and repository scanning.
+substitutions:
+  _SERVICE_NAME: xtrakt-api-examples
+  _EVIDENCE_BUCKET: cogneris-compliance-evidence-dev
+  _ENFORCE_SCA: "false"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - id: secret-scan
+    name: gcr.io/cloud-builders/git
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set +e
+        mkdir -p .compliance-evidence
+        {
+          echo "xTrakt secret pattern scan (Cloud Build)"
+          echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Service: ${_SERVICE_NAME}"
+          echo "Commit: $COMMIT_SHA"
+        } > .compliance-evidence/secret-scan.txt
+        git grep -nE \
+          '(BEGIN (RSA |DSA |EC |OPENSSH )?PRIVATE KEY|sk-[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{20,})' \
+          -- ':!**/package-lock.json' ':!**/node_modules/**' \
+          >> .compliance-evidence/secret-scan.txt
+        scan_exit=$$?
+        echo "git_grep_exit=$$scan_exit" >> .compliance-evidence/secret-scan.txt
+        if [ "$$scan_exit" -eq 0 ]; then
+          echo true > .compliance-evidence/.secret-scan-failed
+        else
+          echo false > .compliance-evidence/.secret-scan-failed
+        fi
+
+  - id: npm-audit
+    name: node:24-alpine
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set +e
+        mkdir -p .compliance-evidence
+        scan_exit=0
+        target_count=0
+        {
+          echo "xTrakt npm audit evidence (Cloud Build)"
+          echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Service: ${_SERVICE_NAME}"
+          echo "Commit: $COMMIT_SHA"
+        } > .compliance-evidence/npm-audit.txt
+        find . -path '*/package-lock.json' -not -path '*/node_modules/*' | sort > /tmp/locks.txt
+        while IFS= read -r lockfile; do
+          target_count=$$((target_count + 1))
+          project_dir="$$(dirname "$$lockfile")"
+          echo "## $$project_dir" >> .compliance-evidence/npm-audit.txt
+          (
+            cd "$$project_dir"
+            npm audit --package-lock-only --omit=dev --audit-level=high
+          ) >> .compliance-evidence/npm-audit.txt 2>&1
+          audit_exit=$$?
+          echo "npm_audit_exit=$$audit_exit" >> .compliance-evidence/npm-audit.txt
+          if [ "$$audit_exit" -ne 0 ]; then scan_exit=$$audit_exit; fi
+        done < /tmp/locks.txt
+        if [ "$$target_count" -eq 0 ]; then
+          echo "No package-lock.json found; npm vulnerability scan failed coverage." >> .compliance-evidence/npm-audit.txt
+          scan_exit=1
+        fi
+        echo "overall_npm_audit_exit=$$scan_exit" >> .compliance-evidence/npm-audit.txt
+        echo "$$scan_exit" > .compliance-evidence/.npm-audit-exit
+        echo "$$target_count" > .compliance-evidence/.npm-audit-count
+        cat .compliance-evidence/npm-audit.txt
+        exit 0
+
+  - id: sbom
+    name: anchore/syft:latest
+    args:
+      - dir:.
+      - -o
+      - spdx-json=.compliance-evidence/sbom.spdx.json
+
+  - id: trivy-vuln
+    name: aquasec/trivy:0.56.2
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set +e
+        trivy fs --scanners=vuln --severity=HIGH,CRITICAL --exit-code=1 --output=.compliance-evidence/trivy-vuln.txt .
+        scan_exit=$$?
+        echo "trivy_vulnerability_scan_exit=$$scan_exit" >> .compliance-evidence/trivy-vuln.txt
+        echo "$$scan_exit" > .compliance-evidence/.trivy-vuln-exit
+        echo 1 > .compliance-evidence/.trivy-vuln-count
+        exit 0
+
+  - id: trivy-posture
+    name: aquasec/trivy:0.56.2
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set +e
+        trivy fs --scanners=secret,misconfig --severity=HIGH,CRITICAL --exit-code=0 --output=.compliance-evidence/trivy-posture.txt .
+        scan_exit=$$?
+        echo "trivy_posture_scan_exit=$$scan_exit" >> .compliance-evidence/trivy-posture.txt
+        echo "$$scan_exit" > .compliance-evidence/.trivy-posture-exit
+        echo 1 > .compliance-evidence/.trivy-posture-count
+        exit 0
+
+  - id: upload-evidence
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gsutil -m cp -r .compliance-evidence/* \
+          "gs://${_EVIDENCE_BUCKET}/${_SERVICE_NAME}/$SHORT_SHA/"
+
+  - id: hard-gate
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ "$$(cat .compliance-evidence/.secret-scan-failed 2>/dev/null)" = "true" ]; then
+          echo "ERROR: secret-pattern scan failed; evidence was uploaded."
+          exit 1
+        fi
+        if [ "${_ENFORCE_SCA}" = "true" ]; then
+          sca_failed=0
+          check_sca() {
+            if ! "$$@"; then
+              echo "ERROR: SCA check failed: $$*"
+              sca_failed=1
+            fi
+          }
+          check_sca test -s .compliance-evidence/npm-audit.txt
+          check_sca test "$$(cat .compliance-evidence/.npm-audit-count)" -gt 0
+          check_sca test "$$(cat .compliance-evidence/.npm-audit-exit)" -eq 0
+          check_sca test -s .compliance-evidence/trivy-vuln.txt
+          check_sca test "$$(cat .compliance-evidence/.trivy-vuln-count)" -gt 0
+          check_sca test "$$(cat .compliance-evidence/.trivy-vuln-exit)" -eq 0
+          if [ "$$sca_failed" -ne 0 ]; then
+            echo "ERROR: SCA gate failed; evidence was uploaded."
+            exit 1
+          fi
+        fi
+        echo "Security hard gates passed."
+
+timeout: 600s
