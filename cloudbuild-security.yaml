@@ -114,8 +114,10 @@ steps:
     args:
       - -c
       - |
-        gsutil -m cp -r .compliance-evidence/* \
-          "gs://${_EVIDENCE_BUCKET}/${_SERVICE_NAME}/$SHORT_SHA/"
+        gsutil -m cp -r \
+          .compliance-evidence/* \
+          .compliance-evidence/.[!.]* \
+          "gs://${_EVIDENCE_BUCKET}/${_SERVICE_NAME}/$SHORT_SHA/$BUILD_ID/"
 
   - id: hard-gate
     name: gcr.io/cloud-builders/gcloud
