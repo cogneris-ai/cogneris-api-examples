@@ -8,6 +8,7 @@ import { replaceOutput } from "./sdk-output-swap.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const configDirectory = path.join(root, "scripts", "sdk-config");
+const overlayDirectory = path.join(root, "scripts", "sdk-overlays");
 const sourcePath = path.join(root, "openapi", "cogneris-openapi.yaml");
 const committedOutput = path.join(root, "sdks");
 
@@ -76,6 +77,20 @@ async function hashFiles(directory) {
 
 async function writeJson(filePath, value) {
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function applyOverlayFiles(sourceDirectory, destinationDirectory) {
+  for (const relativePath of await listFiles(sourceDirectory)) {
+    const destination = path.join(destinationDirectory, relativePath);
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    await fs.copyFile(path.join(sourceDirectory, relativePath), destination);
+  }
+}
+
+async function appendOverlay(targetPath, overlayPath) {
+  const current = await fs.readFile(targetPath, "utf8");
+  const addition = await fs.readFile(overlayPath, "utf8");
+  await fs.writeFile(targetPath, `${current.trimEnd()}\n${addition}`);
 }
 
 async function validatePackages(stagedOutput) {
@@ -230,6 +245,23 @@ async function main() {
     await fs.copyFile(
       path.join(configDirectory, "python-README.md"),
       path.join(pythonOutput, "README.md"),
+    );
+
+    await applyOverlayFiles(
+      path.join(overlayDirectory, "typescript", "files"),
+      typescriptOutput,
+    );
+    await appendOverlay(
+      path.join(typescriptOutput, "src", "index.ts"),
+      path.join(overlayDirectory, "typescript", "index.append.ts"),
+    );
+    await applyOverlayFiles(
+      path.join(overlayDirectory, "python", "files"),
+      pythonOutput,
+    );
+    await appendOverlay(
+      path.join(pythonOutput, "cogneris_document_ai_sdk", "__init__.py"),
+      path.join(overlayDirectory, "python", "__init__.append.py"),
     );
 
     await validatePackages(stagedOutput);

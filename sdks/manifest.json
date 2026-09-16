@@ -21,7 +21,7 @@
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
         "CHANGELOG.md": "ac7c530c4edee5501837f433be29df11e348001b5be07fd04675aea1476eac45",
-        "cogneris_document_ai_sdk/__init__.py": "180a656b65f648abb591b242d06afcacb9639062c42c5fabec36e61159ca2540",
+        "cogneris_document_ai_sdk/__init__.py": "12a79be842018e72dd0158ae6650b1ca64c2efdd037bc91d63f23c5e9c016183",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/documents/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
         "cogneris_document_ai_sdk/api/documents/classify_documents.py": "cd30aeae63202199173cdedbf8b52b37101cbbc8f44f76db828fa185b7e0d09a",
@@ -40,6 +40,7 @@
         "cogneris_document_ai_sdk/api/portal/list_portal_channels.py": "b575afbba3f92bf07ea05a442ca0b18ff3ab6fcd6df7e47ead335aad2282e8fe",
         "cogneris_document_ai_sdk/api/portal/list_portal_forms.py": "7695776fbef654249709b77fbd013e2c987a071802a438562aeb9c6a838b1ccb",
         "cogneris_document_ai_sdk/client.py": "a3f99d2eac81090b2dbb9b52d56645c2a2046c6c24bd643b7908ee089c3fe556",
+        "cogneris_document_ai_sdk/cogneris.py": "ff837d9137919a9b989f5c55b90fc865df75f14a36685670a78edaed1cc50d3e",
         "cogneris_document_ai_sdk/errors.py": "80ef060662aa992360020f84e684fea0ecb1cedbe9ed5ffa5c6ece5134f5e6ad",
         "cogneris_document_ai_sdk/models/__init__.py": "6757279f52916d5e6640ed4704b033a292f1675e1889726d1b7e7ec259f6950c",
         "cogneris_document_ai_sdk/models/classify_documents_body.py": "3ccfeaa7c2cff584a067ca5a7d0772b73d1f5e2f7a0eda42ff3fda83916b1c2d",
@@ -81,6 +82,7 @@
         "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",
         "src/client/utils.gen.ts": "dce96188f7dfd8e9e5543199a42a5117e23042a7dd48e1ceaff9bb20898f8522",
         "src/client.gen.ts": "d4ada0a7ec628c1853352da5416908e6f84bacd6fe82ffaa0bff5b0ae9aa57ef",
+        "src/cogneris.ts": "ad461b675d1f7e95e0c0c3f73d648931e21b9c8faaf8f7ccaa5706d0480e78e4",
         "src/core/auth.gen.ts": "4b4aca5bd9b2c43a112bb74617295278d84f86360ada71a8db57f09cd0c254f4",
         "src/core/bodySerializer.gen.ts": "a74163de6731f06f185948895cc4b5f8900e7d30ce76b9588717bad99ab165a7",
         "src/core/params.gen.ts": "097c75f6e269c6c8680641091832a69b38e8828e8ee8465318d32a177593330f",
@@ -89,7 +91,7 @@
         "src/core/serverSentEvents.gen.ts": "df993567abbe3e5b477d81517fb967cf63cf40b7866957d5dc6cc03238cb1426",
         "src/core/types.gen.ts": "0c33c5e096608fc1f859d89bc17ce428e306c7aa3c2c30acd8affa5a734370af",
         "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
-        "src/index.ts": "56e75bc2cc53450680020c83704285671787af562c6281a50f4b5dbe2ae07953",
+        "src/index.ts": "57aea8c5f83f789934f2cd1b5072891463fbd88620d9da519955ab5183683b5b",
         "src/sdk.gen.ts": "8a40647dd9a371a7bb23e1b11cbfc3fba6cafd1d9348c7afcc22e4ee6bac3398",
         "src/types.gen.ts": "c946a5bf4c1cae6bdfe0376935092dabf16bfd7417003d225e358220d8de8d6a",
         "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
