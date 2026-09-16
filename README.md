@@ -227,3 +227,6 @@ same committed collection. Neither generator persists credentials.
 See [`SUPPORT.md`](SUPPORT.md) for support and security reporting boundaries and
 [`VERSIONING.md`](VERSIONING.md) for Semantic Versioning, dated OpenAPI
 compatibility, and deprecation notice policy.
+
+See [`RELEASING.md`](RELEASING.md) for local artifact verification, the manual
+dry-run workflow, and the owner-controlled gates required before publication.
