@@ -5,7 +5,13 @@
   "description": "Runnable Cogneris API examples generated from OpenAPI",
   "scripts": {
     "generate": "node scripts/generate-postman.mjs",
+    "generate:sdks": "node scripts/generate-sdks.mjs",
+    "check:sdks": "node scripts/generate-sdks.mjs --check",
     "smoke:live": "node scripts/smoke-live.mjs",
     "test": "python3 -m unittest discover -s tests -p 'test_*.py'"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "typescript": "5.9.3"
   }
 }
