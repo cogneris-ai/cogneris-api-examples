@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test, { after } from "node:test";
@@ -156,6 +156,37 @@ test("CLI package has the public identity, binary, and exact SDK dependency", as
   assert.equal(packageJson.dependencies["@cogneris/document-ai-sdk"], "0.1.0");
 });
 
+test("build leaves a durable installed SDK after temporary cleanup", async (context) => {
+  run(process.execPath, [path.join(root, "scripts", "build-cli.mjs")], { cwd: root });
+  context.after(() => rm(path.join(root, "cli", "dist"), { recursive: true, force: true }));
+
+  const dependencyPath = path.join(
+    root,
+    "node_modules",
+    "@cogneris",
+    "document-ai-sdk",
+  );
+  assert.equal((await lstat(dependencyPath)).isSymbolicLink(), false);
+  assert.equal((await lstat(await realpath(dependencyPath))).isDirectory(), true);
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      "-e",
+      `const { _runCliForTesting } = require(${JSON.stringify(path.join(root, "cli", "dist", "run.js"))});
+       const io = { stdout: { write() {} }, stderr: { write() {} } };
+       const client = { getJob: async (jobId) => ({ jobId, status: "Succeeded" }) };
+       _runCliForTesting(["jobs", "get", "built-job"], {
+         env: { COGNERIS_API_KEY: "test-key" }, io,
+         _createClientForTesting: () => client,
+       }).then((code) => { process.exitCode = code; });`,
+    ],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, "");
+});
+
 test("installed CLI delegates every public command to CognerisClient", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "cogneris-cli-input-"));
   temporaryDirectories.push(directory);
@@ -277,6 +308,46 @@ test("usage failures stay on stderr and do not expose credential arguments or in
   }
 });
 
+test("strict grammar rejects option-like values, duplicates, sentinels, and extras without SDK calls", async () => {
+  let clientConstructions = 0;
+  const clientFactory = () => {
+    clientConstructions += 1;
+    return {
+      extract: async () => ({ hasErrors: false }),
+      getJob: async () => ({ jobId: "unexpected", status: "Succeeded" }),
+      submitJob: async () => ({ jobId: "unexpected", status: "Queued" }),
+    };
+  };
+  const invalidInvocations = [
+    ["jobs", "get", "--help"],
+    ["jobs", "get", "--"],
+    ["jobs", "get", "job-id", "extra"],
+    ["jobs", "get", "--unknown"],
+    ["extract", "--help"],
+    ["extract", "--", "input.pdf"],
+    ["--region", "--help", "jobs", "get", "job-id"],
+    ["--region", "us", "--region", "eu", "jobs", "get", "job-id"],
+    ["--region=us", "jobs", "get", "job-id"],
+    ["jobs", "submit", "--operation"],
+    ["jobs", "submit", "--input-reference"],
+    ["jobs", "submit", "--operation", "Extraction", "--input-reference"],
+    ["jobs", "submit", "--operation", "Extraction", "--input-reference", "--base-url"],
+    ["jobs", "submit", "--operation", "--input-reference", "reference"],
+    ["jobs", "submit", "--operation", "Extraction", "--operation", "Split", "--input-reference", "reference"],
+    ["jobs", "submit", "--operation", "Extraction", "--input-reference", "one", "--input-reference", "two"],
+    ["jobs", "submit", "--operation", "Extraction", "--input-reference", "reference", "extra"],
+    ["jobs", "submit", "--", "--operation", "Extraction", "--input-reference", "reference"],
+  ];
+
+  for (const argumentsList of invalidInvocations) {
+    const result = await invoke(argumentsList, { clientFactory });
+    assert.equal(result.code, 2, JSON.stringify(argumentsList));
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /Usage:/);
+  }
+  assert.equal(clientConstructions, 0);
+});
+
 test("installed CLI uses the SDK loopback seam for multipart and job requests", async (context) => {
   const requests = [];
   let waitCount = 0;
@@ -393,4 +464,120 @@ test("packaged cogneris binary enforces configuration without stdout or stack tr
   assert.equal(result.stdout, "");
   assert.match(result.stderr, /COGNERIS_API_KEY/);
   assert.doesNotMatch(result.stderr, /at .*\(|Error:/);
+});
+
+test("installed binary handles success, safe API failure, and broken stdout without reflection", async (context) => {
+  const apiKey = "binary-api-key-sentinel";
+  const serverDetail = "binary-server-detail-sentinel";
+  const resultBody = "binary-result-body-sentinel";
+  let releaseBrokenPipeResponse;
+  const brokenPipeResponseReleased = new Promise((resolve) => {
+    releaseBrokenPipeResponse = resolve;
+  });
+  let observeBrokenPipeRequest;
+  const brokenPipeRequestObserved = new Promise((resolve) => {
+    observeBrokenPipeRequest = resolve;
+  });
+  const server = createServer(async (request, response) => {
+    for await (const _chunk of request) { /* consume request */ }
+    if (request.url === "/api/v1/document-jobs/success-job") {
+      json(response, 200, { jobId: "success-job", operation: "Extraction", status: "Succeeded" });
+    } else if (request.url === "/api/v1/document-jobs/failure-job") {
+      json(response, 500, { code: apiKey, title: serverDetail });
+    } else if (request.url === "/api/v1/document-jobs/broken-pipe-job") {
+      observeBrokenPipeRequest();
+      await brokenPipeResponseReleased;
+      json(response, 200, {
+        jobId: "broken-pipe-job",
+        operation: "Extraction",
+        status: "Succeeded",
+        outputReference: resultBody.repeat(200_000),
+      });
+    } else {
+      json(response, 404, { code: "not-found" });
+    }
+  });
+  const baseUrl = await listen(server);
+  context.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const { bin, consumerDirectory } = await installedPackages();
+  const preloadPath = path.join(consumerDirectory, "cli-loopback-preload.cjs");
+  await writeFile(
+    preloadPath,
+    `const Module = require("node:module");
+const originalLoad = Module._load;
+const sdk = originalLoad.call(Module, "@cogneris/document-ai-sdk", module, false);
+class LoopbackCognerisClient extends sdk.CognerisClient {
+  constructor(options) {
+    super({ ...options, _baseUrlForTesting: process.env.TEST_COGNERIS_BASE_URL });
+  }
+}
+const replacement = { ...sdk, CognerisClient: LoopbackCognerisClient };
+Module._load = function(request, parent, isMain) {
+  return request === "@cogneris/document-ai-sdk"
+    ? replacement
+    : originalLoad.call(this, request, parent, isMain);
+};
+`,
+  );
+  const childEnvironment = {
+    ...process.env,
+    COGNERIS_API_KEY: apiKey,
+    NODE_OPTIONS: `--require=${preloadPath}`,
+    TEST_COGNERIS_BASE_URL: baseUrl,
+  };
+  const runBinary = (jobId) => new Promise((resolve, reject) => {
+    const child = spawn(bin, ["jobs", "get", jobId], {
+      cwd: consumerDirectory,
+      env: childEnvironment,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.once("error", reject);
+    child.once("close", (status) => resolve({ status, stderr, stdout }));
+  });
+
+  const succeeded = await runBinary("success-job");
+  assert.equal(succeeded.status, 0, succeeded.stderr);
+  assert.equal(succeeded.stderr, "");
+  assert.deepEqual(JSON.parse(succeeded.stdout), {
+    jobId: "success-job",
+    operation: "Extraction",
+    status: "Succeeded",
+  });
+
+  const failed = await runBinary("failure-job");
+  assert.equal(failed.status, 1);
+  assert.equal(failed.stdout, "");
+  assert.match(failed.stderr, /HTTP 500/);
+  assert.equal(failed.stderr.includes(apiKey), false);
+  assert.equal(failed.stderr.includes(serverDetail), false);
+  assert.doesNotMatch(failed.stderr, /at .*\(|Error:/);
+
+  const child = spawn(bin, ["jobs", "get", "broken-pipe-job"], {
+    cwd: consumerDirectory,
+    env: childEnvironment,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let brokenPipeStderr = "";
+  child.stderr.setEncoding("utf8");
+  child.stderr.on("data", (chunk) => { brokenPipeStderr += chunk; });
+  await brokenPipeRequestObserved;
+  child.stdout.destroy();
+  releaseBrokenPipeResponse();
+  const brokenPipeStatus = await new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", resolve);
+  });
+  assert.equal(brokenPipeStatus, 1);
+  assert.match(brokenPipeStderr, /output failed/i);
+  assert.equal(brokenPipeStderr.includes(apiKey), false);
+  assert.equal(brokenPipeStderr.includes(serverDetail), false);
+  assert.equal(brokenPipeStderr.includes(resultBody), false);
+  assert.doesNotMatch(brokenPipeStderr, /at .*\(|Error:/);
 });

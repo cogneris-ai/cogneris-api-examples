@@ -84,19 +84,23 @@ function nonEmpty(value: string | undefined): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function requiredValue(value: string | undefined): value is string {
+  return nonEmpty(value) && !value.startsWith('-');
+}
+
 function parseSubmit(argumentsList: string[]): Command {
   let operation: string | undefined;
   let inputReference: string | undefined;
   for (let index = 0; index < argumentsList.length; index += 1) {
     const argument = argumentsList[index];
     const value = argumentsList[index + 1];
-    if (argument === '--operation' && operation === undefined && value !== undefined) {
+    if (argument === '--operation' && operation === undefined && requiredValue(value)) {
       operation = value;
       index += 1;
     } else if (
       argument === '--input-reference' &&
       inputReference === undefined &&
-      value !== undefined
+      requiredValue(value)
     ) {
       inputReference = value;
       index += 1;
@@ -104,8 +108,8 @@ function parseSubmit(argumentsList: string[]): Command {
       failUsage();
     }
   }
-  if (!nonEmpty(operation) || !OPERATIONS.has(operation as DocumentJobOperation)) failUsage();
-  if (!nonEmpty(inputReference)) failUsage();
+  if (!requiredValue(operation) || !OPERATIONS.has(operation as DocumentJobOperation)) failUsage();
+  if (!requiredValue(inputReference)) failUsage();
   return {
     kind: 'submit',
     operation: operation as DocumentJobOperation,
@@ -117,7 +121,11 @@ function parseCommand(argumentsList: string[]): Command {
   if (argumentsList.some((argument) => argument === '--api-key' || argument.startsWith('--api-key='))) {
     failUsage();
   }
-  if (argumentsList[0] === 'extract' && argumentsList.length === 2 && nonEmpty(argumentsList[1])) {
+  if (
+    argumentsList[0] === 'extract' &&
+    argumentsList.length === 2 &&
+    requiredValue(argumentsList[1])
+  ) {
     return { kind: 'extract', filePath: argumentsList[1] };
   }
   if (argumentsList[0] !== 'jobs') failUsage();
@@ -127,7 +135,7 @@ function parseCommand(argumentsList: string[]): Command {
       argumentsList[1] === 'wait' ||
       argumentsList[1] === 'cancel') &&
     argumentsList.length === 3 &&
-    nonEmpty(argumentsList[2])
+    requiredValue(argumentsList[2])
   ) {
     return { kind: argumentsList[1], jobId: argumentsList[2] };
   }
