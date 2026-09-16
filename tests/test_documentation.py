@@ -1,4 +1,6 @@
 import os
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -61,6 +63,100 @@ class DocumentationContractTests(unittest.TestCase):
             self.assertIn("COGNERIS_REGION", source)
             self.assertNotIn("COGNERIS_BASE_URL", source)
             self.assertNotIn("--base-url", source)
+
+    def test_documented_consumer_setup_resolves_examples_and_local_cli(self):
+        readme = (ROOT / "README.md").read_text()
+        match = re.search(
+            r"<!-- consumer-setup:start -->\s*```bash\n(?P<script>.*?)\n```\s*"
+            r"<!-- consumer-setup:end -->",
+            readme,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "README must provide an executable consumer setup block")
+
+        with tempfile.TemporaryDirectory(prefix="cogneris-documented-workflow-") as temporary_name:
+            temporary = Path(temporary_name)
+            release = temporary / "release"
+            consumer = temporary / "consumer"
+            release.mkdir()
+            try:
+                subprocess.run(
+                    ["npm", "run", "build", "--prefix", "sdks/typescript"],
+                    cwd=ROOT,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["npm", "run", "build:cli"],
+                    cwd=ROOT,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    [
+                        "npm", "pack", "./sdks/typescript", "--pack-destination",
+                        str(release), "--silent",
+                    ],
+                    cwd=ROOT,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["npm", "pack", "./cli", "--pack-destination", str(release), "--silent"],
+                    cwd=ROOT,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["uv", "build", "--wheel", "--out-dir", str(release)],
+                    cwd=PYTHON_SDK,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+
+                environment = dict(os.environ)
+                environment.update(
+                    {
+                        "COGNERIS_CHECKOUT": str(ROOT),
+                        "COGNERIS_RELEASE": str(release),
+                        "COGNERIS_CONSUMER": str(consumer),
+                        "PYTHON_BIN": sys.executable,
+                    }
+                )
+                result = subprocess.run(
+                    ["bash", "-eu", "-o", "pipefail", "-c", match.group("script")],
+                    cwd=temporary,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    env=environment,
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+                invocations = (
+                    (["node", "./examples/typescript/quickstart.mjs", "extract", "missing.pdf"], 2),
+                    ([str(consumer / ".venv/bin/python"), "./examples/python/quickstart.py", "extract", "missing.pdf"], 2),
+                    (["./node_modules/.bin/cogneris", "jobs", "get", "job-id"], 2),
+                )
+                for command, expected_code in invocations:
+                    invoked = subprocess.run(
+                        command,
+                        cwd=consumer,
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                        env={key: value for key, value in environment.items() if key != "COGNERIS_API_KEY"},
+                    )
+                    self.assertEqual(invoked.returncode, expected_code, invoked.stdout + invoked.stderr)
+                    self.assertEqual(invoked.stdout, "")
+            finally:
+                shutil.rmtree(ROOT / "sdks/typescript/dist", ignore_errors=True)
+                shutil.rmtree(ROOT / "cli/dist", ignore_errors=True)
 
 
 class InstalledExampleSmokeTests(unittest.TestCase):

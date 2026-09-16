@@ -29,31 +29,49 @@ ownership and a release are explicitly authorized, install only locally built
 or owner-provided local release artifacts. Do not run a registry install by
 package name alone.
 
-Build TypeScript SDK and CLI tarballs from this checkout:
+Choose explicit checkout, release-artifact, and consumer directories. Use
+absolute paths so later commands cannot accidentally resolve against a
+different working directory:
 
 ```bash
+export COGNERIS_CHECKOUT=/absolute/path/to/cogneris-api-examples
+export COGNERIS_RELEASE="$COGNERIS_CHECKOUT/release"
+export COGNERIS_CONSUMER=/absolute/path/to/my-cogneris-consumer
+```
+
+Build TypeScript SDK and CLI tarballs plus the Python wheel in the checkout:
+
+```bash
+cd "$COGNERIS_CHECKOUT"
 npm ci
 npm run build --prefix sdks/typescript
 npm run build:cli
-mkdir -p release
-npm pack ./sdks/typescript --pack-destination ./release
-npm pack ./cli --pack-destination ./release
+mkdir -p "$COGNERIS_RELEASE"
+npm pack ./sdks/typescript --pack-destination "$COGNERIS_RELEASE"
+npm pack ./cli --pack-destination "$COGNERIS_RELEASE"
+(cd sdks/python && uv build --wheel --out-dir "$COGNERIS_RELEASE")
 ```
 
-In a separate consumer project, install the SDK tarball. Install both tarballs
-when using the CLI so its exact `0.1.0` SDK dependency is satisfied locally:
+Set up the separate consumer project. This block installs both npm tarballs in
+one operation so the CLI's exact `0.1.0` SDK dependency is satisfied locally,
+installs the wheel into a consumer-local virtual environment, and copies the
+runnable examples to paths that exist in the consumer:
 
+<!-- consumer-setup:start -->
 ```bash
-npm install /path/to/release/cogneris-document-ai-sdk-0.1.0.tgz
-npm install /path/to/release/cogneris-document-ai-cli-0.1.0.tgz
+export COGNERIS_CHECKOUT="${COGNERIS_CHECKOUT:-/absolute/path/to/cogneris-api-examples}"
+export COGNERIS_RELEASE="${COGNERIS_RELEASE:-$COGNERIS_CHECKOUT/release}"
+export COGNERIS_CONSUMER="${COGNERIS_CONSUMER:-/absolute/path/to/my-cogneris-consumer}"
+mkdir -p "$COGNERIS_CONSUMER/examples/typescript" "$COGNERIS_CONSUMER/examples/python"
+cp "$COGNERIS_CHECKOUT/examples/typescript/quickstart.mjs" "$COGNERIS_CONSUMER/examples/typescript/"
+cp "$COGNERIS_CHECKOUT/examples/python/quickstart.py" "$COGNERIS_CONSUMER/examples/python/"
+cd "$COGNERIS_CONSUMER"
+test -f package.json || npm init --yes
+npm install "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.tgz" "$COGNERIS_RELEASE/cogneris-document-ai-cli-0.1.0.tgz"
+uv venv --python "${PYTHON_BIN:-python3}" .venv
+uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"
 ```
-
-Build and install the Python wheel locally:
-
-```bash
-(cd sdks/python && uv build --wheel --out-dir ../../release)
-python -m pip install /path/to/release/cogneris_document_ai_sdk-0.1.0-py3-none-any.whl
-```
+<!-- consumer-setup:end -->
 
 ## TypeScript: upload or submit and poll
 
@@ -62,7 +80,8 @@ The runnable example imports `CognerisClient` from the official installed
 `multipart/form-data` and prints only envelope status:
 
 ```bash
-node examples/typescript/quickstart.mjs extract /path/to/document.pdf
+cd "$COGNERIS_CONSUMER"
+node ./examples/typescript/quickstart.mjs extract /path/to/document.pdf
 ```
 
 For an already-uploaded input reference, submit an asynchronous job and poll it
@@ -70,7 +89,8 @@ to a terminal state. The reference must be valid for your tenant; the public
 contract does not upload it for you.
 
 ```bash
-node examples/typescript/quickstart.mjs async Extraction tenant/input/reference
+cd "$COGNERIS_CONSUMER"
+node ./examples/typescript/quickstart.mjs async Extraction tenant/input/reference
 ```
 
 The maintained interface used by the example is:
@@ -88,8 +108,9 @@ The Python example imports `CognerisClient` from the installed
 `cogneris-document-ai-sdk` wheel:
 
 ```bash
-python examples/python/quickstart.py extract /path/to/document.pdf
-python examples/python/quickstart.py async Extraction tenant/input/reference
+cd "$COGNERIS_CONSUMER"
+./.venv/bin/python ./examples/python/quickstart.py extract /path/to/document.pdf
+./.venv/bin/python ./examples/python/quickstart.py async Extraction tenant/input/reference
 ```
 
 The equivalent maintained interface is:
@@ -108,14 +129,16 @@ stops on success/failure/cancellation, and uses a bounded attempt count.
 
 ## CLI
 
-The installed binary is `cogneris`. Its supported grammar is exactly:
+The consumer-local binary is `./node_modules/.bin/cogneris`. Invoke that path
+from `$COGNERIS_CONSUMER`; a local npm install does not add it to the user's
+shell `PATH`. Its supported grammar is exactly:
 
 ```text
-cogneris [--region us|eu] extract <file>
-cogneris [--region us|eu] jobs submit --operation <operation> --input-reference <reference>
-cogneris [--region us|eu] jobs get <job-id>
-cogneris [--region us|eu] jobs wait <job-id>
-cogneris [--region us|eu] jobs cancel <job-id>
+./node_modules/.bin/cogneris [--region us|eu] extract <file>
+./node_modules/.bin/cogneris [--region us|eu] jobs submit --operation <operation> --input-reference <reference>
+./node_modules/.bin/cogneris [--region us|eu] jobs get <job-id>
+./node_modules/.bin/cogneris [--region us|eu] jobs wait <job-id>
+./node_modules/.bin/cogneris [--region us|eu] jobs cancel <job-id>
 ```
 
 `--region` overrides `COGNERIS_REGION`. The CLI has no `--api-key` or public

@@ -74,7 +74,13 @@ before(async () => {
       path: request.url,
     });
     if (request.method === "POST" && request.url === "/Document/extraction") {
-      if (body.includes("error-document")) {
+      if (body.includes("application-error-document")) {
+        json(response, 200, {
+          data: { metadata: { secretField: extractedMarker } },
+          meta: { httpStatusCode: 200, messages: [responseMarker] },
+          hasErrors: true,
+        });
+      } else if (body.includes("error-document")) {
         json(response, 500, { title: responseMarker, detail: extractedMarker });
       } else {
         json(response, 200, {
@@ -187,6 +193,16 @@ test("quickstart reports controlled errors without raw bodies or credentials", a
   assert.equal(result.exitCode, 1);
   assert.equal(result.stdout, "");
   assert.equal(result.stderr, "Cogneris API request failed with HTTP 500.\n");
+  for (const sensitive of [apiKey, extractedMarker, responseMarker]) {
+    assert.equal(result.stderr.includes(sensitive), false);
+  }
+});
+
+test("quickstart treats a 200 application-error envelope as a safe failure", async () => {
+  const result = await invoke(["extract", "$FILE"], "application-error-document");
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.stdout, "");
+  assert.equal(result.stderr, "Cogneris extraction reported an application error.\n");
   for (const sensitive of [apiKey, extractedMarker, responseMarker]) {
     assert.equal(result.stderr.includes(sensitive), false);
   }

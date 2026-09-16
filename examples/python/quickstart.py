@@ -71,6 +71,8 @@ def _run_example_for_testing(
             except OSError:
                 raise UsageError("Unable to read the input file.") from None
             result = client.extract(contents, file_name=Path(first).name)
+            if result.has_errors is True:
+                raise CognerisError("Cogneris extraction reported an application error.")
             has_errors = result.has_errors if isinstance(result.has_errors, bool) else None
             http_status_code = getattr(result.meta, "http_status_code", None)
             if not isinstance(http_status_code, int):

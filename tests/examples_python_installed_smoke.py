@@ -53,7 +53,16 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         body = self._record()
         if self.path == "/Document/extraction":
-            if b"error-document" in body:
+            if b"application-error-document" in body:
+                self._json(
+                    200,
+                    {
+                        "data": {"metadata": {"secretField": EXTRACTED_MARKER}},
+                        "meta": {"httpStatusCode": 200, "messages": [RESPONSE_MARKER]},
+                        "hasErrors": True,
+                    },
+                )
+            elif b"error-document" in body:
                 self._json(500, {"title": RESPONSE_MARKER, "detail": EXTRACTED_MARKER})
             else:
                 self._json(
@@ -178,6 +187,16 @@ class InstalledPythonExampleTests(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertEqual(stdout, "")
         self.assertEqual(stderr, "Cogneris API request failed with HTTP 500.\n")
+        for sensitive in (API_KEY, EXTRACTED_MARKER, RESPONSE_MARKER):
+            self.assertNotIn(sensitive, stderr)
+
+    def test_application_error_envelope_is_a_safe_failure(self):
+        exit_code, _, stdout, stderr = self.invoke(
+            ["extract", "$FILE"], "application-error-document"
+        )
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout, "")
+        self.assertEqual(stderr, "Cogneris extraction reported an application error.\n")
         for sensitive in (API_KEY, EXTRACTED_MARKER, RESPONSE_MARKER):
             self.assertNotIn(sensitive, stderr)
 

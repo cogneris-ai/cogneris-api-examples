@@ -68,6 +68,9 @@ export async function _runExampleForTesting({
       const result = await client.extract(new Blob([new Uint8Array(contents)]), {
         fileName: path.basename(selected.filePath),
       });
+      if (result.hasErrors === true) {
+        throw new CognerisError("Cogneris extraction reported an application error.");
+      }
       writeJson(io.stdout, {
         operation: "extraction",
         hasErrors: result.hasErrors === true,
