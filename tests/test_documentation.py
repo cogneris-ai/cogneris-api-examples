@@ -76,87 +76,117 @@ class DocumentationContractTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory(prefix="cogneris-documented-workflow-") as temporary_name:
             temporary = Path(temporary_name)
+            checkout = temporary / "checkout"
             release = temporary / "release"
             consumer = temporary / "consumer"
+            ignored = shutil.ignore_patterns(
+                "dist", "node_modules", ".venv", "__pycache__", ".ruff_cache"
+            )
+            shutil.copytree(ROOT / "sdks", checkout / "sdks", ignore=ignored)
+            shutil.copytree(ROOT / "cli", checkout / "cli", ignore=ignored)
+            shutil.copytree(ROOT / "examples", checkout / "examples", ignore=ignored)
+            (checkout / "package.json").write_text('{"private":true}\n')
             release.mkdir()
-            try:
-                subprocess.run(
-                    ["npm", "run", "build", "--prefix", "sdks/typescript"],
-                    cwd=ROOT,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                subprocess.run(
-                    ["npm", "run", "build:cli"],
-                    cwd=ROOT,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                subprocess.run(
-                    [
-                        "npm", "pack", "./sdks/typescript", "--pack-destination",
-                        str(release), "--silent",
-                    ],
-                    cwd=ROOT,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                subprocess.run(
-                    ["npm", "pack", "./cli", "--pack-destination", str(release), "--silent"],
-                    cwd=ROOT,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                subprocess.run(
-                    ["uv", "build", "--wheel", "--out-dir", str(release)],
-                    cwd=PYTHON_SDK,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
 
-                environment = dict(os.environ)
-                environment.update(
-                    {
-                        "COGNERIS_CHECKOUT": str(ROOT),
-                        "COGNERIS_RELEASE": str(release),
-                        "COGNERIS_CONSUMER": str(consumer),
-                        "PYTHON_BIN": sys.executable,
-                    }
-                )
-                result = subprocess.run(
-                    ["bash", "-eu", "-o", "pipefail", "-c", match.group("script")],
-                    cwd=temporary,
+            sentinel_contents = b"pre-existing-build-output-must-survive\x00\xff"
+            sdk_sentinel = checkout / "sdks/typescript/dist/pre-existing-sentinel.bin"
+            cli_sentinel = checkout / "cli/dist/pre-existing-sentinel.bin"
+            sdk_sentinel.parent.mkdir(parents=True)
+            cli_sentinel.parent.mkdir(parents=True)
+            sdk_sentinel.write_bytes(sentinel_contents)
+            cli_sentinel.write_bytes(sentinel_contents)
+
+            typescript = ROOT / "node_modules/.bin/tsc"
+            subprocess.run(
+                [str(typescript), "-p", str(checkout / "sdks/typescript/tsconfig.json")],
+                cwd=checkout / "sdks/typescript",
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            sdk_tarball = subprocess.run(
+                [
+                    "npm", "pack", "./sdks/typescript", "--pack-destination",
+                    str(release), "--silent",
+                ],
+                cwd=checkout,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip().splitlines()[-1]
+            subprocess.run(
+                [
+                    "npm", "install", "--ignore-scripts", "--no-audit", "--no-fund",
+                    "--no-save", str(release / sdk_tarball),
+                ],
+                cwd=checkout,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                [
+                    str(typescript), "-p", str(checkout / "cli/tsconfig.json"),
+                    "--typeRoots", str(ROOT / "node_modules/@types"),
+                ],
+                cwd=checkout / "cli",
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["npm", "pack", "./cli", "--pack-destination", str(release), "--silent"],
+                cwd=checkout,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["uv", "build", "--wheel", "--out-dir", str(release)],
+                cwd=checkout / "sdks/python",
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            environment = dict(os.environ)
+            environment.update(
+                {
+                    "COGNERIS_CHECKOUT": str(checkout),
+                    "COGNERIS_RELEASE": str(release),
+                    "COGNERIS_CONSUMER": str(consumer),
+                    "PYTHON_BIN": sys.executable,
+                }
+            )
+            result = subprocess.run(
+                ["bash", "-eu", "-o", "pipefail", "-c", match.group("script")],
+                cwd=temporary,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            invocations = (
+                (["node", "./examples/typescript/quickstart.mjs", "extract", "missing.pdf"], 2),
+                ([str(consumer / ".venv/bin/python"), "./examples/python/quickstart.py", "extract", "missing.pdf"], 2),
+                (["./node_modules/.bin/cogneris", "jobs", "get", "job-id"], 2),
+            )
+            for command, expected_code in invocations:
+                invoked = subprocess.run(
+                    command,
+                    cwd=consumer,
                     check=False,
                     capture_output=True,
                     text=True,
-                    env=environment,
+                    env={key: value for key, value in environment.items() if key != "COGNERIS_API_KEY"},
                 )
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(invoked.returncode, expected_code, invoked.stdout + invoked.stderr)
+                self.assertEqual(invoked.stdout, "")
 
-                invocations = (
-                    (["node", "./examples/typescript/quickstart.mjs", "extract", "missing.pdf"], 2),
-                    ([str(consumer / ".venv/bin/python"), "./examples/python/quickstart.py", "extract", "missing.pdf"], 2),
-                    (["./node_modules/.bin/cogneris", "jobs", "get", "job-id"], 2),
-                )
-                for command, expected_code in invocations:
-                    invoked = subprocess.run(
-                        command,
-                        cwd=consumer,
-                        check=False,
-                        capture_output=True,
-                        text=True,
-                        env={key: value for key, value in environment.items() if key != "COGNERIS_API_KEY"},
-                    )
-                    self.assertEqual(invoked.returncode, expected_code, invoked.stdout + invoked.stderr)
-                    self.assertEqual(invoked.stdout, "")
-            finally:
-                shutil.rmtree(ROOT / "sdks/typescript/dist", ignore_errors=True)
-                shutil.rmtree(ROOT / "cli/dist", ignore_errors=True)
+            self.assertEqual(sdk_sentinel.read_bytes(), sentinel_contents)
+            self.assertEqual(cli_sentinel.read_bytes(), sentinel_contents)
 
 
 class InstalledExampleSmokeTests(unittest.TestCase):
