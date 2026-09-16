@@ -10,6 +10,8 @@ import json
 import os
 import re
 import shutil
+import stat
+import struct
 import subprocess
 import sys
 import tarfile
@@ -20,6 +22,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+BUILD_DIRECTORIES = ("sdks/typescript", "sdks/python", "cli")
+BUILD_FILES = ("package.json", "package-lock.json", "scripts/sdk-release.py")
+EXCLUDED_BUILD_NAMES = {"dist", "node_modules", ".venv", "__pycache__", ".ruff_cache"}
 SEMVER = re.compile(
     r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
     r"(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
@@ -62,14 +67,76 @@ def filenames(version):
     }
 
 
+def archive_path(name, directory, seen):
+    """Validate portable logical paths without normalizing away unsafe syntax."""
+    logical = name[:-1] if directory and name.endswith("/") else name
+    parts = logical.split("/")
+    require(logical and not any(character in logical for character in ("\\", ":"))
+            and all(ord(character) >= 32 and ord(character) != 127 for character in logical)
+            and all(part not in {"", ".", ".."} and part.rstrip(". ") == part for part in parts),
+            "unsafe archive path")
+    folded = logical.casefold()
+    require(folded not in seen, "unsafe archive duplicate or case-colliding path")
+    parents = ["/".join(parts[:index]).casefold() for index in range(1, len(parts))]
+    require(all(seen.get(parent) != "file" for parent in parents), "unsafe archive file/directory collision")
+    require(directory or not any(previous.startswith(folded + "/") for previous in seen),
+            "unsafe archive file/directory collision")
+    seen[folded] = "directory" if directory else "file"
+
+
+def inspect_tar(archive):
+    seen = {}
+    members = archive.getmembers()
+    for member in members:
+        directory = member.type == tarfile.DIRTYPE
+        require((member.type in {tarfile.REGTYPE, tarfile.AREGTYPE} or directory)
+                and member.sparse is None and not member.linkname and not member.pax_headers,
+                "unsafe archive non-regular tar member")
+        require(not directory or member.size == 0, "unsafe archive directory payload")
+        archive_path(member.name, directory, seen)
+        require(member.name == "package/" or member.name.startswith("package/"),
+                "unsafe archive npm root")
+    return members
+
+
+def inspect_zip(archive):
+    seen = {}
+    members = archive.infolist()
+    for member in members:
+        mode = stat.S_IFMT(member.external_attr >> 16)
+        directory = member.is_dir()
+        require(member.orig_filename == member.filename, "unsafe archive ambiguous ZIP filename")
+        require(mode in ({0, stat.S_IFDIR} if directory else {0, stat.S_IFREG}),
+                "unsafe archive non-regular ZIP member")
+        require(not (member.external_attr & 0x10) or directory, "unsafe archive ZIP directory mode")
+        require(not directory or member.file_size == 0, "unsafe archive directory payload")
+        archive_path(member.filename, directory, seen)
+        # Our generated wheels require no ZIP extra metadata. In particular,
+        # PKWARE/ASi Unix extras can encode hardlinks even with a regular mode.
+        require(not member.extra and not member.flag_bits & 1, "unsafe archive ZIP extension or encryption")
+        archive.fp.seek(member.header_offset)
+        header = archive.fp.read(30)
+        require(len(header) == 30, "unsafe archive truncated ZIP header")
+        signature, _, flags, compression, _, _, _, _, _, name_size, extra_size = struct.unpack("<4s5H3I2H", header)
+        require(signature == b"PK\x03\x04" and extra_size == 0 and flags == member.flag_bits
+                and compression == member.compress_type, "unsafe archive inconsistent ZIP local header")
+        raw_name = archive.fp.read(name_size)
+        require(raw_name.decode("utf-8" if flags & 0x800 else "cp437") == member.filename,
+                "unsafe archive inconsistent ZIP local filename")
+        # Opening a stream validates offsets/overlap without extracting a file.
+        with archive.open(member):
+            pass
+    return members
+
+
 def package_metadata(file):
     if file.suffix == ".tgz":
         with tarfile.open(file, "r:gz") as archive:
-            members = [member for member in archive.getmembers() if member.name == "package/package.json"]
+            members = [member for member in inspect_tar(archive) if member.name == "package/package.json"]
             require(len(members) == 1 and members[0].isfile(), "invalid npm package metadata")
             return json.load(archive.extractfile(members[0]))
     with zipfile.ZipFile(file) as archive:
-        metadata = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
+        metadata = [member.filename for member in inspect_zip(archive) if member.filename.endswith(".dist-info/METADATA")]
         require(len(metadata) == 1, "invalid wheel metadata")
         parsed = email.parser.BytesParser().parsebytes(archive.read(metadata[0]))
         return {"name": parsed["Name"], "version": parsed["Version"]}
@@ -106,20 +173,68 @@ def integrity(arguments):
     return metadata
 
 
-def build(arguments):
-    source_versions(arguments.version)
-    output = Path(arguments.output).absolute()
-    require(not output.exists() and not output.is_symlink(), "artifact output already exists; refusing overwrite")
+def clean_build_snapshot():
+    """Bind actual packaged inputs to HEAD, then build from those immutable bytes.
+
+    Only copied source trees and the build script/dependency declarations matter.
+    Excluded caches/outputs and unrelated files elsewhere are neither rejected nor
+    copied. Explicit byte comparisons also catch assume-unchanged index entries.
+    """
+    error = "dirty or untracked build inputs; commit relevant sources before packaging"
     source = run(["git", "rev-parse", "HEAD"])
     require(re.fullmatch(r"[0-9a-f]{40}", source), "source commit is required")
+    relevant = (*BUILD_DIRECTORIES, *BUILD_FILES)
+    staged = subprocess.run(["git", "diff", "--cached", "--quiet", source, "--", *relevant], cwd=ROOT)
+    require(staged.returncode == 0, error)
+    entries = subprocess.check_output(["git", "ls-tree", "-rz", "--full-tree", source, "--", *relevant], cwd=ROOT)
+    expected = {}
+    for entry in filter(None, entries.split(b"\0")):
+        metadata, encoded_path = entry.split(b"\t", 1)
+        mode, kind, object_id = metadata.decode().split()
+        relative = encoded_path.decode()
+        if EXCLUDED_BUILD_NAMES.intersection(Path(relative).parts):
+            continue
+        require(kind == "blob" and mode in {"100644", "100755"}, error)
+        expected[relative] = (mode, object_id)
+    actual = set(BUILD_FILES)
+    for relative in BUILD_DIRECTORIES:
+        directory = ROOT / relative
+        require(directory.is_dir() and not directory.is_symlink(), error)
+        for current, directories, files in os.walk(directory, followlinks=False):
+            directories[:] = [name for name in directories if name not in EXCLUDED_BUILD_NAMES]
+            require(all(not (Path(current) / name).is_symlink() for name in directories), error)
+            for name in files:
+                if name not in EXCLUDED_BUILD_NAMES:
+                    actual.add((Path(current) / name).relative_to(ROOT).as_posix())
+    require(actual == set(expected), error)
+    snapshot = {}
+    for relative, (mode, object_id) in expected.items():
+        file = ROOT / relative
+        require(file.is_file() and not file.is_symlink(), error)
+        committed = subprocess.check_output(["git", "cat-file", "blob", object_id], cwd=ROOT)
+        require(file.read_bytes() == committed, error)
+        require(bool(file.stat().st_mode & 0o111) == (mode == "100755"), error)
+        snapshot[relative] = (committed, mode)
+    return source, snapshot
+
+
+def build(arguments):
+    output = Path(arguments.output).absolute()
+    require(not output.exists() and not output.is_symlink(), "artifact output already exists; refusing overwrite")
+    source, snapshot = clean_build_snapshot()
+    source_versions(arguments.version)
     with tempfile.TemporaryDirectory(prefix="cogneris-release-build-") as temporary_name:
         temporary = Path(temporary_name)
         checkout = temporary / "checkout"
         staged = temporary / "artifacts"
         staged.mkdir()
-        ignored = shutil.ignore_patterns("dist", "node_modules", ".venv", "__pycache__", ".ruff_cache")
-        for relative in ("sdks", "cli"):
-            shutil.copytree(ROOT / relative, checkout / relative, ignore=ignored)
+        # Use HEAD's verified bytes, never a second read of mutable source files.
+        for relative, (contents, mode) in snapshot.items():
+            if any(relative.startswith(directory + "/") for directory in BUILD_DIRECTORIES):
+                file = checkout / relative
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(contents)
+                file.chmod(0o755 if mode == "100755" else 0o644)
         (checkout / "package.json").write_text('{"private":true}\n')
         compiler = ROOT / "node_modules/.bin/tsc"
         run([compiler, "-p", checkout / "sdks/typescript/tsconfig.json"], checkout)

@@ -11,9 +11,6 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED = {"npm test", "npm run check:sdks", "npm run verify:sdks",
-            "npm run test:cli", "npm run build:cli", "npm run test:docs",
-            "npm run pack:sdks", "npm run verify:artifacts"}
 ALLOWED_ACTIONS = {"actions/checkout", "actions/setup-node", "actions/setup-python",
                    "actions/upload-artifact", "actions/download-artifact",
                    "pypa/gh-action-pypi-publish"}
@@ -42,84 +39,164 @@ def parse(text):
     return yaml.load(text, Loader=WorkflowLoader)
 
 
-def runs(job):
-    return "\n".join(step.get("run", "") for step in job["steps"])
+def command(block, **fields):
+    return {"run": block.strip(), **fields}
+
+
+def action(name, settings, **fields):
+    return {"uses": name, "with": settings, **fields}
+
+
+ARTIFACT_ARGUMENTS = (
+    '--version "$RELEASE_VERSION" --artifacts "$RUNNER_TEMP/sdk-release" '
+    '--manifest-sha256 "$MANIFEST_SHA256" --source "$GITHUB_SHA"'
+)
+CHECK_VERSION = 'python scripts/sdk-release.py check-version --version "$RELEASE_VERSION"'
+VERSION_OUTPUT = """version=$(node -p "require('./cli/package.json').version")
+python scripts/sdk-release.py check-version --version "$version"
+echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+echo "version=$version" >> "$GITHUB_OUTPUT" """
+MANIFEST_OUTPUT = 'echo "sha256=$(sha256sum "$RUNNER_TEMP/sdk-release/manifest.json" | cut -d \' \' -f 1)" >> "$GITHUB_OUTPUT"'
+PYTHON_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
+READ_ONLY = {"contents": "read"}
+
+
+def checkout_step():
+    return action("actions/checkout", {"persist-credentials": False})
+
+
+def node_step():
+    return action("actions/setup-node", {"node-version": 24, "package-manager-cache": False})
+
+
+def python_step(matrix=False):
+    return action("actions/setup-python", {"python-version": "${{ matrix.python }}" if matrix else "3.12"})
+
+
+def download_step(build):
+    return action("actions/download-artifact", {
+        "artifact-ids": "${{ needs." + build + ".outputs.artifact-id }}",
+        "path": "${{ runner.temp }}/sdk-release",
+    })
+
+
+def expected_jobs(release):
+    """Allowlist complete executable blocks, step order, and all execution fields.
+
+    Deliberately do not parse arbitrary shell or accept a matching line inside a
+    larger program. Any new shell/control flow needs an explicit contract review.
+    Presentation-only step names and the terminal YAML newline are normalized.
+    """
+    build = "build" if release else "postman"
+    version = "${{ inputs.version }}" if release else "${{ needs.postman.outputs.version }}"
+    main_steps = [
+        checkout_step(), node_step(), python_step(),
+        command("python -m pip install uv==0.10.10"),
+        command(CHECK_VERSION) if release else command(VERSION_OUTPUT, id="version"),
+        *[command(body) for body in ("npm ci", "npm run check:sdks", "npm run verify:sdks",
+                                    "npm run test:cli", "npm run build:cli", "npm run test:docs", "npm test")],
+        command('npm run pack:sdks -- --version "$RELEASE_VERSION" --output "$RUNNER_TEMP/sdk-release"'),
+        command(MANIFEST_OUTPUT, id="manifest"),
+        command("npm run verify:artifacts -- " + ARTIFACT_ARGUMENTS,
+                env={"MANIFEST_SHA256": "${{ steps.manifest.outputs.sha256 }}"}),
+        action("actions/upload-artifact", {
+            "name": "sdk-release-${{ github.run_id }}-${{ github.run_attempt }}",
+            "path": "${{ runner.temp }}/sdk-release/",
+            "if-no-files-found": "error", "retention-days": 14,
+        }, id="artifacts"),
+    ]
+    outputs = {"artifact-id": "${{ steps.artifacts.outputs.artifact-id }}",
+               "manifest-sha256": "${{ steps.manifest.outputs.sha256 }}"}
+    if not release:
+        outputs["version"] = "${{ steps.version.outputs.version }}"
+    jobs = {
+        build: {
+            "runs-on": "ubuntu-latest", "permissions": READ_ONLY,
+            "outputs": outputs,
+            "env": dict(PYTHON_ENV, **({"RELEASE_VERSION": version} if release else {})),
+            "steps": main_steps,
+        },
+        "python-compatibility": {
+            "needs": [build], "runs-on": "ubuntu-latest", "permissions": READ_ONLY,
+            "strategy": {"fail-fast": False, "matrix": {"python": ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]}},
+            "env": dict(PYTHON_ENV, RELEASE_VERSION=version,
+                        MANIFEST_SHA256="${{ needs." + build + ".outputs.manifest-sha256 }}"),
+            "steps": [checkout_step(), python_step(matrix=True),
+                      command("python -m pip install uv==0.10.10"), download_step(build),
+                      command("python scripts/sdk-release.py verify " + ARTIFACT_ARGUMENTS + " --python-only")],
+        },
+    }
+    if release:
+        for registry in ("npm", "pypi"):
+            env = dict(PYTHON_ENV, RELEASE_VERSION=version,
+                       MANIFEST_SHA256="${{ needs.build.outputs.manifest-sha256 }}",
+                       SDK_RELEASE_READY="${{ vars.SDK_RELEASE_READY }}")
+            env["SDK_" + registry.upper() + "_TRUSTED_PUBLISHING_READY"] = (
+                "${{ vars.SDK_" + registry.upper() + "_TRUSTED_PUBLISHING_READY }}")
+            steps = [checkout_step()]
+            if registry == "npm":
+                env.update(NPM_CONFIG_USERCONFIG="/dev/null",
+                           NPM_CONFIG_GLOBALCONFIG="${{ github.workspace }}/../sdk-release-global.npmrc",
+                           REPOSITORY_PRIVATE="${{ github.event.repository.private }}")
+                steps.append(node_step())
+            steps.extend([
+                python_step(), download_step(build),
+                command("python scripts/sdk-release.py verify " + ARTIFACT_ARGUMENTS + " --integrity-only\n"
+                        "python scripts/sdk-release.py check-publish " + ARTIFACT_ARGUMENTS + " --registry " + registry),
+            ])
+            if registry == "npm":
+                steps.append(command(
+                    'npm publish "./cogneris-document-ai-sdk-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts\n'
+                    'npm publish "./cogneris-document-ai-cli-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts',
+                    **{"working-directory": "${{ runner.temp }}/sdk-release"}))
+            else:
+                steps.extend([
+                    command('mkdir "$RUNNER_TEMP/pypi"\n'
+                            'cp "$RUNNER_TEMP/sdk-release/cogneris_document_ai_sdk-$RELEASE_VERSION-py3-none-any.whl" "$RUNNER_TEMP/pypi/"'),
+                    action("pypa/gh-action-pypi-publish", {
+                        "packages-dir": "${{ runner.temp }}/pypi/", "attestations": True,
+                    }),
+                ])
+            jobs["publish-" + registry] = {
+                "if": "${{ inputs.dry_run == false && github.ref == 'refs/heads/main' }}",
+                "needs": ["build", "python-compatibility"], "environment": "sdk-release",
+                "runs-on": "ubuntu-latest", "permissions": {"contents": "read", "id-token": "write"},
+                "env": env, "steps": steps,
+            }
+    return jobs
 
 
 def contract(document, source, release):
-    assert document["permissions"] == {"contents": "read"}
-    for job_name, job in document["jobs"].items():
-        publish = release and job_name in {"publish-npm", "publish-pypi"}
-        assert job.get("permissions") == ({"contents": "read", "id-token": "write"}
-                                      if publish else {"contents": "read"})
-        assert not job.get("continue-on-error")
+    assert set(document) == ({"name", "on", "permissions", "jobs", "concurrency"} if release
+                             else {"name", "on", "permissions", "jobs"})
+    assert document["permissions"] == READ_ONLY
+    if release:
+        assert isinstance(document["on"], dict) and set(document["on"]) == {"workflow_dispatch"}
+        assert set(document["on"]["workflow_dispatch"]) == {"inputs"}
+        inputs = copy.deepcopy(document["on"]["workflow_dispatch"]["inputs"])
+        for value in inputs.values():
+            value.pop("description", None)
+        assert inputs == {"version": {"required": True, "type": "string"},
+                          "dry_run": {"required": True, "type": "boolean", "default": True}}
+        assert document["concurrency"] == {"group": "sdk-release", "cancel-in-progress": False}
+    else:
+        assert document["on"] == {"pull_request": None, "push": {"branches": ["main"]}}
+    actual = copy.deepcopy(document["jobs"])
+    for job in actual.values():
         for step in job["steps"]:
+            step.pop("name", None)  # Only a UI label; all execution fields are compared below.
             if "uses" in step:
-                action, sha = step["uses"].split("@")
-                assert action in ALLOWED_ACTIONS
+                name, sha = step["uses"].split("@")
+                assert name in ALLOWED_ACTIONS
                 assert re.fullmatch(r"[0-9a-f]{40}", sha)
-                assert re.search(re.escape(step["uses"]) + r"\s+# v\d[^\n]*", source)
-                if action == "actions/checkout":
-                    assert step["with"]["persist-credentials"] is False
-                if action == "actions/setup-node":
-                    assert str(step["with"]["node-version"]) == "24"
-            assert not step.get("continue-on-error")
-    assert "secrets." not in source
-    main = document["jobs"]["build" if release else "postman"]
-    assert "if" not in main
-    for command in REQUIRED:
-        assert any(re.search(r"(?m)^\s*" + re.escape(command) + r"(?:\s+--\s+.*)?\s*$",
-                             step.get("run", "")) and "if" not in step
-                   for step in main["steps"]), command
-    compatibility = document["jobs"]["python-compatibility"]
-    assert "if" not in compatibility
-    assert all("if" not in step for step in compatibility["steps"])
-    assert set(compatibility["strategy"]["matrix"]["python"]) == {
-        "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"}
-    assert compatibility["needs"] == ["build" if release else "postman"]
-    assert "--python-only" in runs(compatibility)
-    assert "--manifest-sha256" in runs(compatibility)
-    assert "pack:sdks" not in runs(compatibility)
-    if not release:
-        assert set(document["on"]) == {"push", "pull_request"}
-        assert document["on"]["push"]["branches"] == ["main"]
-        return
-    assert isinstance(document["on"], dict) and set(document["on"]) == {"workflow_dispatch"}
-    inputs = document["on"]["workflow_dispatch"]["inputs"]
-    assert inputs["version"]["required"] is True and inputs["version"]["type"] == "string"
-    assert "default" not in inputs["version"]
-    assert inputs["dry_run"]["type"] == "boolean" and inputs["dry_run"]["default"] is True
-    assert set(document["jobs"]) == {"build", "python-compatibility", "publish-npm", "publish-pypi"}
-    assert "check-version" in runs(main)
-    assert main["outputs"]["manifest-sha256"] == "${{ steps.manifest.outputs.sha256 }}"
-    assert main["outputs"]["artifact-id"] == "${{ steps.artifacts.outputs.artifact-id }}"
-    for job_name in ("publish-npm", "publish-pypi"):
-        job = document["jobs"][job_name]
-        assert job["if"] == "${{ inputs.dry_run == false && github.ref == 'refs/heads/main' }}"
-        assert job["environment"] == "sdk-release"
-        assert set(job["needs"]) == {"build", "python-compatibility"}
-        body = runs(job)
-        assert "--manifest-sha256" in body and '"$RELEASE_VERSION"' in body
-        assert "--source" in body and "check-publish" in body
-        assert "npm ci" not in body and "pack:sdks" not in body and "uv build" not in body
-        download = next(step for step in job["steps"] if step.get("uses", "").startswith("actions/download-artifact@"))
-        assert download["with"]["artifact-ids"] == "${{ needs.build.outputs.artifact-id }}"
-        assert job["env"]["RELEASE_VERSION"] == "${{ inputs.version }}"
-        assert job["env"]["SDK_RELEASE_READY"] == "${{ vars.SDK_RELEASE_READY }}"
-        checks = next(i for i, step in enumerate(job["steps"]) if "check-publish" in step.get("run", ""))
-        assert "if" not in job["steps"][checks]
-        if job_name == "publish-npm":
-            publish = next(i for i, step in enumerate(job["steps"]) if "npm publish" in step.get("run", ""))
-            assert "--provenance" in body and "--ignore-scripts" in body
-            assert "https://registry.npmjs.org" in body
-        else:
-            publish = next(i for i, step in enumerate(job["steps"]) if step.get("uses", "").startswith("pypa/gh-action-pypi-publish@"))
-            assert job["steps"][publish]["with"]["attestations"] is True
-            assert job["steps"][publish]["with"]["packages-dir"] == "${{ runner.temp }}/pypi/"
-        assert checks < publish
-    for job_name in ("build", "python-compatibility"):
-        assert "npm publish" not in runs(document["jobs"][job_name])
-        assert not any(step.get("uses", "").startswith("pypa/") for step in document["jobs"][job_name]["steps"])
+                assert re.search(re.escape(step["uses"]) + r"[ \t]+# v\d[^\n]*", source)
+                step["uses"] = name
+            if "run" in step:
+                step["run"] = step["run"].strip()
+    expected = expected_jobs(release)
+    assert set(actual) == set(expected)
+    for name, job in expected.items():
+        assert actual[name] == job, "workflow execution contract changed: " + name
 
 
 class SdkWorkflowTests(unittest.TestCase):
@@ -168,6 +245,44 @@ class SdkWorkflowTests(unittest.TestCase):
             parse("on: {workflow_dispatch: {}}\non: push\n")
         with self.assertRaises(yaml.constructor.ConstructorError):
             parse("!!python/object/apply:os.system ['false']")
+
+    def test_contract_rejects_nonexecuting_gates_and_untrusted_source_bindings(self):
+        def change_runs(document, job, transform):
+            for step in document["jobs"][job]["steps"]:
+                if "run" in step:
+                    step["run"] = transform(step["run"])
+
+        def replace_gate(document, wrapper):
+            change_runs(document, "publish-pypi", lambda body: wrapper(body) if "check-publish" in body else body)
+
+        mutations = {
+            "echoed publication guards": lambda d: replace_gate(d, lambda body: "\n".join("echo " + line for line in body.splitlines())),
+            "disabled full tests": lambda d: change_runs(d, "build", lambda body: "if false; then\n  npm test\nfi" if body == "npm test" else body),
+            "self-claimed source": lambda d: change_runs(d, "publish-pypi", lambda body: body.replace('"$GITHUB_SHA"', '"$(python -c \'import json,os; print(json.load(open(os.environ["RUNNER_TEMP"]+"/sdk-release/manifest.json"))["source"])\')"')),
+            "ignored guard failure": lambda d: replace_gate(d, lambda body: "\n".join(line + " || true" for line in body.splitlines())),
+            "guarded by false branch": lambda d: replace_gate(d, lambda body: "if false; then\n" + body + "\nfi"),
+            "source environment override": lambda d: d["jobs"]["publish-pypi"]["env"].update(GITHUB_SHA="0" * 40),
+            "digest from artifact environment": lambda d: d["jobs"]["publish-pypi"]["env"].update(MANIFEST_SHA256="${{ inputs.version }}"),
+            "run shell turned into echo": lambda d: next(s for s in d["jobs"]["publish-pypi"]["steps"] if "check-publish" in s.get("run", "")).update(shell="echo {0}"),
+            "workflow defaults disable shell": lambda d: d.update(defaults={"run": {"shell": "echo {0}"}}),
+            "untrusted checkout ref": lambda d: d["jobs"]["publish-pypi"]["steps"][0]["with"].update(ref="untrusted"),
+            "echoed compatibility verification": lambda d: change_runs(d, "python-compatibility", lambda body: "echo " + body if "--python-only" in body else body),
+            "skipped download": lambda d: next(s for s in d["jobs"]["publish-pypi"]["steps"] if s.get("uses", "").startswith("actions/download-artifact@")).update({"if": "${{ false }}"}),
+            "publish before verification": lambda d: d["jobs"]["publish-pypi"]["steps"].insert(0, d["jobs"]["publish-pypi"]["steps"].pop()),
+        }
+        original, source = self.load("release-sdks.yml")
+        for label, mutate in mutations.items():
+            with self.subTest(mutation=label):
+                changed = copy.deepcopy(original)
+                mutate(changed)
+                with self.assertRaises((AssertionError, KeyError, ValueError, TypeError, StopIteration)):
+                    contract(changed, source, True)
+
+    def test_validation_rejects_test_commands_hidden_in_inactive_shell(self):
+        document, source = self.load("validate.yml")
+        next(step for step in document["jobs"]["postman"]["steps"] if step.get("run") == "npm test")["run"] = "if false; then\n npm test\nfi"
+        with self.assertRaises(AssertionError):
+            contract(document, source, False)
 
     def test_npm_release_disables_ambient_npmrc_without_breaking_the_cli(self):
         document, _ = self.load("release-sdks.yml")

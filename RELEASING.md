@@ -78,8 +78,20 @@ npm run test:workflows
 ```
 
 The artifact builder refuses existing output directories and builds only in
-owned temporary copies. Registry dependency downloads may be needed for clean
-installation; tests contact only loopback API fixtures.
+owned temporary copies. Packaged source trees, the release builder, and root
+dependency declarations must match the committed `HEAD`, including the index;
+modified, deleted, staged, or untracked build inputs fail before packaging.
+The builder uses a verified snapshot of Git object bytes, so a later source edit
+cannot silently enter an artifact labeled with the earlier commit. Unrelated
+files and excluded dependency/cache/build directories are preserved and excluded.
+
+Verification inspects archive metadata without filesystem extraction. Only
+regular files and canonical empty directory markers are accepted; links, special
+files, unsafe or colliding paths, tar PAX extensions, and ZIP extra metadata are
+rejected. The current package builders need no such extensions. Local and central
+ZIP headers must agree, preventing alternate filename/link interpretations.
+Registry dependency downloads may be needed for clean installation; tests contact
+only loopback API fixtures.
 
 References: [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/),
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements/),
