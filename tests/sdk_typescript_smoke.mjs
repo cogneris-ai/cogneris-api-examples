@@ -21,6 +21,8 @@ let pollingCounts = new Map();
 const jobId = "11111111-1111-4111-8111-111111111111";
 const failedJobId = "22222222-2222-4222-8222-222222222222";
 const endlessJobId = "33333333-3333-4333-8333-333333333333";
+const reflectedApiKey = "test-api-key-reflected-sentinel";
+const reflectedDocument = "document-reflected-sentinel";
 
 function json(response, status, body, headers = {}) {
   response.writeHead(status, { "Content-Type": "application/json", ...headers });
@@ -64,11 +66,12 @@ before(async () => {
       contentType: request.headers["content-type"],
       method: request.method,
       path: request.url,
+      receivedAt: Date.now(),
     });
 
     if (request.method === "POST" && request.url === "/Document/extraction") {
-      if (body.includes("reject-this-document")) {
-        json(response, 415, { code: "unsupported_media_type", title: "Unsupported document" });
+      if (body.includes(reflectedDocument)) {
+        json(response, 415, { code: reflectedApiKey, title: reflectedDocument, retryable: true });
       } else {
         json(response, 200, { data: { accepted: true }, meta: { status: 200 }, hasErrors: false });
       }
@@ -88,7 +91,14 @@ before(async () => {
       const count = (pollingCounts.get(id) ?? 0) + 1;
       pollingCounts.set(id, count);
       if (id === failedJobId) {
-        json(response, 200, { jobId: id, operation: "Extraction", status: "Failed", failureCode: "processing_failed", retryable: false });
+        json(response, 200, {
+          jobId: id,
+          operation: "Extraction",
+          status: "Failed",
+          failureCode: reflectedDocument,
+          outputReference: reflectedApiKey,
+          retryable: false,
+        });
       } else if (id === endlessJobId) {
         json(response, 200, { jobId: id, operation: "Extraction", status: "Processing" }, { "Retry-After": "0" });
       } else if (count === 1) {
@@ -123,7 +133,22 @@ test("installed package exports the maintained helper surface", () => {
   assert.equal(new sdk.CognerisApiError("test") instanceof sdk.CognerisError, true);
   assert.equal(sdk.cognerisBaseUrl("us"), "https://api-us.cogneris.ai");
   assert.equal(sdk.cognerisBaseUrl("eu"), "https://api-eu.cogneris.ai");
-  assert.throws(() => sdk.cognerisBaseUrl("apac"), /us.*eu/);
+  for (const invalidRegion of ["apac", "constructor", "toString"]) {
+    assert.throws(() => sdk.cognerisBaseUrl(invalidRegion), /us.*eu/);
+    assert.throws(
+      () => new sdk.CognerisClient({
+        apiKey: "test-api-key",
+        region: invalidRegion,
+        _baseUrlForTesting: baseUrl,
+      }),
+      /us.*eu/,
+    );
+  }
+  assert.doesNotThrow(() => new sdk.CognerisClient({
+    apiKey: "test-api-key",
+    region: "us",
+    _baseUrlForTesting: "http://[::1]:4321",
+  }));
   assert.deepEqual(sdk.COGNERIS_REGION_URLS, {
     us: "https://api-us.cogneris.ai",
     eu: "https://api-eu.cogneris.ai",
@@ -133,25 +158,28 @@ test("installed package exports the maintained helper surface", () => {
 test("client sends bearer auth and multipart bytes without including them in errors", async () => {
   requests = [];
   const client = new sdk.CognerisClient({
-    apiKey: "test-api-key",
+    apiKey: reflectedApiKey,
     region: "us",
     _baseUrlForTesting: baseUrl,
   });
   const result = await client.extract(new Blob(["ordinary-document"]), { fileName: "sample.pdf" });
   assert.equal(result.data.accepted, true);
   const upload = requests.at(-1);
-  assert.equal(upload.authorization, "Bearer test-api-key");
+  assert.equal(upload.authorization, `Bearer ${reflectedApiKey}`);
   assert.match(upload.contentType, /^multipart\/form-data; boundary=/);
   assert.match(upload.body.toString(), /ordinary-document/);
   assert.match(upload.body.toString(), /sample\.pdf/);
 
   await assert.rejects(
-    () => client.extract(new Blob(["reject-this-document"]), { fileName: "bad.exe" }),
+    () => client.extract(new Blob([reflectedDocument]), { fileName: "bad.exe" }),
     (error) => {
       assert.equal(error instanceof sdk.CognerisApiError, true);
       assert.equal(error.status, 415);
-      assert.equal(error.code, "unsupported_media_type");
-      assert.doesNotMatch(error.message, /reject-this-document|test-api-key/);
+      assert.equal(error.retryable, true);
+      assert.equal("code" in error, false);
+      const exposed = `${error.message} ${JSON.stringify(error)}`;
+      assert.equal(exposed.includes(reflectedDocument), false);
+      assert.equal(exposed.includes(reflectedApiKey), false);
       return true;
     },
   );
@@ -171,6 +199,8 @@ test("job helpers submit, honor Retry-After, stop on success, and cancel", async
   assert.equal(job.status, "Succeeded");
   assert.equal(pollingCounts.get(jobId), 2);
   assert.ok(Date.now() - started >= 900, "Retry-After: 1 should delay the next poll");
+  const firstPoll = requests.find((request) => request.method === "GET" && request.path?.endsWith(jobId));
+  assert.ok(firstPoll.receivedAt - submitted.receivedAt >= 900, "submit Retry-After: 1 should delay the first poll");
 
   const cancelled = await client.cancelJob(jobId);
   assert.equal(cancelled.status, "Cancelled");
@@ -184,8 +214,13 @@ test("wait surfaces terminal failures and bounded-attempt exhaustion as typed er
     () => client.waitForJob(failedJobId, { maxAttempts: 3 }),
     (error) => {
       assert.equal(error instanceof sdk.CognerisJobTerminalError, true);
-      assert.equal(error.job.status, "Failed");
-      assert.equal(error.failureCode, "processing_failed");
+      assert.equal(error.status, "Failed");
+      assert.equal(error.retryable, false);
+      assert.equal("job" in error, false);
+      assert.equal("failureCode" in error, false);
+      const exposed = `${error.message} ${JSON.stringify(error)}`;
+      assert.equal(exposed.includes(reflectedDocument), false);
+      assert.equal(exposed.includes(reflectedApiKey), false);
       return true;
     },
   );

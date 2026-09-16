@@ -5,6 +5,8 @@ from .cogneris import (
     CognerisError,
     CognerisJobTerminalError,
     CognerisMaxAttemptsError,
+    CognerisResponseError,
+    CognerisTransportError,
     cogneris_base_url,
 )
 
@@ -15,5 +17,7 @@ __all__ += (
     "CognerisError",
     "CognerisJobTerminalError",
     "CognerisMaxAttemptsError",
+    "CognerisResponseError",
+    "CognerisTransportError",
     "cogneris_base_url",
 )

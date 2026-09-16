@@ -8,7 +8,7 @@
     "generate:sdks": "node scripts/generate-sdks.mjs",
     "check:sdks": "node scripts/generate-sdks.mjs --check",
     "test:sdk:typescript": "node --test tests/sdk_typescript_smoke.mjs",
-    "test:sdk:python": "PYTHONDONTWRITEBYTECODE=1 uv run --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest tests.test_sdk_helpers.PythonSdkHelperTests -v",
+    "test:sdk:python": "PYTHONDONTWRITEBYTECODE=1 uv run --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest tests.test_sdk_helpers.PythonInstalledSdkSmokeTests -v",
     "verify:sdks": "npm run check:sdks && npm run test:sdk:typescript && npm run test:sdk:python",
     "smoke:live": "node scripts/smoke-live.mjs",
     "test": "PYTHONDONTWRITEBYTECODE=1 uv run --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest discover -s tests -p 'test_*.py'"
