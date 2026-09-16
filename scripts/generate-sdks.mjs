@@ -4,6 +4,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { replaceOutput } from "./sdk-output-swap.mjs";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const configDirectory = path.join(root, "scripts", "sdk-config");
 const sourcePath = path.join(root, "openapi", "cogneris-openapi.yaml");
@@ -152,25 +154,6 @@ async function compareOutputs(expectedDirectory, actualDirectory) {
   return differences;
 }
 
-async function replaceOutput(stagedOutput, temporaryRoot) {
-  const backup = path.join(temporaryRoot, "previous-sdks");
-  let hadPreviousOutput = true;
-  try {
-    await fs.rename(committedOutput, backup);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-    hadPreviousOutput = false;
-  }
-
-  try {
-    await fs.rename(stagedOutput, committedOutput);
-  } catch (error) {
-    if (hadPreviousOutput) await fs.rename(backup, committedOutput);
-    throw error;
-  }
-  if (hadPreviousOutput) await fs.rm(backup, { recursive: true, force: true });
-}
-
 async function main() {
   const generators = await readJson(path.join(configDirectory, "generators.json"));
   const typescriptGeneratorPackage = await readJson(
@@ -281,7 +264,7 @@ async function main() {
         console.log("Generated SDK output is current.");
       }
     } else {
-      await replaceOutput(stagedOutput, temporaryRoot);
+      await replaceOutput({ committedOutput, stagedOutput });
       console.log("Generated SDK output updated.");
     }
   } finally {

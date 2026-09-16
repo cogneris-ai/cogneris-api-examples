@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -182,6 +183,83 @@ class SdkGenerationTests(unittest.TestCase):
             )
         finally:
             generated_file.write_bytes(original)
+
+    def test_failed_install_and_restore_preserve_the_old_tree_for_manual_recovery(self):
+        javascript = r"""
+import fs from "node:fs/promises";
+import path from "node:path";
+import { replaceOutput } from "./scripts/sdk-output-swap.mjs";
+
+const sandbox = process.env.COGNERIS_SWAP_TEST_ROOT;
+const temporaryRoot = path.join(sandbox, "generation-temp");
+const stagedOutput = path.join(temporaryRoot, "sdks");
+const committedOutput = path.join(sandbox, "sdks");
+await fs.mkdir(stagedOutput, { recursive: true });
+await fs.mkdir(committedOutput, { recursive: true });
+await fs.writeFile(path.join(stagedOutput, "marker.txt"), "new SDK tree");
+await fs.writeFile(path.join(committedOutput, "marker.txt"), "old SDK tree");
+
+let renameCalls = 0;
+const filesystem = {
+  mkdtemp: fs.mkdtemp.bind(fs),
+  rm: fs.rm.bind(fs),
+  rename: async (source, destination) => {
+    renameCalls += 1;
+    if (renameCalls === 2 || renameCalls === 3) {
+      const error = new Error(renameCalls === 2 ? "install denied" : "restore denied");
+      error.code = "EACCES";
+      throw error;
+    }
+    return fs.rename(source, destination);
+  },
+};
+
+let caught;
+try {
+  await replaceOutput({ committedOutput, stagedOutput, filesystem });
+} catch (error) {
+  caught = error;
+} finally {
+  // Mirrors generate-sdks.mjs's unconditional staging cleanup.
+  await fs.rm(temporaryRoot, { recursive: true, force: true });
+}
+
+const backupRoots = (await fs.readdir(sandbox))
+  .filter((entry) => entry.startsWith(".sdk-backup-"));
+const recoveryPath = backupRoots.length === 1
+  ? path.join(sandbox, backupRoots[0], "sdks")
+  : null;
+let oldTreeSurvives = false;
+if (recoveryPath) {
+  oldTreeSurvives =
+    (await fs.readFile(path.join(recoveryPath, "marker.txt"), "utf8")) ===
+    "old SDK tree";
+}
+
+console.log(JSON.stringify({
+  errorMessage: caught?.message ?? null,
+  oldTreeSurvives,
+  recoveryPath,
+}));
+"""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            environment = {
+                **os.environ,
+                "COGNERIS_SWAP_TEST_ROOT": temporary_directory,
+            }
+            result = subprocess.run(
+                ["node", "--input-type=module", "--eval", javascript],
+                cwd=ROOT,
+                env=environment,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            outcome = json.loads(result.stdout)
+            self.assertTrue(outcome["oldTreeSurvives"], outcome)
+            self.assertIsNotNone(outcome["recoveryPath"], outcome)
+            self.assertIn(outcome["recoveryPath"], outcome["errorMessage"])
+            self.assertIn("automatic recovery failed", outcome["errorMessage"])
 
     def test_generated_artifacts_exclude_internal_platform_and_admin_routes(self):
         generated_text = "\n".join(
