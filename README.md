@@ -1,58 +1,206 @@
-# Cogneris API examples
+# Cogneris Document AI quickstart
 
-Runnable examples for the [Cogneris Document AI API](https://cogneris.ai/docs.html).
-The Postman collection is generated from the published OpenAPI contract, with no
-API keys or customer data committed to this repository.
+This repository is the canonical first-result path for the public Cogneris
+Document AI API: TypeScript, Python, the `cogneris` CLI, and Postman. All of
+them are built from [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
+OpenAPI contract version `2026-08-07`.
 
-## Import the Postman collection
+## Before you start
 
-1. Download [`Cogneris-API.postman_collection.json`](postman/Cogneris-API.postman_collection.json).
-2. In Postman, select **Import**, then choose the downloaded file.
-3. Open the collection variables and set `bearerToken` to a valid key beginning
-   with `xtkt_live_`. The committed value is intentionally empty.
-4. Open **Documents → extraction → Extract structured fields from a document**,
-   choose a local file in the `file` form-data field, and send the request.
+Use a tenant-scoped API key and select exactly `us` and `eu` as the region. The
+SDK examples and CLI read credentials only from `COGNERIS_API_KEY`; they never
+accept the key as an argument. `COGNERIS_REGION` defaults to `us`.
 
-Optional form-data fields ship deselected, so the request sends only what the
-contract requires. `ComplementaryPrompt` is appended verbatim to the model
-prompt — select it and replace the placeholder only when you want to steer the
-extraction.
+```bash
+export COGNERIS_API_KEY='xtkt_live_...'
+export COGNERIS_REGION='us' # or eu
+```
 
-**Documents → classifier** and **Documents → facematch** accept more than one
-document, so their `files` and `documents` fields are file pickers that take a
-multiple selection.
+The region maps to `https://api-us.cogneris.ai` or
+`https://api-eu.cogneris.ai`. Do not log the key, file contents, extracted
+fields, input/output references, or raw response bodies. The examples print
+only controlled status summaries and identifiers.
 
-The collection defaults to `https://api-us.cogneris.ai`. Change `baseUrl` to
-`https://api-eu.cogneris.ai` when your tenant is hosted in Europe.
+## Install local release artifacts
 
-## Run the live extraction smoke test
+`@cogneris/document-ai-sdk`, `cogneris-document-ai-sdk`, and
+`@cogneris/document-ai-cli` are not published to npm or PyPI. Until registry
+ownership and a release are explicitly authorized, install only locally built
+or owner-provided local release artifacts. Do not run a registry install by
+package name alone.
 
-Use the same collection request from the command line with a valid live key and
-a non-sensitive local document. The key is read from the environment and is not
-written to the collection or printed in the output.
+Build TypeScript SDK and CLI tarballs from this checkout:
 
-The run fails on an error envelope returned with HTTP 200, not just on a failing
-status code, and reports the shape of the result rather than the extracted
-fields — so the output is safe to paste as evidence.
+```bash
+npm ci
+npm run build --prefix sdks/typescript
+npm run build:cli
+mkdir -p release
+npm pack ./sdks/typescript --pack-destination ./release
+npm pack ./cli --pack-destination ./release
+```
+
+In a separate consumer project, install the SDK tarball. Install both tarballs
+when using the CLI so its exact `0.1.0` SDK dependency is satisfied locally:
+
+```bash
+npm install /path/to/release/cogneris-document-ai-sdk-0.1.0.tgz
+npm install /path/to/release/cogneris-document-ai-cli-0.1.0.tgz
+```
+
+Build and install the Python wheel locally:
+
+```bash
+(cd sdks/python && uv build --wheel --out-dir ../../release)
+python -m pip install /path/to/release/cogneris_document_ai_sdk-0.1.0-py3-none-any.whl
+```
+
+## TypeScript: upload or submit and poll
+
+The runnable example imports `CognerisClient` from the official installed
+`@cogneris/document-ai-sdk` package. Synchronous extraction sends the file as
+`multipart/form-data` and prints only envelope status:
+
+```bash
+node examples/typescript/quickstart.mjs extract /path/to/document.pdf
+```
+
+For an already-uploaded input reference, submit an asynchronous job and poll it
+to a terminal state. The reference must be valid for your tenant; the public
+contract does not upload it for you.
+
+```bash
+node examples/typescript/quickstart.mjs async Extraction tenant/input/reference
+```
+
+The maintained interface used by the example is:
+
+```js
+const client = new CognerisClient({ apiKey: process.env.COGNERIS_API_KEY, region: "us" });
+const envelope = await client.extract(file, { fileName: "document.pdf" });
+const submission = await client.submitJob("Extraction", "tenant/input/reference");
+const job = await client.waitForJob(submission.jobId);
+```
+
+## Python: upload or submit and poll
+
+The Python example imports `CognerisClient` from the installed
+`cogneris-document-ai-sdk` wheel:
+
+```bash
+python examples/python/quickstart.py extract /path/to/document.pdf
+python examples/python/quickstart.py async Extraction tenant/input/reference
+```
+
+The equivalent maintained interface is:
+
+```python
+client = CognerisClient(api_key=os.environ["COGNERIS_API_KEY"], region="us")
+envelope = client.extract(contents, file_name="document.pdf")
+submission = client.submit_job("Extraction", "tenant/input/reference")
+job = client.wait_for_job(submission.job_id)
+client.close()
+```
+
+Both SDKs support asynchronous operations `Extraction`, `Classification`,
+`ZeroShot`, `Crop`, and `Split`. Polling honors integer `Retry-After` hints,
+stops on success/failure/cancellation, and uses a bounded attempt count.
+
+## CLI
+
+The installed binary is `cogneris`. Its supported grammar is exactly:
+
+```text
+cogneris [--region us|eu] extract <file>
+cogneris [--region us|eu] jobs submit --operation <operation> --input-reference <reference>
+cogneris [--region us|eu] jobs get <job-id>
+cogneris [--region us|eu] jobs wait <job-id>
+cogneris [--region us|eu] jobs cancel <job-id>
+```
+
+`--region` overrides `COGNERIS_REGION`. The CLI has no `--api-key` or public
+base-URL option. Success is JSON on stdout. Configuration/usage failures exit
+2; controlled API/runtime failures exit 1 and go to stderr. CLI JSON can include
+contract response fields, so treat it as sensitive unless you reduce it to a
+safe status summary before sharing it.
+
+## Responses and errors
+
+Successful synchronous document calls return an `Envelope`: `data` is the
+operation payload, `meta` carries status/messages, and `hasErrors` is the fast
+failure indicator. Application code may inspect `data`, but the quickstart
+examples deliberately do not print extracted field values or raw bodies.
+
+The maintained SDK helpers raise typed, locally controlled errors. TypeScript
+uses `CognerisApiError`, `CognerisJobTerminalError`, and
+`CognerisMaxAttemptsError`; Python additionally distinguishes
+`CognerisTransportError` and `CognerisResponseError`. Branch on the error type,
+HTTP `status`, terminal job `status`, or `retryable` when present. Do not log the
+whole request, response, exception context, document, or credential.
+
+## Public contract limits
+
+- Uploads use `multipart/form-data`. Accepted extensions are `.pdf`, `.png`,
+  `.jpg`, `.jpeg`, `.tiff`, `.tif`, `.bmp`, `.doc`, and `.docx`.
+- The maximum is 10 MB per file except `/Document/split`, which accepts 500 MB.
+- There is no fetch-by-URL upload: synchronous documents travel in the request
+  body. Asynchronous submission takes a reference to an already-uploaded input.
+- One fixed-window limit covers the contract: 50 requests per API key per
+  1-minute window. Excess requests return HTTP 429.
+- Schema is selected by tenant configuration and the document itself. There is
+  no public schema or template parameter on extraction requests.
+- Public evidence, cost, destination, and webhook-signature APIs are absent
+  from OpenAPI contract `2026-08-07`. Do not fabricate calls or infer private
+  service behavior for those capabilities.
+- `CognerisClient` is the maintained document/job helper. Portal,
+  administrative, and internal APIs are not SDK helper features. Public Portal
+  operations that exist in the generated contract have separate scopes and
+  response rules; this quickstart does not present them as document helpers.
+
+## Postman path
+
+The existing Postman workflow remains supported:
+
+1. Import [`postman/Cogneris-API.postman_collection.json`](postman/Cogneris-API.postman_collection.json).
+2. Set the secret collection variable `bearerToken` to a valid key. The
+   committed value is intentionally empty.
+3. Use **Documents → extraction → Extract structured fields from a document**
+   and select a local file in the `file` form-data field.
+4. Keep optional form-data fields deselected unless needed.
+
+`ComplementaryPrompt` is appended verbatim to the model prompt. Classifier and
+facematch accept multiple files. The collection defaults to the US endpoint;
+set `baseUrl` to `https://api-eu.cogneris.ai` for an EU-hosted tenant.
+
+The existing opt-in live smoke uses its historical `COGNERIS_KEY` input and a
+non-sensitive local file. It reports response shape, not extracted values:
 
 ```bash
 COGNERIS_KEY=xtkt_live_... npm run smoke:live -- --file /path/to/document.pdf
 ```
 
-For an EU-hosted tenant, add `--base-url https://api-eu.cogneris.ai`.
+For an EU-hosted tenant, add `--base-url https://api-eu.cogneris.ai` to this
+legacy live-smoke command.
 
-## Regenerate from OpenAPI
+This live-smoke compatibility path is separate from the SDK examples and CLI,
+which use only `COGNERIS_API_KEY` and `COGNERIS_REGION`.
 
-The source contract is [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
-copied from `cogneris-site/src/openapi.yaml`. To regenerate it:
+## Regeneration, support, and versions
+
+Regenerate Postman and verify deterministic SDK output with:
 
 ```bash
-npm ci
 npm run generate
+npm run generate:sdks
 npm test
+npm run check:sdks
 ```
 
-The generator removes unstable converter IDs and adds an empty, secret-typed
-`bearerToken` collection variable. Its converter process uses a fixed random
-seed so the same OpenAPI input produces the same committed collection. It does
-not add or persist credentials.
+The OpenAPI source is copied from `cogneris-site/src/openapi.yaml`. The Postman
+generator removes unstable converter IDs, adds an empty secret-typed
+`bearerToken`, and uses a fixed random seed so identical input produces the
+same committed collection. Neither generator persists credentials.
+
+See [`SUPPORT.md`](SUPPORT.md) for support and security reporting boundaries and
+[`VERSIONING.md`](VERSIONING.md) for Semantic Versioning, dated OpenAPI
+compatibility, and deprecation notice policy.
