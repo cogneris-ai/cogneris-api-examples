@@ -93,7 +93,7 @@ def expected_jobs(release):
         checkout_step(), node_step(), python_step(),
         command("python -m pip install uv==0.10.10"),
         command(CHECK_VERSION) if release else command(VERSION_OUTPUT, id="version"),
-        *[command(body) for body in ("npm ci", "npm run check:sdks", "npm run verify:sdks",
+        *[command(body) for body in ("npm ci", "npm run audit:deps", "npm run check:sdks", "npm run verify:sdks",
                                     "npm run test:cli", "npm run build:cli", "npm run test:docs", "npm test")],
         command('npm run pack:sdks -- --version "$RELEASE_VERSION" --output "$RUNNER_TEMP/sdk-release"'),
         command(MANIFEST_OUTPUT, id="manifest"),

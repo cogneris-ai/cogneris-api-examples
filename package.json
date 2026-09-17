@@ -5,6 +5,7 @@
   "description": "Runnable Cogneris API examples generated from OpenAPI",
   "scripts": {
     "generate": "node scripts/generate-postman.mjs",
+    "audit:deps": "npm audit --audit-level=high",
     "generate:sdks": "node scripts/generate-sdks.mjs",
     "check:sdks": "node scripts/generate-sdks.mjs --check",
     "build:cli": "node scripts/build-cli.mjs",
@@ -23,5 +24,8 @@
     "@hey-api/openapi-ts": "0.99.0",
     "@types/node": "22.20.3",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "js-yaml": "4.3.2"
   }
 }

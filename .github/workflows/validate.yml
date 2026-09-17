@@ -38,6 +38,7 @@ jobs:
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: npm ci
+      - run: npm run audit:deps
       - run: npm run check:sdks
       - run: npm run verify:sdks
       - run: npm run test:cli

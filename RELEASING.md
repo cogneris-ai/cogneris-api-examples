@@ -14,9 +14,10 @@ integrity metadata; they do not claim a signed provenance attestation.
 One build supplies the Python 3.9–3.14 compatibility matrix. Every matrix job
 verifies and installs the same wheel and runs installed SDK/example loopback tests;
 it does not regenerate SDKs or rebuild packages. The full Node 24/Python 3.12 job
-retains the Postman tests and runs SDK drift, SDK verification, CLI build/tests,
-documentation/examples, and the aggregate suite. These are the currently tested
-Python minors within the package's declared `>=3.9,<4.0` range.
+retains the Postman tests and runs a high-severity dependency audit, SDK drift,
+SDK verification, CLI build/tests, documentation/examples, and the aggregate suite.
+These are the currently tested Python minors within the package's declared
+`>=3.9,<4.0` range.
 
 Build outputs include an immutable Actions artifact ID and the manifest digest.
 Consumers require that exact ID, independently compare the manifest digest, verify
