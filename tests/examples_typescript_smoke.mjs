@@ -32,7 +32,7 @@ function json(response, status, body, headers = {}) {
 function serviceEnvelope(status, data) {
   return {
     data,
-    meta: { httpStatusCode: status, messages: [], errors: [] },
+    meta: { httpStatusCode: status, messages: [] },
     hasErrors: false,
   };
 }
@@ -178,18 +178,18 @@ test("installed SDK quickstart runs sync upload and emits only a safe summary", 
 
 test("installed SDK quickstart submits and polls without printing output references", async () => {
   requests = [];
-  const inputReference = "private/input/reference.pdf";
-  const result = await invoke(["async", "Extraction", inputReference]);
+  const inputReference = "artifact://private/input/reference.pdf";
+  const result = await invoke(["async", "Facematch", inputReference]);
   assert.equal(result.exitCode, 0, result.stderr);
   assert.deepEqual(JSON.parse(result.stdout), {
-    operation: "Extraction",
+    operation: "Facematch",
     jobId,
     status: "Succeeded",
   });
   assert.equal(result.stderr, "");
   assert.deepEqual(JSON.parse(requests.find((request) =>
     request.method === "POST" && request.path === "/api/v1/document-jobs").body), {
-    operation: "Extraction",
+    operation: "Facematch",
     inputReference,
   });
   assert.equal(result.stdout.includes(responseMarker), false);

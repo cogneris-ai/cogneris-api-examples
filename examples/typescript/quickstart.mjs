@@ -7,7 +7,7 @@ import { CognerisClient, CognerisError } from "@cogneris-ai/document-ai-sdk";
 const USAGE = `Usage:
   node quickstart.mjs extract <file>
   node quickstart.mjs async <operation> <input-reference>`;
-const OPERATIONS = new Set(["Extraction", "Classification", "ZeroShot", "Crop", "Split"]);
+const OPERATIONS = new Set(["Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"]);
 
 class UsageError extends Error {}
 

@@ -8,7 +8,7 @@ import {
 import type {
   DocumentJob,
   DocumentJobCancellation,
-  DocumentJobOperation,
+  DocumentJobSubmitOperation,
   DocumentJobSubmission,
   Envelope,
 } from './types.gen';
@@ -183,7 +183,7 @@ export class CognerisClient {
   }
 
   async submitJob(
-    operation: DocumentJobOperation,
+    operation: DocumentJobSubmitOperation,
     inputReference: string,
   ): Promise<DocumentJobSubmission> {
     const result = await submitDocumentJob({

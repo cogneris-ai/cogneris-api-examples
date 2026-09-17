@@ -5,7 +5,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.document_job_status import DocumentJobStatus
+from ..models.document_job_submit_status import DocumentJobSubmitStatus
 
 T = TypeVar("T", bound="DocumentJobSubmission")
 
@@ -15,13 +15,13 @@ class DocumentJobSubmission:
     """
     Attributes:
         job_id (UUID):
-        status (DocumentJobStatus):
+        status (DocumentJobSubmitStatus):
         status_url (str):
         retry_after_seconds (int):
     """
 
     job_id: UUID
-    status: DocumentJobStatus
+    status: DocumentJobSubmitStatus
     status_url: str
     retry_after_seconds: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -53,7 +53,7 @@ class DocumentJobSubmission:
         d = dict(src_dict)
         job_id = UUID(d.pop("jobId"))
 
-        status = DocumentJobStatus(d.pop("status"))
+        status = DocumentJobSubmitStatus(d.pop("status"))
 
         status_url = d.pop("statusUrl")
 

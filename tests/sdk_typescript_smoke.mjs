@@ -32,7 +32,7 @@ function json(response, status, body, headers = {}) {
 function serviceEnvelope(status, data) {
   return {
     data,
-    meta: { httpStatusCode: status, messages: [], errors: [] },
+    meta: { httpStatusCode: status, messages: [] },
     hasErrors: false,
   };
 }
@@ -202,10 +202,10 @@ test("job helpers submit, honor Retry-After, stop on success, and cancel", async
   requests = [];
   pollingCounts = new Map();
   const client = new sdk.CognerisClient({ apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET", region: "eu", _baseUrlForTesting: baseUrl });
-  const submission = await client.submitJob("Extraction", "input/ref");
+  const submission = await client.submitJob("Facematch", "artifact://input/ref");
   assert.equal(submission.jobId, jobId);
   const submitted = requests.at(-1);
-  assert.deepEqual(JSON.parse(submitted.body.toString()), { operation: "Extraction", inputReference: "input/ref" });
+  assert.deepEqual(JSON.parse(submitted.body.toString()), { operation: "Facematch", inputReference: "artifact://input/ref" });
 
   const started = Date.now();
   const job = await client.waitForJob(jobId, { maxAttempts: 3 });

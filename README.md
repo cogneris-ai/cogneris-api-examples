@@ -107,7 +107,7 @@ contract does not upload it for you.
 
 ```bash
 cd "$COGNERIS_CONSUMER"
-node ./examples/typescript/quickstart.mjs async Extraction tenant/input/reference
+node ./examples/typescript/quickstart.mjs async Extraction artifact://tenant/input/reference
 ```
 
 The maintained interface used by the example is:
@@ -115,7 +115,7 @@ The maintained interface used by the example is:
 ```js
 const client = new CognerisClient({ apiKey: process.env.COGNERIS_API_KEY, region: "us" });
 const envelope = await client.extract(file, { fileName: "document.pdf" });
-const submission = await client.submitJob("Extraction", "tenant/input/reference");
+const submission = await client.submitJob("Extraction", "artifact://tenant/input/reference");
 const job = await client.waitForJob(submission.jobId);
 ```
 
@@ -127,7 +127,7 @@ The Python example imports `CognerisClient` from the installed
 ```bash
 cd "$COGNERIS_CONSUMER"
 ./.venv/bin/python ./examples/python/quickstart.py extract /path/to/document.pdf
-./.venv/bin/python ./examples/python/quickstart.py async Extraction tenant/input/reference
+./.venv/bin/python ./examples/python/quickstart.py async Extraction artifact://tenant/input/reference
 ```
 
 The equivalent maintained interface is:
@@ -135,13 +135,13 @@ The equivalent maintained interface is:
 ```python
 client = CognerisClient(api_key=os.environ["COGNERIS_API_KEY"], region="us")
 envelope = client.extract(contents, file_name="document.pdf")
-submission = client.submit_job("Extraction", "tenant/input/reference")
+submission = client.submit_job("Extraction", "artifact://tenant/input/reference")
 job = client.wait_for_job(submission.job_id)
 client.close()
 ```
 
 Both SDKs support asynchronous operations `Extraction`, `Classification`,
-`ZeroShot`, `Crop`, and `Split`. Polling honors integer `Retry-After` hints,
+`ZeroShot`, `Crop`, `Split`, and `Facematch`. Polling honors integer `Retry-After` hints,
 stops on success/failure/cancellation, and uses a bounded attempt count.
 
 ## CLI

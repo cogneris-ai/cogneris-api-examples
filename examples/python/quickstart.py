@@ -12,7 +12,7 @@ from cogneris_document_ai_sdk import CognerisClient, CognerisError
 USAGE = """Usage:
   python quickstart.py extract <file>
   python quickstart.py async <operation> <input-reference>"""
-OPERATIONS = {"Extraction", "Classification", "ZeroShot", "Crop", "Split"}
+OPERATIONS = {"Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"}
 
 
 class UsageError(Exception):

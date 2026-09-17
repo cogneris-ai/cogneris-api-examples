@@ -8,7 +8,7 @@ import {
   type CognerisRegion,
   type DocumentJob,
   type DocumentJobCancellation,
-  type DocumentJobOperation,
+  type DocumentJobSubmitOperation,
   type DocumentJobSubmission,
   type Envelope,
 } from '@cogneris-ai/document-ai-sdk';
@@ -20,12 +20,13 @@ const USAGE = `Usage:
   cogneris [--region us|eu] jobs wait <job-id>
   cogneris [--region us|eu] jobs cancel <job-id>`;
 
-const OPERATIONS = new Set<DocumentJobOperation>([
+const OPERATIONS = new Set<DocumentJobSubmitOperation>([
   'Extraction',
   'Classification',
   'ZeroShot',
   'Crop',
   'Split',
+  'Facematch',
 ]);
 
 class UsageError extends Error {}
@@ -39,7 +40,7 @@ type Client = {
   extract(file: Blob | File, options?: { fileName?: string }): Promise<Envelope>;
   getJob(jobId: string): Promise<DocumentJob>;
   submitJob(
-    operation: DocumentJobOperation,
+    operation: DocumentJobSubmitOperation,
     inputReference: string,
   ): Promise<DocumentJobSubmission>;
   waitForJob(jobId: string): Promise<DocumentJob>;
@@ -54,7 +55,7 @@ type CliDependencies = {
 
 type Command =
   | { kind: 'extract'; filePath: string }
-  | { kind: 'submit'; operation: DocumentJobOperation; inputReference: string }
+  | { kind: 'submit'; operation: DocumentJobSubmitOperation; inputReference: string }
   | { kind: 'get' | 'wait' | 'cancel'; jobId: string };
 
 function failUsage(message = 'Invalid command or options.'): never {
@@ -109,11 +110,11 @@ function parseSubmit(argumentsList: string[]): Command {
       failUsage();
     }
   }
-  if (!requiredValue(operation) || !OPERATIONS.has(operation as DocumentJobOperation)) failUsage();
+  if (!requiredValue(operation) || !OPERATIONS.has(operation as DocumentJobSubmitOperation)) failUsage();
   if (!requiredValue(inputReference)) failUsage();
   return {
     kind: 'submit',
-    operation: operation as DocumentJobOperation,
+    operation: operation as DocumentJobSubmitOperation,
     inputReference,
   };
 }

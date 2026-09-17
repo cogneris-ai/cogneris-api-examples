@@ -16,7 +16,7 @@ from .models.document_job import DocumentJob
 from .models.document_job_cancellation import DocumentJobCancellation
 from .models.document_job_cancellation_envelope import DocumentJobCancellationEnvelope
 from .models.document_job_envelope import DocumentJobEnvelope
-from .models.document_job_operation import DocumentJobOperation
+from .models.document_job_submit_operation import DocumentJobSubmitOperation
 from .models.document_job_status import DocumentJobStatus
 from .models.document_job_submission import DocumentJobSubmission
 from .models.document_job_submission_envelope import DocumentJobSubmissionEnvelope
@@ -185,10 +185,10 @@ class CognerisClient:
 
     def submit_job(
         self,
-        operation: Union[str, DocumentJobOperation],
+        operation: Union[str, DocumentJobSubmitOperation],
         input_reference: str,
     ) -> DocumentJobSubmission:
-        parsed_operation = operation if isinstance(operation, DocumentJobOperation) else DocumentJobOperation(operation)
+        parsed_operation = operation if isinstance(operation, DocumentJobSubmitOperation) else DocumentJobSubmitOperation(operation)
         response = _safe_generated_call(
             lambda: submit_document_job.sync_detailed(
                 client=self._client,
