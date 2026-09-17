@@ -186,7 +186,8 @@ sanitized `CognerisApiException`, `CognerisTransportException`,
 
 Stage the exact `cogneris-document-ai-sdk-0.1.0.jar` and
 `cogneris-document-ai-sdk-0.1.0.pom` as one local Maven artifact. A full JDK 17
-with `javac` is required; `jdk4py` is not a full compiler JDK on this host.
+with `javac` and Apache Maven 3.9 or newer are required; `jdk4py` is not a full
+compiler JDK on this host.
 
 ```bash
 export COGNERIS_MAVEN_REPOSITORY="$COGNERIS_CONSUMER/java/maven-repository"
@@ -196,26 +197,58 @@ cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.jar" "$COGNERIS_MAVEN_COORD
 cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.pom" "$COGNERIS_MAVEN_COORDINATES/"
 ```
 
-Bind the dependency to that explicit repository in the consumer POM; keep
-Maven Central only for the artifact's public transitive dependencies:
+Create `$COGNERIS_CONSUMER/java/pom.xml` with the dependency bound to that
+explicit repository. Maven Central remains available only for the artifact's
+public transitive dependencies and build plugins; the Cogneris package itself
+resolves from `COGNERIS_MAVEN_REPOSITORY`:
 
 ```xml
-<repositories>
-  <repository>
-    <id>cogneris-local-release</id>
-    <url>file://${env.COGNERIS_MAVEN_REPOSITORY}</url>
-  </repository>
-</repositories>
-<dependencies>
-  <dependency>
-    <groupId>ai.cogneris</groupId>
-    <artifactId>cogneris-document-ai-sdk</artifactId>
-    <version>0.1.0</version>
-  </dependency>
-</dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example</groupId>
+  <artifactId>cogneris-quickstart</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <repositories>
+    <repository>
+      <id>cogneris-local-release</id>
+      <url>file://${env.COGNERIS_MAVEN_REPOSITORY}</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>ai.cogneris</groupId>
+      <artifactId>cogneris-document-ai-sdk</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+  </dependencies>
+</project>
 ```
 
-Copy `examples/java/Quickstart.java` to the consumer's Java source tree. The
+Copy the example into Maven's source layout, compile it, resolve the runtime
+classpath from the POM, and invoke it with only the compiled example plus the
+resolved package dependencies:
+
+```bash
+export COGNERIS_JAVA_CONSUMER="$COGNERIS_CONSUMER/java"
+mkdir -p "$COGNERIS_JAVA_CONSUMER/src/main/java"
+cp "$COGNERIS_CHECKOUT/examples/java/Quickstart.java" \
+  "$COGNERIS_JAVA_CONSUMER/src/main/java/Quickstart.java"
+cd "$COGNERIS_JAVA_CONSUMER"
+mvn --batch-mode compile dependency:build-classpath \
+  -Dmdep.outputFile=target/runtime-classpath.txt
+export COGNERIS_JAVA_CLASSPATH="$(tr -d '\r\n' < target/runtime-classpath.txt)"
+java -cp "target/classes:$COGNERIS_JAVA_CLASSPATH" Quickstart extract /path/to/document.pdf
+```
+
+The command is a package-only first-result path: the consumer has no reference
+to `sdks/java` and Maven resolves the Cogneris coordinate from the explicit
+local repository. The package remains unavailable from Maven Central. The
 example maps `COGNERIS_REGION=us|eu` to `CognerisClient.Region.US` or
 `CognerisClient.Region.EU` and demonstrates `extract`, `submitJob`, `getJob`,
 `waitForJob`, and `cancelJob`. The facade sends bearer authentication and
