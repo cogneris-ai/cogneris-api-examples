@@ -723,7 +723,7 @@ export type CreatePortalMagicLinkErrors = {
      */
     403: ProblemDetails;
     /**
-     * No such form
+     * No such form, or it belongs to another tenant. The two are indistinguishable by design.
      */
     404: unknown;
     /**

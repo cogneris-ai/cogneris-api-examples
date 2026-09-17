@@ -1,0 +1,14 @@
+{
+  "groupId": "ai.cogneris",
+  "artifactId": "cogneris-document-ai-sdk",
+  "artifactVersion": "0.1.0",
+  "invokerPackage": "ai.cogneris.documentai",
+  "apiPackage": "ai.cogneris.documentai.api",
+  "modelPackage": "ai.cogneris.documentai.model",
+  "library": "native",
+  "dateLibrary": "java8",
+  "serializationLibrary": "jackson",
+  "hideGenerationTimestamp": true,
+  "licenseName": "Apache-2.0",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0"
+}

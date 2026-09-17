@@ -1,8 +1,8 @@
 # Support policy
 
 This repository supports the public Cogneris Document AI contract and the
-generated TypeScript and Python SDK artifacts, CLI artifact, examples, and
-Postman collection built from it. Support covers reproducible generation,
+generated TypeScript, Python, C#/.NET 8, and Java 17 SDK artifacts, CLI artifact,
+examples, and Postman collection built from it. Support covers reproducible generation,
 installation from a release artifact, documented authentication and region
 selection, and behavior represented by the dated public OpenAPI contract.
 
@@ -12,6 +12,12 @@ Include the artifact version, OpenAPI contract version, runtime version,
 command or minimal reproduction, safe error class/status, and region. Remove
 API keys, document contents, extracted values, raw responses, tenant data, and
 input/output references before posting.
+
+For C# or Java, state whether the exact local
+`Cogneris.DocumentAI.0.1.0.nupkg` or the paired
+`cogneris-document-ai-sdk-0.1.0.jar` and `.pom` was used. Package-name-only
+registry installation is outside the supported path until NuGet or Maven
+Central availability has separately verified release evidence.
 
 The repository does not provide support for tenant configuration, schema or
 template design, service entitlement, Portal administration, private/internal

@@ -1,0 +1,9 @@
+{
+  "packageName": "Cogneris.DocumentAI",
+  "packageVersion": "0.1.0",
+  "targetFramework": "net8.0",
+  "library": "generichost",
+  "nullableReferenceTypes": true,
+  "licenseId": "Apache-2.0",
+  "hideGenerationTimestamp": true
+}

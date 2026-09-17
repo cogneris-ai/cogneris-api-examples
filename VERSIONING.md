@@ -1,10 +1,12 @@
 # Versioning and compatibility
 
 The TypeScript SDK (`@cogneris-ai/document-ai-sdk`), Python SDK
-(`cogneris-document-ai-sdk`), and TypeScript CLI
+(`cogneris-document-ai-sdk`), C# SDK (`Cogneris.DocumentAI`), Java SDK
+(`ai.cogneris:cogneris-document-ai-sdk`), and TypeScript CLI
 (`@cogneris-ai/document-ai-cli`) use Semantic Versioning. Their current `0.1.0`
-artifacts are unpublished development artifacts; a package version alone does
-not mean that an npm or PyPI release exists.
+artifacts remain unpublished in npm, PyPI, NuGet, and Maven Central unless a
+separate registry release is verified; a package version or local artifact
+alone does not prove registry availability.
 
 Every generated SDK release is tied to a dated public OpenAPI contract. The
 current artifacts are generated from Cogneris Document AI OpenAPI version
@@ -23,7 +25,7 @@ Semantic Versioning applies to the maintained SDK helper and CLI interfaces:
 
 While the packages remain below `1.0.0`, release notes must still call out any
 compatibility impact explicitly. A newer OpenAPI date is not by itself proof of
-backward compatibility; compare the contract and regenerate/check both SDKs.
+backward compatibility; compare the contract and regenerate/check all four SDKs.
 
 ## Deprecation notice
 

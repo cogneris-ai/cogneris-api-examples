@@ -1,5 +1,6 @@
 """Security contracts for the executable GitHub workflow configuration."""
 import copy
+import json
 import os
 import re
 import subprocess
@@ -12,8 +13,13 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_ACTIONS = {"actions/checkout", "actions/setup-node", "actions/setup-python",
+                   "actions/setup-dotnet", "actions/setup-java",
                    "actions/upload-artifact", "actions/download-artifact",
                    "pypa/gh-action-pypi-publish"}
+REQUIRED_ACTION_PINS = {
+    "actions/setup-dotnet": "26b0ec14cb23fa6904739307f278c14f94c95bf1",
+    "actions/setup-java": "b6effb05e454b25005698d916606bdc6ffcbf961",
+}
 
 
 class WorkflowLoader(yaml.SafeLoader):
@@ -73,6 +79,14 @@ def python_step(matrix=False):
     return action("actions/setup-python", {"python-version": "${{ matrix.python }}" if matrix else "3.12"})
 
 
+def dotnet_step():
+    return action("actions/setup-dotnet", {"dotnet-version": "8.0.x"})
+
+
+def java_step():
+    return action("actions/setup-java", {"distribution": "temurin", "java-version": "17"})
+
+
 def download_step(build):
     return action("actions/download-artifact", {
         "artifact-ids": "${{ needs." + build + ".outputs.artifact-id }}",
@@ -90,7 +104,7 @@ def expected_jobs(release):
     build = "build" if release else "postman"
     version = "${{ inputs.version }}" if release else "${{ needs.postman.outputs.version }}"
     main_steps = [
-        checkout_step(), node_step(), python_step(),
+        checkout_step(), node_step(), python_step(), dotnet_step(), java_step(),
         command("python -m pip install uv==0.10.10"),
         command(CHECK_VERSION) if release else command(VERSION_OUTPUT, id="version"),
         *[command(body) for body in ("npm ci", "npm run audit:deps", "npm run check:sdks", "npm run verify:sdks",
@@ -189,6 +203,8 @@ def contract(document, source, release):
                 name, sha = step["uses"].split("@")
                 assert name in ALLOWED_ACTIONS
                 assert re.fullmatch(r"[0-9a-f]{40}", sha)
+                if name in REQUIRED_ACTION_PINS:
+                    assert sha == REQUIRED_ACTION_PINS[name]
                 assert re.search(re.escape(step["uses"]) + r"[ \t]+# v\d[^\n]*", source)
                 step["uses"] = name
             if "run" in step:
@@ -213,6 +229,29 @@ class SdkWorkflowTests(unittest.TestCase):
     def test_release_is_manual_dry_by_default_and_uses_protected_oidc_jobs(self):
         document, source = self.load("release-sdks.yml")
         contract(document, source, True)
+
+    def test_release_version_input_describes_all_five_package_families(self):
+        document, _ = self.load("release-sdks.yml")
+        self.assertEqual(
+            document["on"]["workflow_dispatch"]["inputs"]["version"]["description"],
+            "Exact SemVer already present in all five package families (no v prefix)",
+        )
+
+    def test_package_scripts_verify_all_four_package_only_consumers(self):
+        scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
+        self.assertEqual(
+            scripts["test:sdk:csharp"],
+            "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_sdk_helpers.CSharpSdkSmokeTests -v",
+        )
+        self.assertEqual(
+            scripts["test:sdk:java"],
+            "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_sdk_helpers.JavaSdkSmokeTests -v",
+        )
+        self.assertEqual(
+            scripts["verify:sdks"],
+            "npm run check:sdks && npm run test:sdk:typescript && npm run test:sdk:python && "
+            "npm run test:sdk:csharp && npm run test:sdk:java",
+        )
 
     def test_contract_rejects_trigger_permission_gate_and_integrity_regressions(self):
         original, source = self.load("release-sdks.yml")

@@ -36,6 +36,19 @@ function run(command, argumentsList, options = {}) {
   }
 }
 
+function generateOpenApiSdk(generatorName, configPath, outputPath, generators) {
+  const pin = generators[generatorName];
+  run("uvx", [
+    "--from", `${pin.package}==${pin.version}`,
+    "--with", `${pin.runtime.package}==${pin.runtime.version}`,
+    "openapi-generator-cli", "generate",
+    "-g", generatorName,
+    "-i", sourcePath,
+    "-o", outputPath,
+    "-c", configPath,
+  ]);
+}
+
 async function sha256(filePath) {
   return crypto
     .createHash("sha256")
@@ -94,7 +107,7 @@ async function appendOverlay(targetPath, overlayPath) {
 }
 
 async function applyApprovedLicense(stagedOutput) {
-  for (const packageDirectory of ["typescript", "python"]) {
+  for (const packageDirectory of ["typescript", "python", "csharp", "java"]) {
     for (const legalFile of ["LICENSE", "NOTICE"]) {
       await fs.copyFile(
         path.join(root, legalFile),
@@ -116,6 +129,204 @@ async function applyApprovedLicense(stagedOutput) {
       `${readmeDeclaration}license = "Apache-2.0"\nlicense-files = ["LICENSE", "NOTICE"]\n`,
     ),
   );
+
+  const csharpProjectPath = path.join(stagedOutput, "csharp", "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj");
+  const csharpProject = await fs.readFile(csharpProjectPath, "utf8");
+  if (!csharpProject.includes("<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>")) {
+    throw new Error("generated C# project is missing the approved license expression");
+  }
+  await fs.writeFile(csharpProjectPath, csharpProject.replace("</Project>", `  <ItemGroup>
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../../NOTICE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>`));
+
+  const javaLegalDirectory = path.join(stagedOutput, "java", "src", "main", "resources", "META-INF");
+  await fs.mkdir(javaLegalDirectory, { recursive: true });
+  for (const legalFile of ["LICENSE", "NOTICE"]) {
+    await fs.copyFile(path.join(root, legalFile), path.join(javaLegalDirectory, legalFile));
+  }
+}
+
+async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
+  const scaffolding = sdkName === "csharp"
+    ? [".gitignore", ".openapi-generator-ignore", ".openapi-generator", "appveyor.yml", "api", "docs", "docs/scripts", "src/Cogneris.DocumentAI.Test", "Cogneris.DocumentAI.sln", "src/Cogneris.DocumentAI/README.md"]
+    : [".github", ".gitignore", ".openapi-generator-ignore", ".openapi-generator", ".travis.yml", "api", "docs", "git_push.sh", "build.sbt", "src/test"];
+  for (const relativePath of scaffolding) {
+    await fs.rm(path.join(outputPath, relativePath), { recursive: true, force: true });
+  }
+
+  if (sdkName === "csharp") {
+    const projectPath = path.join(outputPath, "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj");
+    let project = await fs.readFile(projectPath, "utf8");
+    const replacements = new Map([
+      ["<Authors>OpenAPI</Authors>", "<Authors>COGNERIS, INC.</Authors>"],
+      ["<Company>OpenAPI</Company>", "<Company>COGNERIS, INC.</Company>"],
+      ["<AssemblyTitle>OpenAPI Library</AssemblyTitle>", "<AssemblyTitle>Cogneris Document AI SDK</AssemblyTitle>"],
+      ["<Description>A library generated from a OpenAPI doc</Description>", "<Description>Cogneris Document AI API client for .NET</Description>"],
+      ["<Copyright>No Copyright</Copyright>", "<Copyright>Copyright 2026 COGNERIS, INC.</Copyright>"],
+      ["<RepositoryUrl>https://github.com/GIT_USER_ID/GIT_REPO_ID.git</RepositoryUrl>", "<RepositoryUrl>https://github.com/cogneris-ai/cogneris-api-examples.git</RepositoryUrl>"],
+    ]);
+    for (const [generated, approved] of replacements) {
+      if (project.split(generated).length !== 2) {
+        throw new Error(`generated C# package metadata template changed: ${generated}`);
+      }
+      project = project.replace(generated, approved);
+    }
+    await fs.writeFile(projectPath, project);
+  } else if (sdkName === "java") {
+    const buildPath = path.join(outputPath, "build.gradle");
+    let build = await fs.readFile(buildPath, "utf8");
+    if (build.split("JavaVersion.VERSION_11").length !== 3) {
+      throw new Error("generated Java runtime targets do not match the expected template");
+    }
+    build = build.replaceAll("JavaVersion.VERSION_11", "JavaVersion.VERSION_17");
+    if (!build.includes("apply plugin: 'java'")) throw new Error("generated Java library plugin template is missing");
+    build = build.replace("apply plugin: 'java'", "apply plugin: 'java-library'");
+    // Generated public models and ApiClient expose these types. The published
+    // Gradle POM must make them available when an external consumer compiles.
+    for (const dependency of [
+      "com.google.code.findbugs:jsr305",
+      "com.fasterxml.jackson.core:jackson-core",
+      "com.fasterxml.jackson.core:jackson-annotations",
+      "com.fasterxml.jackson.core:jackson-databind",
+      "org.openapitools:jackson-databind-nullable",
+    ]) {
+      const declaration = `implementation "${dependency}:`;
+      if (!build.includes(declaration)) throw new Error(`generated Java public dependency is missing: ${dependency}`);
+      build = build.replace(declaration, `api "${dependency}:`);
+    }
+    const publication = `            artifactId = 'cogneris-document-ai-sdk'
+            from components.java`;
+    if (build.split(publication).length !== 2) {
+      throw new Error("generated Java publication template changed");
+    }
+    build = build.replace(publication, `${publication}
+            pom {
+                name = 'Cogneris Document AI SDK'
+                description = 'Cogneris Document AI API client for Java'
+                url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                licenses {
+                    license {
+                        name = 'Apache-2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'COGNERIS, INC.'
+                        organization = 'COGNERIS, INC.'
+                        organizationUrl = 'https://github.com/cogneris-ai'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git'
+                    url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                }
+            }`);
+    await fs.writeFile(buildPath, build);
+    const pomPath = path.join(outputPath, "pom.xml");
+    let pom = await fs.readFile(pomPath, "utf8");
+    for (const target of ["source", "target"]) {
+      const declaration = `<maven.compiler.${target}>11</maven.compiler.${target}>`;
+      if (!pom.includes(declaration)) throw new Error(`generated Java POM is missing ${declaration}`);
+      pom = pom.replace(declaration, `<maven.compiler.${target}>17</maven.compiler.${target}>`);
+    }
+    const enforcer = /(<requireJavaVersion>\s*<version>)11(<\/version>\s*<\/requireJavaVersion>)/;
+    if (!enforcer.test(pom)) throw new Error("generated Java POM is missing its Java 11 enforcer template");
+    pom = pom.replace(enforcer, (_, opening, closing) => `${opening}17${closing}`);
+    const generatedUrl = "<url>https://github.com/openapitools/openapi-generator</url>";
+    if (pom.split(generatedUrl).length !== 3) {
+      throw new Error(`generated Java POM provenance template changed: ${generatedUrl}`);
+    }
+    pom = pom.replaceAll(generatedUrl, "<url>https://github.com/cogneris-ai/cogneris-api-examples</url>");
+    const pomReplacements = new Map([
+      ["<description>OpenAPI Java</description>", "<description>Cogneris Document AI API client for Java</description>"],
+      ["<connection>scm:git:git@github.com:openapitools/openapi-generator.git</connection>", "<connection>scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git</connection>"],
+      ["<developerConnection>scm:git:git@github.com:openapitools/openapi-generator.git</developerConnection>", "<developerConnection>scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git</developerConnection>"],
+      [`<developer>
+            <name>OpenAPI-Generator Contributors</name>
+            <email>team@openapitools.org</email>
+            <organization>OpenAPITools.org</organization>
+            <organizationUrl>http://openapitools.org</organizationUrl>
+        </developer>`, `<developer>
+            <name>COGNERIS, INC.</name>
+            <organization>COGNERIS, INC.</organization>
+            <organizationUrl>https://github.com/cogneris-ai</organizationUrl>
+        </developer>`],
+    ]);
+    for (const [generated, approved] of pomReplacements) {
+      if (!pom.includes(generated)) {
+        throw new Error(`generated Java POM provenance template changed: ${generated}`);
+      }
+      pom = pom.replace(generated, approved);
+    }
+    await fs.writeFile(pomPath, pom);
+    const wrapperPath = path.join(outputPath, "gradle", "wrapper", "gradle-wrapper.properties");
+    const wrapper = await fs.readFile(wrapperPath, "utf8");
+    const gradle = generators.java.gradle;
+    if (!wrapper.includes(`gradle-${gradle.version}-bin.zip`) || wrapper.includes("distributionSha256Sum=")) {
+      throw new Error("generated Gradle wrapper does not match the pinned distribution template");
+    }
+    await fs.writeFile(wrapperPath, `${wrapper.trimEnd()}\ndistributionSha256Sum=${gradle.distributionSha256}\n`);
+    await normalizeJavaNativeSources(outputPath);
+  }
+}
+
+async function normalizeJavaNativeSources(outputPath) {
+  const apiDirectory = path.join(outputPath, "src", "main", "java", "ai", "cogneris", "documentai", "api");
+  for (const [name, expectedDecoders] of [["DocumentsApi", 7], ["JobsApi", 5], ["PortalApi", 4]]) {
+    const filePath = path.join(apiDirectory, `${name}.java`);
+    let source = await fs.readFile(filePath, "utf8");
+    const decoder = /new String\(((?:localVarResponseBody|responseBody)\.readAllBytes\(\))\)/g;
+    if ([...source.matchAll(decoder)].length !== expectedDecoders) {
+      throw new Error(`generated Java ${name} response decoder template changed`);
+    }
+    source = source.replace(decoder, "new String($1, java.nio.charset.StandardCharsets.UTF_8)");
+    if (name === "DocumentsApi") {
+      const prompt = 'multiPartBuilder.addTextBody("ComplementaryPrompt", complementaryPrompt.toString());';
+      if (source.split(prompt).length !== 2) throw new Error("generated Java multipart prompt template changed");
+      source = source.replace(prompt,
+        'multiPartBuilder.addTextBody("ComplementaryPrompt", complementaryPrompt.toString(), org.apache.http.entity.ContentType.TEXT_PLAIN.withCharset(java.nio.charset.StandardCharsets.UTF_8));');
+      const pipeProducer = /        Pipe pipe;[\s\S]*?        formDataPublisher = HttpRequest\.BodyPublishers\.ofInputStream\(\(\) -> Channels\.newInputStream\(pipe\.source\(\)\)\);/g;
+      if ([...source.matchAll(pipeProducer)].length !== 6) throw new Error("generated Java multipart producer template changed");
+      source = source.replace(pipeProducer, "        formDataPublisher = new MultipartBodyPublisher(entity);");
+      const operation = /(    HttpRequest\.Builder localVarRequestBuilder = \w+RequestBuilder\([^\n]+;\n)    try \{/g;
+      if ([...source.matchAll(operation)].length !== 6) throw new Error("generated Java document operation template changed");
+      source = source.replace(operation, "$1    HttpRequest localVarRequest = localVarRequestBuilder.build();\n    try {");
+      source = source.replaceAll("          localVarRequestBuilder.build(),", "          localVarRequest,");
+      const interrupted = `    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }`;
+      if (source.split(interrupted).length !== 7) throw new Error("generated Java document interruption template changed");
+      source = source.replaceAll(interrupted, `${interrupted} finally {
+      localVarRequest.bodyPublisher().ifPresent(publisher -> {
+        if (publisher instanceof MultipartBodyPublisher multipart) multipart.close();
+      });
+    }`);
+      const publisher = await fs.readFile(path.join(overlayDirectory, "java", "multipart-publisher.append.java"), "utf8");
+      if (!/}\s*$/.test(source)) throw new Error("generated Java document class template changed");
+      source = source.replace(/}\s*$/, `${publisher}\n}\n`);
+    }
+    await fs.writeFile(filePath, source);
+  }
+}
+
+async function normalizeGeneratedText(directory) {
+  for (const relativePath of await listFiles(directory)) {
+    const filePath = path.join(directory, relativePath);
+    const bytes = await fs.readFile(filePath);
+    if (bytes.includes(0)) continue;
+    const text = bytes.toString("utf8");
+    // Never decode/rewrite binary artifacts such as the Gradle wrapper JAR.
+    if (!Buffer.from(text, "utf8").equals(bytes)) continue;
+    const normalized = text.replace(/[^\S\r\n]+(?=\r?$)/gm, "").replace(/(?:\r?\n){2,}$/, "\n");
+    if (normalized !== text) await fs.writeFile(filePath, normalized);
+  }
 }
 
 async function validatePackages(stagedOutput) {
@@ -155,8 +366,55 @@ async function validatePackages(stagedOutput) {
     ),
   );
 
+  const csharpProject = await fs.readFile(path.join(stagedOutput, "csharp", "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj"), "utf8");
+  for (const metadata of [
+    "<PackageId>Cogneris.DocumentAI</PackageId>",
+    "<AssemblyName>Cogneris.DocumentAI</AssemblyName>",
+    "<RootNamespace>Cogneris.DocumentAI</RootNamespace>",
+    "<Version>0.1.0</Version>",
+    "<TargetFramework>net8.0</TargetFramework>",
+    "<Nullable>enable</Nullable>",
+    "<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>",
+    '<None Include="../../LICENSE" Pack="true" PackagePath="" />',
+    '<None Include="../../NOTICE" Pack="true" PackagePath="" />',
+  ]) {
+    if (!csharpProject.includes(metadata)) throw new Error(`generated C# metadata is invalid: missing ${metadata}`);
+  }
+
+  const javaPom = await fs.readFile(path.join(stagedOutput, "java", "pom.xml"), "utf8");
+  for (const metadata of [
+    "<groupId>ai.cogneris</groupId>",
+    "<artifactId>cogneris-document-ai-sdk</artifactId>",
+    "<version>0.1.0</version>",
+    "<packaging>jar</packaging>",
+    "<maven.compiler.source>17</maven.compiler.source>",
+    "<maven.compiler.target>17</maven.compiler.target>",
+  ]) {
+    if (!javaPom.includes(metadata)) throw new Error(`generated Java POM identity is invalid: missing ${metadata}`);
+  }
+  if (!/<requireJavaVersion>\s*<version>17<\/version>\s*<\/requireJavaVersion>/.test(javaPom)) {
+    throw new Error("generated Java POM must enforce Java 17");
+  }
+  await fs.access(path.join(stagedOutput, "java", "src", "main", "java", "ai", "cogneris", "documentai", "ApiClient.java"));
+  const javaBuild = await fs.readFile(path.join(stagedOutput, "java", "build.gradle"), "utf8");
+  if (javaBuild.split("JavaVersion.VERSION_17").length !== 3 || javaBuild.includes("JavaVersion.VERSION_11")) {
+    throw new Error("generated Java runtime targets must both be Java 17");
+  }
+
+  for (const sdkName of ["typescript", "python", "csharp", "java"]) {
+    for (const legalFile of ["LICENSE", "NOTICE"]) {
+      const expected = await fs.readFile(path.join(root, legalFile));
+      const actual = await fs.readFile(path.join(stagedOutput, sdkName, legalFile));
+      if (!expected.equals(actual)) throw new Error(`generated ${sdkName} ${legalFile} is invalid`);
+      if (sdkName === "java") {
+        const resource = await fs.readFile(path.join(stagedOutput, sdkName, "src", "main", "resources", "META-INF", legalFile));
+        if (!expected.equals(resource)) throw new Error(`generated Java META-INF/${legalFile} is invalid`);
+      }
+    }
+  }
+
   const forbiddenRoutes = ["/platform", "platform/v1", "/admin", "admincontroller"];
-  for (const sdkName of ["typescript", "python"]) {
+  for (const sdkName of ["typescript", "python", "csharp", "java"]) {
     for (const relativePath of await listFiles(path.join(stagedOutput, sdkName))) {
       const contents = await fs.readFile(
         path.join(stagedOutput, sdkName, relativePath),
@@ -211,6 +469,8 @@ async function main() {
   const stagedOutput = path.join(temporaryRoot, "sdks");
   const typescriptOutput = path.join(stagedOutput, "typescript");
   const pythonOutput = path.join(stagedOutput, "python");
+  const csharpOutput = path.join(stagedOutput, "csharp");
+  const javaOutput = path.join(stagedOutput, "java");
 
   try {
     await fs.mkdir(typescriptOutput, { recursive: true });
@@ -276,6 +536,11 @@ async function main() {
       path.join(pythonOutput, "README.md"),
     );
 
+    for (const [sdkName, outputPath] of [["csharp", csharpOutput], ["java", javaOutput]]) {
+      generateOpenApiSdk(sdkName, path.join(configDirectory, `${sdkName}.json`), outputPath, generators);
+      await normalizeOpenApiSdk(sdkName, outputPath, generators);
+    }
+
     await applyOverlayFiles(
       path.join(overlayDirectory, "typescript", "files"),
       typescriptOutput,
@@ -292,6 +557,10 @@ async function main() {
       path.join(pythonOutput, "cogneris_document_ai_sdk", "__init__.py"),
       path.join(overlayDirectory, "python", "__init__.append.py"),
     );
+    for (const [sdkName, outputPath] of [["csharp", csharpOutput], ["java", javaOutput]]) {
+      await applyOverlayFiles(path.join(overlayDirectory, sdkName, "files"), outputPath);
+      await normalizeGeneratedText(outputPath);
+    }
 
     await applyApprovedLicense(stagedOutput);
 
@@ -304,6 +573,16 @@ async function main() {
       },
       generators,
       packages: {
+        csharp: {
+          name: "Cogneris.DocumentAI",
+          version: "0.1.0",
+          files: await hashFiles(csharpOutput),
+        },
+        java: {
+          name: "ai.cogneris:cogneris-document-ai-sdk",
+          version: "0.1.0",
+          files: await hashFiles(javaOutput),
+        },
         python: {
           name: "cogneris-document-ai-sdk",
           version: "0.1.0",

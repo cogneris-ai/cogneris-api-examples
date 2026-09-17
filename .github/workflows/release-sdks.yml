@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Exact SemVer already present in all three packages (no v prefix)'
+        description: 'Exact SemVer already present in all five package families (no v prefix)'
         required: true
         type: string
       dry_run:
@@ -43,6 +43,13 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
       - run: python -m pip install uv==0.10.10
       - run: python scripts/sdk-release.py check-version --version "$RELEASE_VERSION"
       - run: npm ci

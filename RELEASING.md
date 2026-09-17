@@ -1,20 +1,26 @@
 # SDK release workflow
 
-The registry names are `@cogneris-ai/document-ai-sdk`,
-`@cogneris-ai/document-ai-cli`, and `cogneris-document-ai-sdk`. All three
-packages remain unpublished until the first authorized release completes.
+The package identities are `@cogneris-ai/document-ai-sdk`,
+`@cogneris-ai/document-ai-cli`, `cogneris-document-ai-sdk`,
+`Cogneris.DocumentAI`, and `ai.cogneris:cogneris-document-ai-sdk`. npm and PyPI
+availability requires a separately verified registry release. The C# and Java
+packages are not published to NuGet or Maven Central; no workflow publishes to NuGet or Maven Central.
 Public distribution of version `0.1.0` under Apache License 2.0 was authorized
 by COGNERIS,INC. on 2026-09-17. The release artifacts must carry the repository
 `LICENSE` and `NOTICE` files and matching SPDX metadata.
 
 For local generation, builds, and verification, install Node.js 24, npm 10+,
-Python 3.12, and `uv`/`uvx` on `PATH`, then run `npm ci`. The TypeScript
+Python 3.12, .NET 8, a full JDK 17 with `javac`, and `uv`/`uvx` on `PATH`, then
+run `npm ci`. The TypeScript
 generator requires Node.js >=22.18.0; the installed SDK and CLI require only
 Node.js >=20.0.0 for their built-in `File`/`fetch` runtime and npm 9+ for local
 installation. The Python wheel requires Python `>=3.9,<4.0`; uv is used for
 building and isolated verification here, and is not needed for ordinary Python
 runtime use or installation of an existing wheel with pip. `uv build` resolves
 the wheel build backend declared in `pyproject.toml`.
+The pinned `jdk4py==17.0.9.2` runtime runs generation and is a runtime fallback,
+but it is not a full compiler JDK on this host. Java package builds and consumer
+compilation therefore require a full JDK 17 with `javac`.
 
 Python generation uses `openapi-python-client==0.26.2` with an explicit
 `uvx --with ruff==0.13.3` dependency pin from `scripts/sdk-config/generators.json`.
@@ -23,10 +29,21 @@ the manifest records both pins. Do not upgrade the formatter independently
 without regenerating and checking the committed SDK output.
 
 `.github/workflows/release-sdks.yml` accepts only a manual `workflow_dispatch`.
-Supply the exact SemVer already committed in all three package versions (currently
-`0.1.0`, without a `v` prefix). The default `dry_run: true` executes public validation
-scripts, packs both npm packages, builds the Python wheel, installs those exact
-artifacts in a fresh consumer, and uploads them with a SHA-256 manifest for 14 days.
+Supply the exact SemVer already committed in all five package families (currently
+`0.1.0`, without a `v` prefix). The default `dry_run: true` executes public
+validation scripts, builds the six package files below, installs those exact
+artifacts in fresh package-only consumers, and uploads them with a SHA-256
+manifest for 14 days:
+
+- `cogneris-ai-document-ai-sdk-0.1.0.tgz`
+- `cogneris-ai-document-ai-cli-0.1.0.tgz`
+- `cogneris_document_ai_sdk-0.1.0-py3-none-any.whl`
+- `Cogneris.DocumentAI.0.1.0.nupkg`
+- `cogneris-document-ai-sdk-0.1.0.jar`
+- `cogneris-document-ai-sdk-0.1.0.pom`
+
+The Java JAR and its POM metadata sidecar are one package family, so the dry run
+produces exactly five package families and six package files.
 It requires no publishing credentials or OIDC permission. Dry runs upload unsigned
 integrity metadata; they do not claim a signed provenance attestation.
 
@@ -41,8 +58,9 @@ These are the currently tested Python minors within the package's declared
 Build outputs include an immutable Actions artifact ID and the manifest digest.
 Consumers require that exact ID, independently compare the manifest digest, verify
 all package digests, source commit, names, versions, and the CLI's exact SDK
-dependency. Publication jobs do not rebuild or install package code. They publish
-the verified tarballs or a byte-for-byte copy of the verified wheel.
+dependency. npm/PyPI publication jobs do not rebuild or install package code;
+they publish the verified tarballs or a byte-for-byte copy of the verified
+wheel. There are no NuGet or Maven Central publication jobs.
 
 ## External gates before a real release
 
@@ -120,6 +138,11 @@ tar extension headers are rejected before their payload is parsed. These
 conservative limits cover the current npm and uv output without extraction.
 Registry dependency downloads may be needed for clean installation; tests contact
 only loopback API fixtures.
+
+Every npm tarball, the Python wheel, the NuGet package, and the Java JAR carry
+the Apache-2.0 `LICENSE` and `NOTICE` files plus their ecosystem's license
+metadata. The POM is the Java package's metadata sidecar and records the
+Apache-2.0 name and URL; the JAR is that family's legal-text container.
 
 References: [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/),
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements/),
