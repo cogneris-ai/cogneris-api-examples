@@ -70,7 +70,7 @@
         "src/Cogneris.DocumentAI/Client/TokenContainer`1.cs": "5579011ff83a56e5d4b734c3723f7e9fafadf20300e2949ff7a272c9ff3a1761",
         "src/Cogneris.DocumentAI/Client/TokenProvider`1.cs": "6f9cb9afaf30e50feac097ddf2c83093781a06df351e8c077add4846f3ad80f9",
         "src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj": "2dc4ca7fb5491c904fafecdbe43d89574814cb7e0e8157b4fbaa90cfa7a5459d",
-        "src/Cogneris.DocumentAI/CognerisClient.cs": "e0dd5822ace2554340c80d793ee43ee3197a28a45b811daad4dce0946ce139bd",
+        "src/Cogneris.DocumentAI/CognerisClient.cs": "db869946ab10433f9ac709b16c0fd120d1a163640d45b3ffd2ea25591a746ded",
         "src/Cogneris.DocumentAI/CognerisExceptions.cs": "4f1b9c8ec907ea960dd5d059e5277b620157f312c24abe04d9ab6dc30d82b285",
         "src/Cogneris.DocumentAI/Extensions/IHostBuilderExtensions.cs": "98cbf86d7614f580aceb343965f935bfe854279eb687b8748799c0a8638e2b46",
         "src/Cogneris.DocumentAI/Extensions/IHttpClientBuilderExtensions.cs": "30e075afa11a7a1712abf59d0321774467819469f45fc6ea258a29136521ef73",

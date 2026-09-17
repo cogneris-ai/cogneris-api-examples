@@ -23,7 +23,7 @@ static class Smoke
             "SDK assembly must load from the isolated NuGet cache");
         Console.WriteLine("Package assembly: " + dll);
         foreach (var test in new Func<Task>[] {
-            Workflow, RetryHints, BoundedAndTerminal, Cancellation, SafeErrors, LoopbackSeam, TransportFailure })
+            Workflow, RetryHints, BoundedAndTerminal, Cancellation, SafeErrors, ResponseDecoding, LoopbackSeam, TransportFailure })
         {
             await test();
             Console.WriteLine("PASS " + test.Method.Name);
@@ -196,6 +196,17 @@ static class Smoke
             await Safe<CognerisApiException>(() => client.CancelJobAsync(JobId));
     }
 
+    static async Task ResponseDecoding()
+    {
+        await using var server = new Loopback(new Reply(200, Job("Succeeded"),
+            ContentType: "application/json; charset=" + Reflected));
+        await using var client = Client(server);
+        var error = await Safe<CognerisResponseException>(() => client.GetJobAsync(JobId));
+        Check(error.Message == "Cogneris API response did not match the public contract.",
+            "response decoding must use a fixed safe message");
+        Check(server.Requests.Count == 1, "response decoding must exercise the actual HTTP operation");
+    }
+
     static async Task LoopbackSeam()
     {
         foreach (var uri in new[] { "https://example.com", "http://127.0.0.2", "http://localhost.example.com", "file:///tmp/test", "http://user:secret@localhost", "http://localhost/?secret=1", "relative" })
@@ -241,7 +252,8 @@ static class Smoke
     static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
 }
 
-record Reply(int Status, string Body, string? RetryAfter = null, TimeSpan Delay = default);
+record Reply(int Status, string Body, string? RetryAfter = null, TimeSpan Delay = default,
+    string ContentType = "application/json");
 record Request(string Method, string Path, string Authorization, string ContentType, string Body);
 
 sealed class Loopback : IAsyncDisposable
@@ -282,7 +294,7 @@ sealed class Loopback : IAsyncDisposable
                 var reply = replies.Count > 0 ? replies.Dequeue() : new Reply(500, "Unexpected request");
                 await Task.Delay(reply.Delay, stopping.Token);
                 context.Response.StatusCode = reply.Status;
-                context.Response.ContentType = "application/json";
+                context.Response.ContentType = reply.ContentType;
                 if (reply.RetryAfter is not null) context.Response.Headers["Retry-After"] = reply.RetryAfter;
                 var bytes = Encoding.UTF8.GetBytes(reply.Body);
                 context.Response.ContentLength64 = bytes.Length;

@@ -216,6 +216,12 @@ public sealed class CognerisClient : IAsyncDisposable
         {
             throw new CognerisTransportException();
         }
+        catch (InvalidOperationException)
+        {
+            // Generated operations decode the response body before returning;
+            // unsupported charsets can retain private header text in the cause.
+            throw new CognerisResponseException();
+        }
     }
 
     private static T Parse<T>(Func<T> parse)
