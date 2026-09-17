@@ -148,6 +148,12 @@ def inspect_zip_directory(file):
         tail = stream.read(65557)
     end = tail.rfind(b"PK\x05\x06")
     require(end >= 0 and len(tail) >= end + 22, "unsafe archive missing ZIP footer")
+    # zipfile checks for a ZIP64 locator immediately before the classic footer
+    # and may follow its offsets before returning control to our entry bounds.
+    # Release wheels are deliberately small, so reject ZIP64 before constructing
+    # ZipFile rather than trusting the classic footer's smaller declarations.
+    require(end < 20 or tail[end - 20:end - 16] != b"PK\x06\x07",
+            "unsafe archive ZIP64 directory")
     _, disk, directory_disk, disk_count, count, directory_size, offset, comment_size = struct.unpack(
         "<4s4H2IH", tail[end:end + 22])
     require(count <= MAX_ARCHIVE_ENTRIES, "archive entry count limit exceeded")
