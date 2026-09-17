@@ -1,62 +1,70 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 if TYPE_CHECKING:
     from ..models.document_job import DocumentJob
+    from ..models.service_response_meta import ServiceResponseMeta
 
 
-T = TypeVar("T", bound="ListDocumentJobsResponse200")
+T = TypeVar("T", bound="DocumentJobEnvelope")
 
 
 @_attrs_define
-class ListDocumentJobsResponse200:
+class DocumentJobEnvelope:
     """
     Attributes:
-        jobs (Union[Unset, list['DocumentJob']]):
+        data (DocumentJob):
+        meta (ServiceResponseMeta):
+        has_errors (bool):
     """
 
-    jobs: Union[Unset, list["DocumentJob"]] = UNSET
+    data: "DocumentJob"
+    meta: "ServiceResponseMeta"
+    has_errors: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        jobs: Union[Unset, list[dict[str, Any]]] = UNSET
-        if not isinstance(self.jobs, Unset):
-            jobs = []
-            for jobs_item_data in self.jobs:
-                jobs_item = jobs_item_data.to_dict()
-                jobs.append(jobs_item)
+        data = self.data.to_dict()
+
+        meta = self.meta.to_dict()
+
+        has_errors = self.has_errors
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if jobs is not UNSET:
-            field_dict["jobs"] = jobs
+        field_dict.update(
+            {
+                "data": data,
+                "meta": meta,
+                "hasErrors": has_errors,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.document_job import DocumentJob
+        from ..models.service_response_meta import ServiceResponseMeta
 
         d = dict(src_dict)
-        jobs = []
-        _jobs = d.pop("jobs", UNSET)
-        for jobs_item_data in _jobs or []:
-            jobs_item = DocumentJob.from_dict(jobs_item_data)
+        data = DocumentJob.from_dict(d.pop("data"))
 
-            jobs.append(jobs_item)
+        meta = ServiceResponseMeta.from_dict(d.pop("meta"))
 
-        list_document_jobs_response_200 = cls(
-            jobs=jobs,
+        has_errors = d.pop("hasErrors")
+
+        document_job_envelope = cls(
+            data=data,
+            meta=meta,
+            has_errors=has_errors,
         )
 
-        list_document_jobs_response_200.additional_properties = d
-        return list_document_jobs_response_200
+        document_job_envelope.additional_properties = d
+        return document_job_envelope
 
     @property
     def additional_keys(self) -> list[str]:

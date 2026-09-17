@@ -47,6 +47,17 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
+    def _service_response(self, status, data, headers=None):
+        self._json(
+            status,
+            {
+                "data": data,
+                "meta": {"httpStatusCode": status, "messages": [], "errors": []},
+                "hasErrors": False,
+            },
+            headers,
+        )
+
     def _record(self, body):
         self.requests.append(
             {
@@ -83,7 +94,7 @@ class _Handler(BaseHTTPRequestHandler):
                 )
             return
         if self.path == "/api/v1/document-jobs":
-            self._json(
+            self._service_response(
                 202,
                 {
                     "jobId": JOB_ID,
@@ -95,8 +106,8 @@ class _Handler(BaseHTTPRequestHandler):
             )
             return
         if self.path == f"/api/v1/document-jobs/{JOB_ID}/cancel":
-            self._json(
-                200, {"jobId": JOB_ID, "operation": "Extraction", "status": "Cancelled"}
+            self._service_response(
+                202, {"jobId": JOB_ID, "cancellationRequested": True}
             )
             return
         self._json(404, {"code": "not_found", "title": "Not found"})
@@ -122,7 +133,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.wfile.write(raw)
             return
         if job_id == FAILED_JOB_ID:
-            self._json(
+            self._service_response(
                 200,
                 {
                     "jobId": job_id,
@@ -135,7 +146,7 @@ class _Handler(BaseHTTPRequestHandler):
             )
             return
         if job_id == ENDLESS_JOB_ID:
-            self._json(
+            self._service_response(
                 200,
                 {"jobId": job_id, "operation": "Extraction", "status": "Processing"},
                 {"Retry-After": "0"},
@@ -144,7 +155,7 @@ class _Handler(BaseHTTPRequestHandler):
         if job_id in {NAN_HINT_JOB_ID, INFINITY_HINT_JOB_ID}:
             if count == 1:
                 hint = "NaN" if job_id == NAN_HINT_JOB_ID else "Infinity"
-                self._json(
+                self._service_response(
                     200,
                     {
                         "jobId": job_id,
@@ -154,26 +165,26 @@ class _Handler(BaseHTTPRequestHandler):
                     {"Retry-After": hint},
                 )
             else:
-                self._json(
+                self._service_response(
                     200,
                     {"jobId": job_id, "operation": "Extraction", "status": "Succeeded"},
                 )
             return
         if job_id == RETRY_JOB_ID and count == 1:
-            self._json(
+            self._service_response(
                 200,
                 {"jobId": job_id, "operation": "Extraction", "status": "Processing"},
                 {"Retry-After": "1"},
             )
             return
         if job_id == JOB_ID and count == 1:
-            self._json(
+            self._service_response(
                 200,
                 {"jobId": job_id, "operation": "Extraction", "status": "Processing"},
                 {"Retry-After": "0"},
             )
             return
-        self._json(
+        self._service_response(
             200,
             {
                 "jobId": job_id,
@@ -309,7 +320,8 @@ class InstalledPythonSdkTests(unittest.TestCase):
         self.assertGreaterEqual(time.monotonic() - started, 0.9)
 
         cancelled = client.cancel_job(JOB_ID)
-        self.assertEqual(cancelled.status.value, "Cancelled")
+        self.assertEqual(str(cancelled.job_id), JOB_ID)
+        self.assertTrue(cancelled.cancellation_requested)
         with self.assertRaises(sdk.CognerisMaxAttemptsError) as exhausted:
             client.wait_for_job(ENDLESS_JOB_ID, max_attempts=2, poll_interval_seconds=0)
         self.assertEqual(exhausted.exception.attempts, 2)

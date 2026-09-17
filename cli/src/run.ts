@@ -7,9 +7,10 @@ import {
   type CognerisClientOptions,
   type CognerisRegion,
   type DocumentJob,
+  type DocumentJobCancellation,
   type DocumentJobOperation,
+  type DocumentJobSubmission,
   type Envelope,
-  type SubmitDocumentJobResponse,
 } from '@cogneris-ai/document-ai-sdk';
 
 const USAGE = `Usage:
@@ -34,13 +35,13 @@ type Writable = {
 };
 
 type Client = {
-  cancelJob(jobId: string): Promise<DocumentJob>;
+  cancelJob(jobId: string): Promise<DocumentJobCancellation>;
   extract(file: Blob | File, options?: { fileName?: string }): Promise<Envelope>;
   getJob(jobId: string): Promise<DocumentJob>;
   submitJob(
     operation: DocumentJobOperation,
     inputReference: string,
-  ): Promise<SubmitDocumentJobResponse>;
+  ): Promise<DocumentJobSubmission>;
   waitForJob(jobId: string): Promise<DocumentJob>;
 };
 

@@ -37,6 +37,17 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
+    def _service_response(self, status, data, headers=None):
+        self._json(
+            status,
+            {
+                "data": data,
+                "meta": {"httpStatusCode": status, "messages": [], "errors": []},
+                "hasErrors": False,
+            },
+            headers,
+        )
+
     def _record(self):
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length)
@@ -75,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
                 )
             return
         if self.path == "/api/v1/document-jobs":
-            self._json(
+            self._service_response(
                 202,
                 {
                     "jobId": JOB_ID,
@@ -91,7 +102,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._record()
         if self.path == f"/api/v1/document-jobs/{JOB_ID}":
-            self._json(
+            self._service_response(
                 200,
                 {
                     "jobId": JOB_ID,

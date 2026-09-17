@@ -13,12 +13,16 @@ from .api.documents import extract_document
 from .api.jobs import cancel_document_job, get_document_job, submit_document_job
 from .client import AuthenticatedClient
 from .models.document_job import DocumentJob
+from .models.document_job_cancellation import DocumentJobCancellation
+from .models.document_job_cancellation_envelope import DocumentJobCancellationEnvelope
+from .models.document_job_envelope import DocumentJobEnvelope
 from .models.document_job_operation import DocumentJobOperation
 from .models.document_job_status import DocumentJobStatus
+from .models.document_job_submission import DocumentJobSubmission
+from .models.document_job_submission_envelope import DocumentJobSubmissionEnvelope
 from .models.envelope import Envelope
 from .models.extract_document_body import ExtractDocumentBody
 from .models.submit_document_job_body import SubmitDocumentJobBody
-from .models.submit_document_job_response_202 import SubmitDocumentJobResponse202
 from .types import File, Response
 
 
@@ -108,6 +112,13 @@ def _require_data(response: Response[object], expected_type: type):
     raise _api_error(response)
 
 
+def _require_envelope_data(response: Response[object], envelope_type: type, data_type: type):
+    envelope = _require_data(response, envelope_type)
+    if isinstance(envelope.data, data_type):
+        return envelope.data
+    raise _api_error(response)
+
+
 def _integer_retry_hint(value: object) -> Optional[int]:
     if isinstance(value, bool):
         return None
@@ -176,7 +187,7 @@ class CognerisClient:
         self,
         operation: Union[str, DocumentJobOperation],
         input_reference: str,
-    ) -> SubmitDocumentJobResponse202:
+    ) -> DocumentJobSubmission:
         parsed_operation = operation if isinstance(operation, DocumentJobOperation) else DocumentJobOperation(operation)
         response = _safe_generated_call(
             lambda: submit_document_job.sync_detailed(
@@ -184,7 +195,9 @@ class CognerisClient:
                 body=SubmitDocumentJobBody(operation=parsed_operation, input_reference=input_reference),
             )
         )
-        submission = _require_data(response, SubmitDocumentJobResponse202)
+        submission = _require_envelope_data(
+            response, DocumentJobSubmissionEnvelope, DocumentJobSubmission
+        )
         hint = _integer_retry_hint(response.headers.get("Retry-After"))
         if hint is None:
             hint = _integer_retry_hint(submission.retry_after_seconds)
@@ -194,7 +207,7 @@ class CognerisClient:
 
     def get_job(self, job_id: Union[str, UUID]) -> DocumentJob:
         response = self._get_job_detailed(job_id)
-        return _require_data(response, DocumentJob)
+        return _require_envelope_data(response, DocumentJobEnvelope, DocumentJob)
 
     def wait_for_job(
         self,
@@ -220,7 +233,7 @@ class CognerisClient:
 
         for attempt in range(1, max_attempts + 1):
             response = self._get_job_detailed(parsed_job_id)
-            job = _require_data(response, DocumentJob)
+            job = _require_envelope_data(response, DocumentJobEnvelope, DocumentJob)
             if job.status == DocumentJobStatus.SUCCEEDED:
                 return job
             if job.status in {DocumentJobStatus.FAILED, DocumentJobStatus.CANCELLED}:
@@ -229,10 +242,12 @@ class CognerisClient:
                 time.sleep(_retry_after(response, poll_interval_seconds))
         raise CognerisMaxAttemptsError(max_attempts)
 
-    def cancel_job(self, job_id: Union[str, UUID]) -> DocumentJob:
+    def cancel_job(self, job_id: Union[str, UUID]) -> DocumentJobCancellation:
         parsed_job_id = self._job_uuid(job_id)
         response = _safe_generated_call(lambda: cancel_document_job.sync_detailed(parsed_job_id, client=self._client))
-        return _require_data(response, DocumentJob)
+        return _require_envelope_data(
+            response, DocumentJobCancellationEnvelope, DocumentJobCancellation
+        )
 
     def close(self) -> None:
         self._client.get_httpx_client().close()
