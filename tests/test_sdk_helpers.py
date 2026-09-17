@@ -1,5 +1,6 @@
 import os
 import hashlib
+import json
 import shutil
 import subprocess
 import sys
@@ -132,6 +133,51 @@ class TypeScriptSdkSmokeTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+class CSharpSdkSmokeTests(unittest.TestCase):
+    def test_packed_csharp_sdk_against_loopback(self):
+        fixture = ROOT / "tests/fixtures/csharp-consumer"
+        dotnet = os.environ.get("COGNERIS_DOTNET", "dotnet")
+        for file in fixture.iterdir():
+            self.assertNotIn("ProjectReference", file.read_text())
+            self.assertNotIn(str(ROOT), file.read_text())
+        with tempfile.TemporaryDirectory(prefix="cogneris-csharp-consumer-") as directory:
+            root = Path(directory).resolve()
+            packages = root / "packages"
+            cache = root / "nuget-cache"
+            environment = dict(os.environ, NUGET_PACKAGES=str(cache))
+            # Build the current generated tree without leaving bin/obj in the
+            # deterministic SDK output, then expose only its NuGet artifact.
+            sdk = shutil.copytree(ROOT / "sdks/csharp", root / "sdk")
+            packed = subprocess.run([
+                dotnet, "pack", str(sdk / "src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj"),
+                "-c", "Release", "-o", str(packages),
+            ], cwd=root, env=environment, text=True, capture_output=True)
+            self.assertEqual(packed.returncode, 0, packed.stdout + packed.stderr)
+            project = shutil.copytree(fixture, root / "consumer")
+            # Explicit restore avoids semicolon parsing by MSBuild command-line
+            # properties, and no source project is available during consumption.
+            shutil.rmtree(sdk)
+            restored = subprocess.run([
+                dotnet, "restore", str(project), "--source", str(packages),
+                "--source", "https://api.nuget.org/v3/index.json",
+            ], cwd=root, env=environment, text=True, capture_output=True)
+            self.assertEqual(restored.returncode, 0, restored.stdout + restored.stderr)
+            assets = json.loads((project / "obj/project.assets.json").read_text())
+            library = assets["libraries"]["Cogneris.DocumentAI/0.1.0"]
+            self.assertEqual(library["type"], "package")
+            artifact = packages / "Cogneris.DocumentAI.0.1.0.nupkg"
+            installed = cache / library["path"] / "cogneris.documentai.0.1.0.nupkg"
+            self.assertEqual(hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                             hashlib.sha256(installed.read_bytes()).hexdigest())
+            result = subprocess.run([
+                dotnet, "run", "--project", str(project), "--configuration", "Release", "--no-restore",
+            ], cwd=root, env=environment, text=True, capture_output=True, timeout=120)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn(str(cache / library["path"] / "lib/net8.0/Cogneris.DocumentAI.dll"), result.stdout)
+            print(result.stdout, end="")
+            print("NuGet artifact SHA256: " + hashlib.sha256(artifact.read_bytes()).hexdigest())
 
 
 if __name__ == "__main__":
