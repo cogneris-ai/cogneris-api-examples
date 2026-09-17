@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Exact SemVer already present in all three packages (no v prefix)'
+        description: 'Exact SemVer already present in all five package families (no v prefix)'
         required: true
         type: string
       dry_run:

@@ -230,6 +230,13 @@ class SdkWorkflowTests(unittest.TestCase):
         document, source = self.load("release-sdks.yml")
         contract(document, source, True)
 
+    def test_release_version_input_describes_all_five_package_families(self):
+        document, _ = self.load("release-sdks.yml")
+        self.assertEqual(
+            document["on"]["workflow_dispatch"]["inputs"]["version"]["description"],
+            "Exact SemVer already present in all five package families (no v prefix)",
+        )
+
     def test_package_scripts_verify_all_four_package_only_consumers(self):
         scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
         self.assertEqual(
