@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "path": "openapi/cogneris-openapi.yaml",
-    "sha256": "2b365a076d4bb3e004c24d1cff810f0071cd6851a4317860e7e5b104a492a48c"
+    "sha256": "178943cea26d23b085707b01e0bb37c9dc6d0aec976133b872de451e6de03470"
   },
   "generators": {
     "python": {
@@ -15,6 +15,26 @@
     "typescript": {
       "package": "@hey-api/openapi-ts",
       "version": "0.99.0"
+    },
+    "csharp": {
+      "package": "openapi-generator-cli",
+      "version": "7.25.0",
+      "runtime": {
+        "package": "jdk4py",
+        "version": "17.0.9.2"
+      }
+    },
+    "java": {
+      "package": "openapi-generator-cli",
+      "version": "7.25.0",
+      "runtime": {
+        "package": "jdk4py",
+        "version": "17.0.9.2"
+      },
+      "gradle": {
+        "version": "8.14.5",
+        "distributionSha256": "6f74b601422d6d6fc4e1f9a1ab6522f642c2fdcbc15ae33ebd30ba3d7198e854"
+      }
     }
   },
   "packages": {
@@ -112,7 +132,7 @@
         "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
         "src/index.ts": "805d8c358c6353dc9a2e0faf42a627d7718ace378475eb427fdea0d1c403a45e",
         "src/sdk.gen.ts": "8a40647dd9a371a7bb23e1b11cbfc3fba6cafd1d9348c7afcc22e4ee6bac3398",
-        "src/types.gen.ts": "579407c9ecaeef9ee4f5fc9d944636aea45ba1df3bfd75ecf573dc93f498b322",
+        "src/types.gen.ts": "3ce619aed0c495eeb7628a3e228b3c2a854963bc1dc159e671e223feae199101",
         "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
       }
     }

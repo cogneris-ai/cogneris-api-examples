@@ -99,6 +99,20 @@ class SdkGenerationTests(unittest.TestCase):
                     "package": "@hey-api/openapi-ts",
                     "version": "0.99.0",
                 },
+                "csharp": {
+                    "package": "openapi-generator-cli",
+                    "version": "7.25.0",
+                    "runtime": {"package": "jdk4py", "version": "17.0.9.2"},
+                },
+                "java": {
+                    "package": "openapi-generator-cli",
+                    "version": "7.25.0",
+                    "runtime": {"package": "jdk4py", "version": "17.0.9.2"},
+                    "gradle": {
+                        "version": "8.14.5",
+                        "distributionSha256": "6f74b601422d6d6fc4e1f9a1ab6522f642c2fdcbc15ae33ebd30ba3d7198e854",
+                    },
+                },
             },
         )
         self.assertEqual(package["devDependencies"]["@hey-api/openapi-ts"], "0.99.0")
@@ -106,6 +120,48 @@ class SdkGenerationTests(unittest.TestCase):
             lock["packages"]["node_modules/@hey-api/openapi-ts"]["version"],
             "0.99.0",
         )
+
+    def test_contract_passes_pinned_openapi_generator_validation(self):
+        result = subprocess.run(
+            [
+                "uvx", "--from", "openapi-generator-cli==7.25.0",
+                "--with", "jdk4py==17.0.9.2", "openapi-generator-cli",
+                "validate", "-i", str(ROOT / "openapi/cogneris-openapi.yaml"),
+            ],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_java_runner_sets_java_home_for_a_java_17_child(self):
+        result = subprocess.run(
+            [
+                "uv", "run", "--with", "jdk4py==17.0.9.2", "python",
+                "scripts/run-java.py", "--", sys.executable, "-c",
+                (
+                    "import os, subprocess, sys; "
+                    "version = subprocess.run(['java', '-version'], text=True, "
+                    "capture_output=True); "
+                    "print(os.environ['JAVA_HOME']); "
+                    "print(version.stderr, end=''); "
+                    "sys.exit(version.returncode)"
+                ),
+            ],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(result.stdout.splitlines()[0])
+        self.assertRegex(result.stdout, r'(?:openjdk|java) version "17\.')
+
+    def test_java_runner_returns_the_child_status(self):
+        result = subprocess.run(
+            [
+                "uv", "run", "--with", "jdk4py==17.0.9.2", "python",
+                "scripts/run-java.py", "--", sys.executable, "-c",
+                "raise SystemExit(23)",
+            ],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 23, result.stdout + result.stderr)
 
     def test_manifest_binds_every_artifact_to_the_public_contract(self):
         manifest = json.loads(MANIFEST.read_text())

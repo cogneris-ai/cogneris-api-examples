@@ -420,7 +420,8 @@ paths:
         '402':
           description: Billing quota exhausted. `detail` carries the reason and, where one applies, an upgrade URL.
         '403': { $ref: '#/components/responses/PortalForbidden' }
-        '404': { description: No such form, or it belongs to another tenant. The two are indistinguishable by design. }
+        '404':
+          description: No such form, or it belongs to another tenant. The two are indistinguishable by design.
         '429': { $ref: '#/components/responses/RateLimited' }
         '502': { $ref: '#/components/responses/PortalUnavailable' }
 
