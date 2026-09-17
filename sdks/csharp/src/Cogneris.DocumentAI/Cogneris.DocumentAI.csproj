@@ -6,16 +6,16 @@
     <AssemblyName>Cogneris.DocumentAI</AssemblyName>
     <PackageId>Cogneris.DocumentAI</PackageId>
     <OutputType>Library</OutputType>
-    <Authors>OpenAPI</Authors>
-    <Company>OpenAPI</Company>
-    <AssemblyTitle>OpenAPI Library</AssemblyTitle>
-    <Description>A library generated from a OpenAPI doc</Description>
-    <Copyright>No Copyright</Copyright>
+    <Authors>COGNERIS, INC.</Authors>
+    <Company>COGNERIS, INC.</Company>
+    <AssemblyTitle>Cogneris Document AI SDK</AssemblyTitle>
+    <Description>Cogneris Document AI API client for .NET</Description>
+    <Copyright>Copyright 2026 COGNERIS, INC.</Copyright>
     <RootNamespace>Cogneris.DocumentAI</RootNamespace>
     <Version>0.1.0</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Cogneris.DocumentAI.xml</DocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/GIT_USER_ID/GIT_REPO_ID.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/cogneris-ai/cogneris-api-examples.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes>Minor update</PackageReleaseNotes>
     <Nullable>enable</Nullable>

@@ -157,7 +157,25 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
     await fs.rm(path.join(outputPath, relativePath), { recursive: true, force: true });
   }
 
-  if (sdkName === "java") {
+  if (sdkName === "csharp") {
+    const projectPath = path.join(outputPath, "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj");
+    let project = await fs.readFile(projectPath, "utf8");
+    const replacements = new Map([
+      ["<Authors>OpenAPI</Authors>", "<Authors>COGNERIS, INC.</Authors>"],
+      ["<Company>OpenAPI</Company>", "<Company>COGNERIS, INC.</Company>"],
+      ["<AssemblyTitle>OpenAPI Library</AssemblyTitle>", "<AssemblyTitle>Cogneris Document AI SDK</AssemblyTitle>"],
+      ["<Description>A library generated from a OpenAPI doc</Description>", "<Description>Cogneris Document AI API client for .NET</Description>"],
+      ["<Copyright>No Copyright</Copyright>", "<Copyright>Copyright 2026 COGNERIS, INC.</Copyright>"],
+      ["<RepositoryUrl>https://github.com/GIT_USER_ID/GIT_REPO_ID.git</RepositoryUrl>", "<RepositoryUrl>https://github.com/cogneris-ai/cogneris-api-examples.git</RepositoryUrl>"],
+    ]);
+    for (const [generated, approved] of replacements) {
+      if (project.split(generated).length !== 2) {
+        throw new Error(`generated C# package metadata template changed: ${generated}`);
+      }
+      project = project.replace(generated, approved);
+    }
+    await fs.writeFile(projectPath, project);
+  } else if (sdkName === "java") {
     const buildPath = path.join(outputPath, "build.gradle");
     let build = await fs.readFile(buildPath, "utf8");
     if (build.split("JavaVersion.VERSION_11").length !== 3) {
@@ -179,6 +197,36 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
       if (!build.includes(declaration)) throw new Error(`generated Java public dependency is missing: ${dependency}`);
       build = build.replace(declaration, `api "${dependency}:`);
     }
+    const publication = `            artifactId = 'cogneris-document-ai-sdk'
+            from components.java`;
+    if (build.split(publication).length !== 2) {
+      throw new Error("generated Java publication template changed");
+    }
+    build = build.replace(publication, `${publication}
+            pom {
+                name = 'Cogneris Document AI SDK'
+                description = 'Cogneris Document AI API client for Java'
+                url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                licenses {
+                    license {
+                        name = 'Apache-2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'COGNERIS, INC.'
+                        organization = 'COGNERIS, INC.'
+                        organizationUrl = 'https://github.com/cogneris-ai'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git'
+                    url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                }
+            }`);
     await fs.writeFile(buildPath, build);
     const pomPath = path.join(outputPath, "pom.xml");
     let pom = await fs.readFile(pomPath, "utf8");
@@ -190,6 +238,32 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
     const enforcer = /(<requireJavaVersion>\s*<version>)11(<\/version>\s*<\/requireJavaVersion>)/;
     if (!enforcer.test(pom)) throw new Error("generated Java POM is missing its Java 11 enforcer template");
     pom = pom.replace(enforcer, (_, opening, closing) => `${opening}17${closing}`);
+    const generatedUrl = "<url>https://github.com/openapitools/openapi-generator</url>";
+    if (pom.split(generatedUrl).length !== 3) {
+      throw new Error(`generated Java POM provenance template changed: ${generatedUrl}`);
+    }
+    pom = pom.replaceAll(generatedUrl, "<url>https://github.com/cogneris-ai/cogneris-api-examples</url>");
+    const pomReplacements = new Map([
+      ["<description>OpenAPI Java</description>", "<description>Cogneris Document AI API client for Java</description>"],
+      ["<connection>scm:git:git@github.com:openapitools/openapi-generator.git</connection>", "<connection>scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git</connection>"],
+      ["<developerConnection>scm:git:git@github.com:openapitools/openapi-generator.git</developerConnection>", "<developerConnection>scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git</developerConnection>"],
+      [`<developer>
+            <name>OpenAPI-Generator Contributors</name>
+            <email>team@openapitools.org</email>
+            <organization>OpenAPITools.org</organization>
+            <organizationUrl>http://openapitools.org</organizationUrl>
+        </developer>`, `<developer>
+            <name>COGNERIS, INC.</name>
+            <organization>COGNERIS, INC.</organization>
+            <organizationUrl>https://github.com/cogneris-ai</organizationUrl>
+        </developer>`],
+    ]);
+    for (const [generated, approved] of pomReplacements) {
+      if (!pom.includes(generated)) {
+        throw new Error(`generated Java POM provenance template changed: ${generated}`);
+      }
+      pom = pom.replace(generated, approved);
+    }
     await fs.writeFile(pomPath, pom);
     const wrapperPath = path.join(outputPath, "gradle", "wrapper", "gradle-wrapper.properties");
     const wrapper = await fs.readFile(wrapperPath, "utf8");

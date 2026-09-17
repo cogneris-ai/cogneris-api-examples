@@ -271,7 +271,10 @@ class SdkGenerationTests(unittest.TestCase):
         self.assertTrue((SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj").is_file(), "missing generated C# project")
         project = ET.parse(SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj")
         for tag, value in (("PackageId", "Cogneris.DocumentAI"), ("Version", "0.1.0"),
-                           ("TargetFramework", "net8.0"), ("PackageLicenseExpression", "Apache-2.0")):
+                           ("TargetFramework", "net8.0"), ("PackageLicenseExpression", "Apache-2.0"),
+                           ("Authors", "COGNERIS, INC."), ("Company", "COGNERIS, INC."),
+                           ("Copyright", "Copyright 2026 COGNERIS, INC."),
+                           ("RepositoryUrl", "https://github.com/cogneris-ai/cogneris-api-examples.git")):
             self.assertEqual(project.findtext(f".//{tag}"), value)
         for legal in ("LICENSE", "NOTICE"):
             item = project.find(f".//None[@Include='../../{legal}']")
@@ -281,6 +284,16 @@ class SdkGenerationTests(unittest.TestCase):
         ns = {"m": "http://maven.apache.org/POM/4.0.0"}
         for tag, value in (("groupId", "ai.cogneris"), ("artifactId", "cogneris-document-ai-sdk"), ("version", "0.1.0")):
             self.assertEqual(pom.findtext(f"m:{tag}", namespaces=ns), value)
+        self.assertEqual(pom.findtext("m:url", namespaces=ns), "https://github.com/cogneris-ai/cogneris-api-examples")
+        self.assertEqual(pom.findtext("m:developers/m:developer/m:name", namespaces=ns), "COGNERIS, INC.")
+        self.assertEqual(
+            pom.findtext("m:developers/m:developer/m:organizationUrl", namespaces=ns),
+            "https://github.com/cogneris-ai",
+        )
+        self.assertEqual(
+            pom.findtext("m:scm/m:url", namespaces=ns),
+            "https://github.com/cogneris-ai/cogneris-api-examples",
+        )
         for target in ("source", "target"):
             self.assertEqual(pom.findtext(f"m:properties/m:maven.compiler.{target}", namespaces=ns), "17")
         self.assertEqual(pom.findtext(".//m:requireJavaVersion/m:version", namespaces=ns), "17")

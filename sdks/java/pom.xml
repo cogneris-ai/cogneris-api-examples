@@ -6,12 +6,12 @@
     <packaging>jar</packaging>
     <name>cogneris-document-ai-sdk</name>
     <version>0.1.0</version>
-    <url>https://github.com/openapitools/openapi-generator</url>
-    <description>OpenAPI Java</description>
+    <url>https://github.com/cogneris-ai/cogneris-api-examples</url>
+    <description>Cogneris Document AI API client for Java</description>
     <scm>
-        <connection>scm:git:git@github.com:openapitools/openapi-generator.git</connection>
-        <developerConnection>scm:git:git@github.com:openapitools/openapi-generator.git</developerConnection>
-        <url>https://github.com/openapitools/openapi-generator</url>
+        <connection>scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git</developerConnection>
+        <url>https://github.com/cogneris-ai/cogneris-api-examples</url>
     </scm>
 
     <licenses>
@@ -24,10 +24,9 @@
 
     <developers>
         <developer>
-            <name>OpenAPI-Generator Contributors</name>
-            <email>team@openapitools.org</email>
-            <organization>OpenAPITools.org</organization>
-            <organizationUrl>http://openapitools.org</organizationUrl>
+            <name>COGNERIS, INC.</name>
+            <organization>COGNERIS, INC.</organization>
+            <organizationUrl>https://github.com/cogneris-ai</organizationUrl>
         </developer>
     </developers>
 

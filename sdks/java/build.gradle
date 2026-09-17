@@ -42,6 +42,30 @@ publishing {
         maven(MavenPublication) {
             artifactId = 'cogneris-document-ai-sdk'
             from components.java
+            pom {
+                name = 'Cogneris Document AI SDK'
+                description = 'Cogneris Document AI API client for Java'
+                url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                licenses {
+                    license {
+                        name = 'Apache-2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'COGNERIS, INC.'
+                        organization = 'COGNERIS, INC.'
+                        organizationUrl = 'https://github.com/cogneris-ai'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/cogneris-ai/cogneris-api-examples.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/cogneris-ai/cogneris-api-examples.git'
+                    url = 'https://github.com/cogneris-ai/cogneris-api-examples'
+                }
+            }
         }
     }
 }
