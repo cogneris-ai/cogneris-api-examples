@@ -11,11 +11,77 @@ permissions:
 jobs:
   postman:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.artifacts.outputs.artifact-id }}
+      manifest-sha256: ${{ steps.manifest.outputs.sha256 }}
+      version: ${{ steps.version.outputs.version }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.10.10
+      - id: version
+        run: |
+          version=$(node -p "require('./cli/package.json').version")
+          python scripts/sdk-release.py check-version --version "$version"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: npm ci
+      - run: npm run audit:deps
+      - run: npm run check:sdks
+      - run: npm run verify:sdks
+      - run: npm run test:cli
+      - run: npm run build:cli
+      - run: npm run test:docs
       - run: npm test
+      - run: npm run pack:sdks -- --version "$RELEASE_VERSION" --output "$RUNNER_TEMP/sdk-release"
+      - id: manifest
+        run: echo "sha256=$(sha256sum "$RUNNER_TEMP/sdk-release/manifest.json" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - run: npm run verify:artifacts -- --version "$RELEASE_VERSION" --artifacts "$RUNNER_TEMP/sdk-release" --manifest-sha256 "$MANIFEST_SHA256" --source "$GITHUB_SHA"
+        env:
+          MANIFEST_SHA256: ${{ steps.manifest.outputs.sha256 }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        id: artifacts
+        with:
+          name: sdk-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sdk-release/
+          if-no-files-found: error
+          retention-days: 14
+
+  python-compatibility:
+    needs: [postman]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+    env:
+      RELEASE_VERSION: ${{ needs.postman.outputs.version }}
+      MANIFEST_SHA256: ${{ needs.postman.outputs.manifest-sha256 }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install uv==0.10.10
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.postman.outputs.artifact-id }}
+          path: ${{ runner.temp }}/sdk-release
+      - run: python scripts/sdk-release.py verify --version "$RELEASE_VERSION" --artifacts "$RUNNER_TEMP/sdk-release" --manifest-sha256 "$MANIFEST_SHA256" --source "$GITHUB_SHA" --python-only

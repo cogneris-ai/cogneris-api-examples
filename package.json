@@ -5,7 +5,27 @@
   "description": "Runnable Cogneris API examples generated from OpenAPI",
   "scripts": {
     "generate": "node scripts/generate-postman.mjs",
+    "audit:deps": "npm audit --audit-level=high",
+    "generate:sdks": "node scripts/generate-sdks.mjs",
+    "check:sdks": "node scripts/generate-sdks.mjs --check",
+    "build:cli": "node scripts/build-cli.mjs",
+    "test:cli": "node --test tests/cli_smoke.mjs",
+    "test:sdk:typescript": "node --test tests/sdk_typescript_smoke.mjs",
+    "test:sdk:python": "PYTHONDONTWRITEBYTECODE=1 uv run --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest tests.test_sdk_helpers.PythonInstalledSdkSmokeTests -v",
+    "test:docs": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_documentation -v",
+    "test:workflows": "PYTHONDONTWRITEBYTECODE=1 uv run --with PyYAML==6.0.3 python -m unittest tests.test_sdk_workflows tests.test_sdk_release -v",
+    "pack:sdks": "python3 scripts/sdk-release.py build",
+    "verify:artifacts": "python3 scripts/sdk-release.py verify",
+    "verify:sdks": "npm run check:sdks && npm run test:sdk:typescript && npm run test:sdk:python",
     "smoke:live": "node scripts/smoke-live.mjs",
-    "test": "python3 -m unittest discover -s tests -p 'test_*.py'"
+    "test": "PYTHONDONTWRITEBYTECODE=1 uv run --with PyYAML==6.0.3 --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest discover -s tests -p 'test_*.py'"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/node": "22.20.3",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "js-yaml": "4.3.2"
   }
 }

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "openapi/cogneris-openapi.yaml",
+    "sha256": "0a66dd1eead2b5b05fed8aaf6d7c2954c4ff1bafb16b148955be4c4c73a566e8"
+  },
+  "generators": {
+    "python": {
+      "package": "openapi-python-client",
+      "version": "0.26.2"
+    },
+    "typescript": {
+      "package": "@hey-api/openapi-ts",
+      "version": "0.99.0"
+    }
+  },
+  "packages": {
+    "python": {
+      "name": "cogneris-document-ai-sdk",
+      "version": "0.1.0",
+      "files": {
+        ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
+        "CHANGELOG.md": "ac7c530c4edee5501837f433be29df11e348001b5be07fd04675aea1476eac45",
+        "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
+        "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
+        "cogneris_document_ai_sdk/api/documents/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
+        "cogneris_document_ai_sdk/api/documents/classify_documents.py": "cd30aeae63202199173cdedbf8b52b37101cbbc8f44f76db828fa185b7e0d09a",
+        "cogneris_document_ai_sdk/api/documents/crop_document.py": "6ec5d1ac62d109e05108f7d4043cd94346285489e5d4db010315be191c9b5780",
+        "cogneris_document_ai_sdk/api/documents/extract_document.py": "877bb8b8460ce634920378c2b0d6d9c53381482d8925b849e127efb28c3b09dd",
+        "cogneris_document_ai_sdk/api/documents/face_match_document.py": "2c7db7262ebe144d04e48f77ad45821504b701ed03edd5cc66fe28453c1aec75",
+        "cogneris_document_ai_sdk/api/documents/split_document.py": "449a7d72dc4acb8e355f774aad8999002df9e378e20bc4041858a0d47231a7a9",
+        "cogneris_document_ai_sdk/api/documents/zero_shot_document.py": "de57a7a6c91b958dc5cc53065fbedba27e641487456938b101d0542943c75265",
+        "cogneris_document_ai_sdk/api/jobs/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
+        "cogneris_document_ai_sdk/api/jobs/cancel_document_job.py": "62af8a0c2b69559ca1701bad38030ea8aac88cfbdf60f9af1d255c1554dfbea9",
+        "cogneris_document_ai_sdk/api/jobs/get_document_job.py": "cb25f4fe7e878cae5ddf877b0a7805f3de0b8d37472f64e2edda022705944791",
+        "cogneris_document_ai_sdk/api/jobs/list_document_jobs.py": "64c0ffcaa8a0c612a7ce3c95fe43339fb38b82ca790529f32746e015ab51c8ea",
+        "cogneris_document_ai_sdk/api/jobs/submit_document_job.py": "14cad2fe91acdc0ceb561e3b050990f96032542ef9288a5c69d961d7b9404675",
+        "cogneris_document_ai_sdk/api/portal/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
+        "cogneris_document_ai_sdk/api/portal/create_portal_magic_link.py": "2a6cedfc2d1ec1078376fef3f7b5cdf70dbaca1facffa515877ee4e5b71258df",
+        "cogneris_document_ai_sdk/api/portal/list_portal_channels.py": "b575afbba3f92bf07ea05a442ca0b18ff3ab6fcd6df7e47ead335aad2282e8fe",
+        "cogneris_document_ai_sdk/api/portal/list_portal_forms.py": "7695776fbef654249709b77fbd013e2c987a071802a438562aeb9c6a838b1ccb",
+        "cogneris_document_ai_sdk/client.py": "a3f99d2eac81090b2dbb9b52d56645c2a2046c6c24bd643b7908ee089c3fe556",
+        "cogneris_document_ai_sdk/cogneris.py": "a8520f9dc9c24c49ed165313ebcf1fdfed1af9aa29706c9f7c358d20f90d5363",
+        "cogneris_document_ai_sdk/errors.py": "80ef060662aa992360020f84e684fea0ecb1cedbe9ed5ffa5c6ece5134f5e6ad",
+        "cogneris_document_ai_sdk/models/__init__.py": "6757279f52916d5e6640ed4704b033a292f1675e1889726d1b7e7ec259f6950c",
+        "cogneris_document_ai_sdk/models/classify_documents_body.py": "3ccfeaa7c2cff584a067ca5a7d0772b73d1f5e2f7a0eda42ff3fda83916b1c2d",
+        "cogneris_document_ai_sdk/models/crop_document_body.py": "e40cc4d44d9e8a3eb042196eb8094e916f300b649e3ec2295a25a9755d401314",
+        "cogneris_document_ai_sdk/models/document_job_operation.py": "db3d49bc2463bdc8d8fa093c3c39aad9e2366b497ab074d062d6560037d5277c",
+        "cogneris_document_ai_sdk/models/document_job_status.py": "1390de683706454fbbff3f02255ac5b5964c1ba517101c5ee16093d4d23cdc00",
+        "cogneris_document_ai_sdk/models/document_job.py": "75d9a1835a1da0f55a0bdf4b84c098113c35fb2f2b984b305ab419a066e4fac4",
+        "cogneris_document_ai_sdk/models/envelope_data_metadata.py": "19d3a0d643c3395b3cb29f0d73bba9233ef5ffdc2da29a64521675187c4a2f52",
+        "cogneris_document_ai_sdk/models/envelope_data.py": "3f502e67630f1966d904f9c457a747b01b532f03bdec4a7ce56e8fac0aa1df8f",
+        "cogneris_document_ai_sdk/models/envelope_meta.py": "a47eaf7b2454e3cc1ee3f76f643fb20f2a34627a4be5e752ea9108050e371f63",
+        "cogneris_document_ai_sdk/models/envelope.py": "ea7c816369e1f7d205cd45118906068b51eb9b6ae7da48cb8236030e8ce03fef",
+        "cogneris_document_ai_sdk/models/extract_document_body.py": "e99e6e71054f05d7d8caec3ca1c266e2cff13143f4daf17818c56503dd3a849b",
+        "cogneris_document_ai_sdk/models/face_match_document_body.py": "fae904ff6fe306d1af0cd02e95bd2f63fa919540bb84465e475256cac7d0e626",
+        "cogneris_document_ai_sdk/models/list_document_jobs_response_200.py": "7e56b2939fe2bf8bab04b09ba7651d3f2a4910ef72583d3550b68804b30d604d",
+        "cogneris_document_ai_sdk/models/portal_channels.py": "fc406fe340d309a6078523eb7ef2adc3d121eed2b6b2673170465f4b3a0bf8c9",
+        "cogneris_document_ai_sdk/models/portal_form.py": "8b221dbee5116e8b6201be9e36128d1e086e4630db3fd57c152b718178fa9928",
+        "cogneris_document_ai_sdk/models/portal_magic_link_request.py": "4980c103a03b19b27b0526fde1173e2c84f664b917bc263b3016a6a642c84f86",
+        "cogneris_document_ai_sdk/models/portal_magic_link.py": "ed42161ea24915fd1a711157b3f200b1ecce810a66ab6ce033b394139db4945e",
+        "cogneris_document_ai_sdk/models/portal_send_channel.py": "62012c0a0cd19b6f86774e7ab18098c22cace6e8a80f5697e823952bc4305eb3",
+        "cogneris_document_ai_sdk/models/problem_details_errors_item.py": "efdf8ecb450aab70e631c037219ed966f885122c1ec682992ddc3f9fa8bb8901",
+        "cogneris_document_ai_sdk/models/problem_details.py": "36113188e22e2e061b1a98e6fc24df7f384717d1332b7453e41a933b8ab35386",
+        "cogneris_document_ai_sdk/models/split_document_body.py": "fbad5a4c02c038dc3a7d9d2a864fdbd7479c8454b3c8901c56aa0602ac3671f8",
+        "cogneris_document_ai_sdk/models/submit_document_job_body.py": "41cf3f965823b32e077c1f436df65ad0827e4a505299d663d42b55253ecaa4f4",
+        "cogneris_document_ai_sdk/models/submit_document_job_response_202.py": "f20a2bebbc4e58eda1920fcd193ad5d589465e9d105205fdcf94cfc8bae29758",
+        "cogneris_document_ai_sdk/models/zero_shot_document_body.py": "a5466aefff41e125e5f74ddf5e227beeac87da418bf8c39664a27658b8aa952f",
+        "cogneris_document_ai_sdk/py.typed": "f19254b31662b8ecb5a0979586c4d64214c6ffaa535475579398492fbf5e6d39",
+        "cogneris_document_ai_sdk/types.py": "017e28af14194096addef66b82327e4d86f6b0d04bf24368f72a980d3fa7f32f",
+        "pyproject.toml": "16235b278261b76a7cbcb25fd603cc08fca0f8338ddb420fabdb8b6f737df248",
+        "README.md": "c3f0ced0110f729fb49679a27f69a38b835dee2d5988e2bda7abedc0a0642034"
+      }
+    },
+    "typescript": {
+      "name": "@cogneris/document-ai-sdk",
+      "version": "0.1.0",
+      "files": {
+        "package.json": "d0a39ff68c80c254c34443cbb18a41d1b877d98979f1b436f590aee8f040b4eb",
+        "src/client/client.gen.ts": "8a17b0bf1540258734a128f176f6cb915c849b97d8064a613dba5ef8390e58d9",
+        "src/client/index.ts": "949cc7333527c91928c32410c4a4a2dd2b90b99fe080eb8ce4505647852fbe1b",
+        "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",
+        "src/client/utils.gen.ts": "dce96188f7dfd8e9e5543199a42a5117e23042a7dd48e1ceaff9bb20898f8522",
+        "src/client.gen.ts": "d4ada0a7ec628c1853352da5416908e6f84bacd6fe82ffaa0bff5b0ae9aa57ef",
+        "src/cogneris.ts": "5064f27dfd8faa4b85146657b1949842c21e0220100ed0df1e8b3f61eff977a0",
+        "src/core/auth.gen.ts": "4b4aca5bd9b2c43a112bb74617295278d84f86360ada71a8db57f09cd0c254f4",
+        "src/core/bodySerializer.gen.ts": "a74163de6731f06f185948895cc4b5f8900e7d30ce76b9588717bad99ab165a7",
+        "src/core/params.gen.ts": "097c75f6e269c6c8680641091832a69b38e8828e8ee8465318d32a177593330f",
+        "src/core/pathSerializer.gen.ts": "6e80a19627d36fd2a9e8daee113713b2e047d107d42ead9b4a9ab344690b998c",
+        "src/core/queryKeySerializer.gen.ts": "adc570c9357a08624cce81dc503abd8d8ff60a76d25bd4d3a4afbe349d82d1f0",
+        "src/core/serverSentEvents.gen.ts": "df993567abbe3e5b477d81517fb967cf63cf40b7866957d5dc6cc03238cb1426",
+        "src/core/types.gen.ts": "0c33c5e096608fc1f859d89bc17ce428e306c7aa3c2c30acd8affa5a734370af",
+        "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
+        "src/index.ts": "57aea8c5f83f789934f2cd1b5072891463fbd88620d9da519955ab5183683b5b",
+        "src/sdk.gen.ts": "8a40647dd9a371a7bb23e1b11cbfc3fba6cafd1d9348c7afcc22e4ee6bac3398",
+        "src/types.gen.ts": "c946a5bf4c1cae6bdfe0376935092dabf16bfd7417003d225e358220d8de8d6a",
+        "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
+      }
+    }
+  }
+}

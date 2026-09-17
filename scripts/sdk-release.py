@@ -1,0 +1,348 @@
+"""Build once, verify exact package bytes, and fail closed before publication.
+
+This helper never publishes and never reads publishing credentials. All package
+builds and consumer installs use owned temporary directories.
+"""
+import argparse
+import email.parser
+import hashlib
+import json
+import os
+import re
+import shutil
+import stat
+import struct
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.request
+import zipfile
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+BUILD_DIRECTORIES = ("sdks/typescript", "sdks/python", "cli")
+BUILD_FILES = ("package.json", "package-lock.json", "scripts/sdk-release.py")
+EXCLUDED_BUILD_NAMES = {"dist", "node_modules", ".venv", "__pycache__", ".ruff_cache"}
+SEMVER = re.compile(
+    r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
+    r"(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+    r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+)
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def run(arguments, cwd=ROOT, env=None):
+    return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
+                          check=True, text=True, capture_output=True).stdout.strip()
+
+
+def digest(file):
+    return hashlib.sha256(file.read_bytes()).hexdigest()
+
+
+def source_versions(version):
+    require(SEMVER.fullmatch(version), "version must be explicit SemVer without a v prefix")
+    for package in (ROOT / "sdks/typescript/package.json", ROOT / "cli/package.json"):
+        require(json.loads(package.read_text())["version"] == version,
+                "package version does not exactly match release input")
+    # Match the unique top-level project version; this fixed generated metadata
+    # is also independently checked in the built wheel's standard METADATA.
+    versions = re.findall(r'^version = "([^"]+)"$',
+                          (ROOT / "sdks/python/pyproject.toml").read_text(), re.MULTILINE)
+    require(versions == [version], "Python package version does not exactly match release input")
+
+
+def filenames(version):
+    return {
+        f"cogneris-document-ai-sdk-{version}.tgz": "@cogneris/document-ai-sdk",
+        f"cogneris-document-ai-cli-{version}.tgz": "@cogneris/document-ai-cli",
+        f"cogneris_document_ai_sdk-{version}-py3-none-any.whl": "cogneris-document-ai-sdk",
+    }
+
+
+def archive_path(name, directory, seen):
+    """Validate portable logical paths without normalizing away unsafe syntax."""
+    logical = name[:-1] if directory and name.endswith("/") else name
+    parts = logical.split("/")
+    require(logical and not any(character in logical for character in ("\\", ":"))
+            and all(ord(character) >= 32 and ord(character) != 127 for character in logical)
+            and all(part not in {"", ".", ".."} and part.rstrip(". ") == part for part in parts),
+            "unsafe archive path")
+    folded = logical.casefold()
+    require(folded not in seen, "unsafe archive duplicate or case-colliding path")
+    parents = ["/".join(parts[:index]).casefold() for index in range(1, len(parts))]
+    require(all(seen.get(parent) != "file" for parent in parents), "unsafe archive file/directory collision")
+    require(directory or not any(previous.startswith(folded + "/") for previous in seen),
+            "unsafe archive file/directory collision")
+    seen[folded] = "directory" if directory else "file"
+
+
+def inspect_tar(archive):
+    seen = {}
+    members = archive.getmembers()
+    for member in members:
+        directory = member.type == tarfile.DIRTYPE
+        require((member.type in {tarfile.REGTYPE, tarfile.AREGTYPE} or directory)
+                and member.sparse is None and not member.linkname and not member.pax_headers,
+                "unsafe archive non-regular tar member")
+        require(not directory or member.size == 0, "unsafe archive directory payload")
+        archive_path(member.name, directory, seen)
+        require(member.name == "package/" or member.name.startswith("package/"),
+                "unsafe archive npm root")
+    return members
+
+
+def inspect_zip(archive):
+    seen = {}
+    members = archive.infolist()
+    for member in members:
+        mode = stat.S_IFMT(member.external_attr >> 16)
+        directory = member.is_dir()
+        require(member.orig_filename == member.filename, "unsafe archive ambiguous ZIP filename")
+        require(mode in ({0, stat.S_IFDIR} if directory else {0, stat.S_IFREG}),
+                "unsafe archive non-regular ZIP member")
+        require(not (member.external_attr & 0x10) or directory, "unsafe archive ZIP directory mode")
+        require(not directory or member.file_size == 0, "unsafe archive directory payload")
+        archive_path(member.filename, directory, seen)
+        # Our generated wheels require no ZIP extra metadata. In particular,
+        # PKWARE/ASi Unix extras can encode hardlinks even with a regular mode.
+        require(not member.extra and not member.flag_bits & 1, "unsafe archive ZIP extension or encryption")
+        archive.fp.seek(member.header_offset)
+        header = archive.fp.read(30)
+        require(len(header) == 30, "unsafe archive truncated ZIP header")
+        signature, _, flags, compression, _, _, _, _, _, name_size, extra_size = struct.unpack("<4s5H3I2H", header)
+        require(signature == b"PK\x03\x04" and extra_size == 0 and flags == member.flag_bits
+                and compression == member.compress_type, "unsafe archive inconsistent ZIP local header")
+        raw_name = archive.fp.read(name_size)
+        require(raw_name.decode("utf-8" if flags & 0x800 else "cp437") == member.filename,
+                "unsafe archive inconsistent ZIP local filename")
+        # Opening a stream validates offsets/overlap without extracting a file.
+        with archive.open(member):
+            pass
+    return members
+
+
+def package_metadata(file):
+    if file.suffix == ".tgz":
+        with tarfile.open(file, "r:gz") as archive:
+            members = [member for member in inspect_tar(archive) if member.name == "package/package.json"]
+            require(len(members) == 1 and members[0].isfile(), "invalid npm package metadata")
+            return json.load(archive.extractfile(members[0]))
+    with zipfile.ZipFile(file) as archive:
+        metadata = [member.filename for member in inspect_zip(archive) if member.filename.endswith(".dist-info/METADATA")]
+        require(len(metadata) == 1, "invalid wheel metadata")
+        parsed = email.parser.BytesParser().parsebytes(archive.read(metadata[0]))
+        return {"name": parsed["Name"], "version": parsed["Version"]}
+
+
+def integrity(arguments):
+    source_versions(arguments.version)
+    directory = Path(arguments.artifacts)
+    expected_files = filenames(arguments.version)
+    require(directory.is_dir() and not directory.is_symlink(), "artifact directory must be real")
+    require({file.name for file in directory.iterdir()} == set(expected_files) | {"manifest.json"},
+            "unexpected or missing artifact files")
+    require(all(file.is_file() and not file.is_symlink() for file in directory.iterdir()),
+            "artifact files must be regular files")
+    require(re.fullmatch(r"[0-9a-f]{64}", arguments.manifest_sha256 or ""), "manifest digest is required")
+    require(digest(directory / "manifest.json") == arguments.manifest_sha256, "manifest digest mismatch")
+    manifest = json.loads((directory / "manifest.json").read_text())
+    require(re.fullmatch(r"[0-9a-f]{40}", arguments.source or ""), "source commit is required")
+    require(manifest["source"] == arguments.source, "source commit mismatch")
+    require(manifest["version"] == arguments.version, "manifest version mismatch")
+    require(set(manifest["files"]) == set(expected_files), "manifest artifact set mismatch")
+    metadata = {}
+    for filename, name in expected_files.items():
+        file = directory / filename
+        require(digest(file) == manifest["files"][filename], "artifact digest mismatch")
+        package = package_metadata(file)
+        require(package["name"] == name and package["version"] == arguments.version,
+                "artifact package identity/version mismatch")
+        require("publishConfig" not in package, "package cannot override publication registry/configuration")
+        if name.endswith("-cli"):
+            require(package.get("dependencies", {}).get("@cogneris/document-ai-sdk") == arguments.version,
+                    "CLI SDK dependency must exactly match release version")
+        metadata[name] = package
+    return metadata
+
+
+def clean_build_snapshot():
+    """Bind actual packaged inputs to HEAD, then build from those immutable bytes.
+
+    Only copied source trees and the build script/dependency declarations matter.
+    Excluded caches/outputs and unrelated files elsewhere are neither rejected nor
+    copied. Explicit byte comparisons also catch assume-unchanged index entries.
+    """
+    error = "dirty or untracked build inputs; commit relevant sources before packaging"
+    source = run(["git", "rev-parse", "HEAD"])
+    require(re.fullmatch(r"[0-9a-f]{40}", source), "source commit is required")
+    relevant = (*BUILD_DIRECTORIES, *BUILD_FILES)
+    staged = subprocess.run(["git", "diff", "--cached", "--quiet", source, "--", *relevant], cwd=ROOT)
+    require(staged.returncode == 0, error)
+    entries = subprocess.check_output(["git", "ls-tree", "-rz", "--full-tree", source, "--", *relevant], cwd=ROOT)
+    expected = {}
+    for entry in filter(None, entries.split(b"\0")):
+        metadata, encoded_path = entry.split(b"\t", 1)
+        mode, kind, object_id = metadata.decode().split()
+        relative = encoded_path.decode()
+        if EXCLUDED_BUILD_NAMES.intersection(Path(relative).parts):
+            continue
+        require(kind == "blob" and mode in {"100644", "100755"}, error)
+        expected[relative] = (mode, object_id)
+    actual = set(BUILD_FILES)
+    for relative in BUILD_DIRECTORIES:
+        directory = ROOT / relative
+        require(directory.is_dir() and not directory.is_symlink(), error)
+        for current, directories, files in os.walk(directory, followlinks=False):
+            directories[:] = [name for name in directories if name not in EXCLUDED_BUILD_NAMES]
+            require(all(not (Path(current) / name).is_symlink() for name in directories), error)
+            for name in files:
+                if name not in EXCLUDED_BUILD_NAMES:
+                    actual.add((Path(current) / name).relative_to(ROOT).as_posix())
+    require(actual == set(expected), error)
+    snapshot = {}
+    for relative, (mode, object_id) in expected.items():
+        file = ROOT / relative
+        require(file.is_file() and not file.is_symlink(), error)
+        committed = subprocess.check_output(["git", "cat-file", "blob", object_id], cwd=ROOT)
+        require(file.read_bytes() == committed, error)
+        require(bool(file.stat().st_mode & 0o111) == (mode == "100755"), error)
+        snapshot[relative] = (committed, mode)
+    return source, snapshot
+
+
+def build(arguments):
+    output = Path(arguments.output).absolute()
+    require(not output.exists() and not output.is_symlink(), "artifact output already exists; refusing overwrite")
+    source, snapshot = clean_build_snapshot()
+    source_versions(arguments.version)
+    with tempfile.TemporaryDirectory(prefix="cogneris-release-build-") as temporary_name:
+        temporary = Path(temporary_name)
+        checkout = temporary / "checkout"
+        staged = temporary / "artifacts"
+        staged.mkdir()
+        # Use HEAD's verified bytes, never a second read of mutable source files.
+        for relative, (contents, mode) in snapshot.items():
+            if any(relative.startswith(directory + "/") for directory in BUILD_DIRECTORIES):
+                file = checkout / relative
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(contents)
+                file.chmod(0o755 if mode == "100755" else 0o644)
+        (checkout / "package.json").write_text('{"private":true}\n')
+        compiler = ROOT / "node_modules/.bin/tsc"
+        run([compiler, "-p", checkout / "sdks/typescript/tsconfig.json"], checkout)
+        run(["npm", "pack", "./sdks/typescript", "--ignore-scripts", "--pack-destination", staged], checkout)
+        sdk_tarball = staged / f"cogneris-document-ai-sdk-{arguments.version}.tgz"
+        run(["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--no-save", sdk_tarball], checkout)
+        run([compiler, "-p", checkout / "cli/tsconfig.json", "--typeRoots", ROOT / "node_modules/@types"], checkout)
+        run(["npm", "pack", "./cli", "--ignore-scripts", "--pack-destination", staged], checkout)
+        wheels = temporary / "wheel-build"
+        run(["uv", "build", "--wheel", "--out-dir", wheels], checkout / "sdks/python")
+        # uv also creates an output-directory .gitignore; it is not a release artifact.
+        wheel = wheels / f"cogneris_document_ai_sdk-{arguments.version}-py3-none-any.whl"
+        shutil.copyfile(wheel, staged / wheel.name)
+        require({file.name for file in staged.iterdir()} == set(filenames(arguments.version)),
+                f"built filenames do not match exact release version: {sorted(file.name for file in staged.iterdir())}")
+        manifest = {"version": arguments.version, "source": source,
+                    "files": {file.name: digest(file) for file in sorted(staged.iterdir())}}
+        (staged / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        # copytree refuses an existing destination; no user output is removed.
+        shutil.copytree(staged, output)
+    print(f"Built 3 packages; manifest SHA-256: {digest(output / 'manifest.json')}")
+
+
+def clean_install(arguments):
+    directory = Path(arguments.artifacts).resolve()
+    environment = {key: value for key, value in os.environ.items()
+                   if key not in {"PYTHONPATH", "VIRTUAL_ENV", "COGNERIS_API_KEY"}}
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    environment["COGNERIS_REPOSITORY_ROOT_FOR_TESTING"] = str(ROOT)
+    with tempfile.TemporaryDirectory(prefix="cogneris-release-consumer-") as temporary_name:
+        consumer = Path(temporary_name)
+        run(["uv", "venv", "--python", sys.executable, consumer / "venv"], consumer, environment)
+        python = consumer / "venv/bin/python"
+        wheel = directory / f"cogneris_document_ai_sdk-{arguments.version}-py3-none-any.whl"
+        run(["uv", "pip", "install", "--python", python, wheel], consumer, environment)
+        run([python, ROOT / "tests/sdk_python_installed_smoke.py", "-v"], consumer, environment)
+        run([python, ROOT / "tests/examples_python_installed_smoke.py", "-v"], consumer, environment)
+        if not arguments.python_only:
+            (consumer / "package.json").write_text('{"private":true}\n')
+            tarballs = [directory / name for name in filenames(arguments.version) if name.endswith(".tgz")]
+            run(["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", *tarballs], consumer, environment)
+            run(["node", "-e", "const s = require('@cogneris/document-ai-sdk'); "
+                 "if(typeof s.CognerisClient !== 'function') process.exit(1); "
+                 "if(!require.resolve('@cogneris/document-ai-sdk').includes('/node_modules/')) process.exit(1);"],
+                consumer, environment)
+            invoked = subprocess.run([str(consumer / "node_modules/.bin/cogneris"), "jobs", "get", "job-id"],
+                                     cwd=consumer, env=environment, capture_output=True, text=True)
+            require(invoked.returncode == 2 and not invoked.stdout, "installed CLI configuration smoke failed")
+    print("Exact artifacts passed clean installation and installed Python SDK/example loopback tests.")
+
+
+def check_publish(arguments, metadata):
+    require(os.environ.get("SDK_RELEASE_READY") == "true",
+            "SDK_RELEASE_READY must confirm registry ownership, licensing, security contact and protected environment setup")
+    ready = f"SDK_{arguments.registry.upper()}_TRUSTED_PUBLISHING_READY"
+    require(os.environ.get(ready) == "true", f"{ready} must confirm the registry trusted publisher setup")
+    if arguments.registry == "npm":
+        repository = os.environ.get("GITHUB_REPOSITORY", "")
+        for name in ("@cogneris/document-ai-sdk", "@cogneris/document-ai-cli"):
+            require(metadata[name].get("repository", {}).get("url") == f"git+https://github.com/{repository}.git",
+                    "npm repository.url must match the approved GitHub repository before OIDC publication")
+        npm_version = tuple(int(part) for part in run(["npm", "--version"]).split("."))
+        require(npm_version >= (11, 5, 1), "npm >=11.5.1 is required for trusted publishing")
+        require(os.environ.get("REPOSITORY_PRIVATE") == "false", "npm provenance requires a public repository")
+        # Trusted publishing cannot bootstrap an unregistered npm package.
+        for name in ("@cogneris/document-ai-sdk", "@cogneris/document-ai-cli"):
+            with urllib.request.urlopen(f"https://registry.npmjs.org/{name}", timeout=20) as response:
+                require(json.load(response).get("name") == name, "npm registry ownership/bootstrap gate failed")
+    require(os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GITHUB_REF") == "refs/heads/main",
+            "publication requires a GitHub Actions run on main")
+    require("ACTIONS_ID_TOKEN_REQUEST_URL" in os.environ and "ACTIONS_ID_TOKEN_REQUEST_TOKEN" in os.environ,
+            "GitHub OIDC capability is absent")
+    require(not any(key in os.environ for key in ("NPM_TOKEN", "NODE_AUTH_TOKEN", "TWINE_PASSWORD", "PYPI_API_TOKEN")),
+            "long-lived publishing credential environment variables are forbidden")
+    print("Local publication prerequisites verified; the registry must still authenticate the OIDC identity.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("check-version", "build", "verify", "check-publish"))
+    parser.add_argument("--version", required=True)
+    parser.add_argument("--output")
+    parser.add_argument("--artifacts")
+    parser.add_argument("--manifest-sha256")
+    parser.add_argument("--source")
+    parser.add_argument("--python-only", action="store_true")
+    parser.add_argument("--integrity-only", action="store_true")
+    parser.add_argument("--registry", choices=("npm", "pypi"))
+    arguments = parser.parse_args()
+    if arguments.command == "check-version":
+        source_versions(arguments.version)
+    elif arguments.command == "build":
+        require(arguments.output, "--output is required")
+        build(arguments)
+    else:
+        require(arguments.artifacts, "--artifacts is required")
+        metadata = integrity(arguments)
+        if arguments.command == "check-publish":
+            require(arguments.registry, "--registry is required")
+            check_publish(arguments, metadata)
+        elif not arguments.integrity_only:
+            clean_install(arguments)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as error:
+        # Do not print subprocess output: dependency tools may include environment data.
+        print(f"Release gate failed: {error}", file=sys.stderr)
+        sys.exit(1)

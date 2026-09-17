@@ -1,0 +1,10 @@
+{
+  "python": {
+    "package": "openapi-python-client",
+    "version": "0.26.2"
+  },
+  "typescript": {
+    "package": "@hey-api/openapi-ts",
+    "version": "0.99.0"
+  }
+}
