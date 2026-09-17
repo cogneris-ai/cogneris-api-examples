@@ -1,7 +1,10 @@
 {
   "python": {
     "package": "openapi-python-client",
-    "version": "0.26.2"
+    "version": "0.26.2",
+    "dependencies": {
+      "ruff": "0.13.3"
+    }
   },
   "typescript": {
     "package": "@hey-api/openapi-ts",

@@ -145,12 +145,13 @@ function parseCommand(argumentsList: string[]): Command {
 function requireApiKey(value: string | undefined): string {
   if (
     typeof value !== 'string' ||
-    value.length === 0 ||
+    !value.startsWith('xtkt_live_') ||
+    value.length <= 'xtkt_live_'.length ||
     value.length > 4_096 ||
     !/^[\x21-\x7e]+$/.test(value)
   ) {
     throw new UsageError(
-      'COGNERIS_API_KEY must be set to a non-empty value containing only visible ASCII characters.',
+      'COGNERIS_API_KEY must be a public API key with the required prefix and a non-empty visible-ASCII suffix.',
     );
   }
   return value;
@@ -165,9 +166,13 @@ async function runCommand(client: Client, command: Command): Promise<unknown> {
       } catch {
         throw new UsageError('Unable to read input file.');
       }
-      return client.extract(new Blob([new Uint8Array(contents)]), {
+      const envelope = await client.extract(new Blob([new Uint8Array(contents)]), {
         fileName: path.basename(command.filePath),
       });
+      if (envelope.hasErrors === true) {
+        throw new CognerisError('Cogneris extraction failed.');
+      }
+      return envelope;
     }
     case 'submit':
       return client.submitJob(command.operation, command.inputReference);

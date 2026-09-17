@@ -211,6 +211,8 @@ async function main() {
       [
         "--from",
         `${generators.python.package}==${generators.python.version}`,
+        "--with",
+        `ruff==${generators.python.dependencies.ruff}`,
         "openapi-python-client",
         "generate",
         "--path",

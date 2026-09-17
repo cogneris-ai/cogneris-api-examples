@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/cogneris-ai/cogneris-api-examples.git"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

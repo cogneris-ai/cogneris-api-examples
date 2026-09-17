@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,6 +43,33 @@ def file_hash(path: Path) -> str:
 
 
 class SdkGenerationTests(unittest.TestCase):
+    def test_generation_invokes_the_exact_formatter_pin(self):
+        with tempfile.TemporaryDirectory(prefix="cogneris-generator-pin-") as directory:
+            checkout = Path(directory)
+            for name in ("scripts", "openapi", "sdks"):
+                shutil.copytree(ROOT / name, checkout / name,
+                                ignore=shutil.ignore_patterns("dist", "__pycache__", "node_modules"))
+            (checkout / "node_modules").symlink_to(ROOT / "node_modules", target_is_directory=True)
+            binary = checkout / "bin"
+            binary.mkdir()
+            captured = checkout / "uvx-arguments.json"
+            shim = binary / "uvx"
+            real_uvx = shutil.which("uvx")
+            self.assertIsNotNone(real_uvx)
+            shim.write_text(
+                f"#!{sys.executable}\nimport json, os, sys\n"
+                f"with open({str(captured)!r}, 'w') as output: json.dump(sys.argv[1:], output)\n"
+                f"os.execv({real_uvx!r}, [{real_uvx!r}, *sys.argv[1:]])\n"
+            )
+            shim.chmod(0o755)
+            result = subprocess.run(["node", "scripts/generate-sdks.mjs", "--check"], cwd=checkout,
+                                    env={**os.environ, "PATH": str(binary) + os.pathsep + os.environ["PATH"]},
+                                    text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            arguments = json.loads(captured.read_text())
+            self.assertIn(["--with", "ruff==0.13.3"],
+                          [arguments[index:index + 2] for index in range(len(arguments))])
+
     def test_generated_sdk_outputs_are_committed(self):
         for relative_path in ("sdks/typescript", "sdks/python", "sdks/manifest.json"):
             with self.subTest(path=relative_path):
@@ -63,6 +91,7 @@ class SdkGenerationTests(unittest.TestCase):
                 "python": {
                     "package": "openapi-python-client",
                     "version": "0.26.2",
+                    "dependencies": {"ruff": "0.13.3"},
                 },
                 "typescript": {
                     "package": "@hey-api/openapi-ts",

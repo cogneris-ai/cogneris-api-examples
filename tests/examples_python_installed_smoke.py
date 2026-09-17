@@ -14,7 +14,7 @@ import cogneris_document_ai_sdk as sdk
 
 ROOT = Path(os.environ["COGNERIS_REPOSITORY_ROOT_FOR_TESTING"]).resolve()
 EXAMPLE = ROOT / "examples" / "python" / "quickstart.py"
-API_KEY = "test-api-key-must-not-be-logged"
+API_KEY = "xtkt_live_TEST_ONLY_NOT_A_SECRET-must-not-be-logged"
 DOCUMENT_MARKER = "document-content-must-not-be-logged"
 EXTRACTED_MARKER = "extracted-field-must-not-be-logged"
 RESPONSE_MARKER = "raw-response-must-not-be-logged"
