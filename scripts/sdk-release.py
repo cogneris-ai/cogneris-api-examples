@@ -67,11 +67,16 @@ def digest(file):
 
 def parse_xml(contents):
     require(len(contents) <= MAX_METADATA_BYTES, "XML metadata size limit exceeded")
-    uppercase = contents.upper()
-    require(b"<!DOCTYPE" not in uppercase and b"<!ENTITY" not in uppercase,
+    try:
+        text = contents.decode("utf-8-sig")
+    except UnicodeDecodeError as error:
+        raise ValueError("unsupported XML encoding; UTF-8 is required") from error
+    require("\0" not in text, "unsupported XML encoding; UTF-8 is required")
+    uppercase = text.upper()
+    require("<!DOCTYPE" not in uppercase and "<!ENTITY" not in uppercase,
             "unsafe XML declaration is forbidden")
     try:
-        return ET.fromstring(contents)
+        return ET.fromstring(text)
     except ET.ParseError as error:
         raise ValueError("invalid XML package metadata") from error
 
@@ -488,6 +493,52 @@ def java_command(checkout, *tasks, project_directory=None):
     ]
 
 
+def write_nuget_config(file, staged_source):
+    staged = Path(staged_source)
+    require(staged.is_dir() and not staged.is_symlink(), "staged NuGet source must be a real directory")
+    configuration = ET.Element("configuration")
+    sources = ET.SubElement(configuration, "packageSources")
+    ET.SubElement(sources, "clear")
+    ET.SubElement(sources, "add", key="cogneris-staged", value=str(staged))
+    ET.SubElement(
+        sources, "add", key="nuget.org", value="https://api.nuget.org/v3/index.json"
+    )
+    mappings = ET.SubElement(configuration, "packageSourceMapping")
+    staged_mapping = ET.SubElement(mappings, "packageSource", key="cogneris-staged")
+    ET.SubElement(staged_mapping, "package", pattern="Cogneris.DocumentAI")
+    public_mapping = ET.SubElement(mappings, "packageSource", key="nuget.org")
+    for pattern in ("Microsoft.*", "Polly", "Polly.*", "System.*"):
+        ET.SubElement(public_mapping, "package", pattern=pattern)
+    ET.ElementTree(configuration).write(file, encoding="utf-8", xml_declaration=True)
+
+
+def verify_nuget_install(assets_file, package_cache, staged_package, package_id, version):
+    assets_path = Path(assets_file)
+    staged_path = Path(staged_package)
+    cache = Path(package_cache)
+    require(assets_path.is_file() and not assets_path.is_symlink(),
+            "NuGet restore assets must be a real file")
+    require(assets_path.stat().st_size <= MAX_ARCHIVE_BYTES,
+            "NuGet restore assets size limit exceeded")
+    require(staged_path.is_file() and not staged_path.is_symlink(),
+            "staged NuGet package must be a real file")
+    assets = json.loads(assets_path.read_text())
+    identity = f"{package_id}/{version}"
+    library = assets.get("libraries", {}).get(identity)
+    require(isinstance(library, dict) and library.get("type") == "package",
+            "NuGet consumer did not resolve a package-only dependency")
+    relative = f"{package_id.casefold()}/{version}"
+    require(library.get("path") == relative, "NuGet consumer resolved an unexpected package path")
+    installed = cache / relative / f"{package_id.casefold()}.{version}.nupkg"
+    require(installed.is_file() and not installed.is_symlink(),
+            "installed NuGet package must be a real file")
+    require(installed.stat().st_size <= MAX_ARCHIVE_BYTES,
+            "installed NuGet package size limit exceeded")
+    require(digest(installed) == digest(staged_path),
+            "installed NuGet package digest does not match the staged artifact")
+    return installed
+
+
 def build(arguments):
     output = Path(arguments.output).absolute()
     require(not output.exists() and not output.is_symlink(), "artifact output already exists; refusing overwrite")
@@ -585,9 +636,10 @@ def clean_install(arguments):
 
             nuget_source = consumer / "nuget-source"
             nuget_source.mkdir()
+            staged_nuget = nuget_source / f"Cogneris.DocumentAI.{arguments.version}.nupkg"
             shutil.copyfile(
                 directory / f"Cogneris.DocumentAI.{arguments.version}.nupkg",
-                nuget_source / f"Cogneris.DocumentAI.{arguments.version}.nupkg",
+                staged_nuget,
             )
             csharp_consumer = shutil.copytree(
                 ROOT / "tests/fixtures/csharp-consumer", consumer / "csharp-consumer"
@@ -597,13 +649,22 @@ def clean_install(arguments):
                         and str(ROOT) not in fixture.read_text(),
                         "C# release consumer must be package-only")
             csharp_environment = dict(environment)
-            csharp_environment["NUGET_PACKAGES"] = str(consumer / "nuget-cache")
+            nuget_cache = consumer / "nuget-cache"
+            csharp_environment["NUGET_PACKAGES"] = str(nuget_cache)
+            nuget_config = consumer / "NuGet.config"
+            write_nuget_config(nuget_config, nuget_source)
             dotnet = os.environ.get("COGNERIS_DOTNET", "dotnet")
             run([
                 dotnet, "restore", csharp_consumer,
-                "--source", nuget_source,
-                "--source", "https://api.nuget.org/v3/index.json",
+                "--configfile", nuget_config,
             ], consumer, csharp_environment)
+            verify_nuget_install(
+                csharp_consumer / "obj/project.assets.json",
+                nuget_cache,
+                staged_nuget,
+                "Cogneris.DocumentAI",
+                arguments.version,
+            )
             run([
                 dotnet, "run", "--project", csharp_consumer,
                 "--configuration", "Release", "--no-restore",
