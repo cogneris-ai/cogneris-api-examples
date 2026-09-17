@@ -56,6 +56,91 @@ class DocumentationContractTests(unittest.TestCase):
             self.assertIn(term, versioning)
         self.assertIn("unpublished", versioning)
 
+    def test_readme_documents_csharp_and_java_from_explicit_local_sources(self):
+        readme = (ROOT / "README.md").read_text()
+        for term in (
+            "Cogneris.DocumentAI",
+            "net8.0",
+            ".NET 8",
+            "Cogneris.DocumentAI.0.1.0.nupkg",
+            "ai.cogneris:cogneris-document-ai-sdk",
+            "Java 17",
+            "cogneris-document-ai-sdk-0.1.0.jar",
+            "cogneris-document-ai-sdk-0.1.0.pom",
+            "not published to NuGet or Maven Central",
+        ):
+            self.assertIn(term, readme, f"README is missing C#/Java term: {term}")
+
+        dotnet = re.search(r"^## \.NET 8.*?(?=^## |\Z)", readme, re.MULTILINE | re.DOTALL)
+        self.assertIsNotNone(dotnet, "README must have a .NET 8 section")
+        dotnet_commands = re.findall(
+            r"^dotnet add package Cogneris\.DocumentAI[^\n]*$",
+            dotnet.group(0),
+            re.MULTILINE,
+        )
+        self.assertTrue(dotnet_commands, "README must show local NuGet installation")
+        self.assertTrue(
+            all("--source" in command for command in dotnet_commands),
+            "Every dotnet add command must bind an explicit local package source",
+        )
+
+        java = re.search(r"^## Java 17.*?(?=^## |\Z)", readme, re.MULTILINE | re.DOTALL)
+        self.assertIsNotNone(java, "README must have a Java 17 section")
+        for term in (
+            "COGNERIS_MAVEN_REPOSITORY",
+            "cogneris-document-ai-sdk-0.1.0.jar",
+            "cogneris-document-ai-sdk-0.1.0.pom",
+            "<dependency>",
+            "<repository>",
+            "file://${env.COGNERIS_MAVEN_REPOSITORY}",
+        ):
+            self.assertIn(term, java.group(0), f"Java guidance lacks local source binding: {term}")
+
+    def test_release_documents_exact_five_family_six_file_dry_run(self):
+        releasing = (ROOT / "RELEASING.md").read_text()
+        for term in (
+            "five package families",
+            "six package files",
+            "cogneris-ai-document-ai-sdk-0.1.0.tgz",
+            "cogneris-ai-document-ai-cli-0.1.0.tgz",
+            "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl",
+            "Cogneris.DocumentAI.0.1.0.nupkg",
+            "cogneris-document-ai-sdk-0.1.0.jar",
+            "cogneris-document-ai-sdk-0.1.0.pom",
+            "full JDK 17 with `javac`",
+            "not a full compiler JDK",
+            "no workflow publishes to NuGet or Maven Central",
+        ):
+            self.assertIn(term, releasing, f"Release policy is missing: {term}")
+
+    def test_csharp_and_java_examples_cover_the_public_facades(self):
+        csharp_path = ROOT / "examples/dotnet/Quickstart.cs"
+        java_path = ROOT / "examples/java/Quickstart.java"
+        self.assertTrue(csharp_path.is_file(), "C# facade example is missing")
+        self.assertTrue(java_path.is_file(), "Java facade example is missing")
+        csharp = csharp_path.read_text()
+        java = java_path.read_text()
+        for term in (
+            "CognerisRegion.Us",
+            "CognerisRegion.Eu",
+            "ExtractAsync",
+            "SubmitJobAsync",
+            "GetJobAsync",
+            "WaitForJobAsync",
+            "CancelJobAsync",
+        ):
+            self.assertIn(term, csharp, f"C# example does not exercise facade member: {term}")
+        for term in (
+            "CognerisClient.Region.US",
+            "CognerisClient.Region.EU",
+            ".extract(",
+            ".submitJob(",
+            ".getJob(",
+            ".waitForJob(",
+            ".cancelJob(",
+        ):
+            self.assertIn(term, java, f"Java example does not exercise facade member: {term}")
+
     def test_examples_document_only_supported_environment_and_inputs(self):
         for relative in (
             Path("examples/typescript/quickstart.mjs"),
