@@ -10,9 +10,12 @@ from typing import Mapping, Sequence
 
 
 def is_java_17(java: Path) -> bool:
-    result = subprocess.run(
-        [str(java), "-version"], text=True, capture_output=True, check=False
-    )
+    try:
+        result = subprocess.run(
+            [str(java), "-version"], text=True, capture_output=True, check=False
+        )
+    except OSError:
+        return False
     return result.returncode == 0 and bool(
         re.search(r'(?:openjdk|java) version "17\.', result.stdout + result.stderr)
     )
@@ -43,7 +46,9 @@ def java_environment(environment: Mapping[str, str]) -> dict[str, str]:
 
     result = dict(environment)
     result["JAVA_HOME"] = str(java_home)
-    result["PATH"] = str(java_home / "bin") + os.pathsep + result.get("PATH", "")
+    result["PATH"] = os.pathsep.join(
+        entry for entry in (str(java_home / "bin"), result.get("PATH")) if entry
+    )
     return result
 
 

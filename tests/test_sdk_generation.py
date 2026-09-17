@@ -152,6 +152,33 @@ class SdkGenerationTests(unittest.TestCase):
         self.assertTrue(result.stdout.splitlines()[0])
         self.assertRegex(result.stdout, r'(?:openjdk|java) version "17\.')
 
+    def test_java_runner_falls_back_when_configured_java_is_unusable(self):
+        uv = shutil.which("uv")
+        self.assertIsNotNone(uv)
+        child = "import os; print(os.environ['JAVA_HOME']); print(os.environ['PATH'])"
+        probe = (
+            "import os, subprocess, sys; from jdk4py import JAVA_HOME; "
+            "result = subprocess.run("
+            "[sys.executable, 'scripts/run-java.py', '--', sys.executable, '-c', "
+            f"{child!r}], "
+            "env={**os.environ, 'JAVA_HOME': '/definitely/missing-java-home', "
+            "'PATH': ''}, text=True, capture_output=True); "
+            "print(result.returncode); print(JAVA_HOME); print(result.stdout, end=''); "
+            "print(result.stderr, end='', file=sys.stderr)"
+        )
+        result = subprocess.run(
+            [
+                uv, "run", "--with", "jdk4py==17.0.9.2", "python",
+                "-c", probe,
+            ],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        child_status, expected_java_home, java_home, path = result.stdout.splitlines()
+        self.assertEqual(child_status, "0")
+        self.assertEqual(java_home, expected_java_home)
+        self.assertEqual(path, str(Path(java_home) / "bin"))
+
     def test_java_runner_returns_the_child_status(self):
         result = subprocess.run(
             [
