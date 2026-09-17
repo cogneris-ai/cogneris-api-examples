@@ -2,7 +2,7 @@
   "name": "@cogneris-ai/document-ai-cli",
   "version": "0.1.0",
   "description": "Command-line client for the Cogneris Document AI API",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cogneris-ai/cogneris-api-examples.git"
@@ -14,7 +14,8 @@
     "cogneris": "dist/bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "NOTICE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json"

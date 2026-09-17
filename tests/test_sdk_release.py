@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import io
+import email.parser
 import json
 import os
 import shutil
@@ -184,11 +185,15 @@ def clean_checkout(directory):
     return directory
 
 
-def fixture_bundle(directory, tar_member=None, zip_member=None):
+def fixture_bundle(directory, tar_member=None, zip_member=None, licensed=True):
     """Self-consistent untrusted archives: no installation or package code execution."""
     directory.mkdir()
+    license_contents = (ROOT / "LICENSE").read_bytes()
+    notice_contents = (ROOT / "NOTICE").read_bytes()
     for kind in ("sdk", "cli"):
         metadata = {"name": f"@cogneris-ai/document-ai-{kind}", "version": "0.1.0"}
+        if licensed:
+            metadata["license"] = "Apache-2.0"
         if kind == "cli":
             metadata["dependencies"] = {"@cogneris-ai/document-ai-sdk": "0.1.0"}
         with tarfile.open(directory / f"cogneris-ai-document-ai-{kind}-0.1.0.tgz", "w:gz") as archive:
@@ -196,11 +201,20 @@ def fixture_bundle(directory, tar_member=None, zip_member=None):
             member = tarfile.TarInfo("package/package.json")
             member.size = len(encoded)
             archive.addfile(member, io.BytesIO(encoded))
+            if licensed:
+                for name, contents in (("LICENSE", license_contents), ("NOTICE", notice_contents)):
+                    member = tarfile.TarInfo(f"package/{name}")
+                    member.size = len(contents)
+                    archive.addfile(member, io.BytesIO(contents))
             if kind == "sdk" and tar_member is not None:
                 archive.addfile(tar_member, io.BytesIO(b""))
     with zipfile.ZipFile(directory / "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl", "w") as archive:
+        license_metadata = "License-Expression: Apache-2.0\n" if licensed else ""
         archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/METADATA",
-                         "Name: cogneris-document-ai-sdk\nVersion: 0.1.0\n")
+                         f"Name: cogneris-document-ai-sdk\nVersion: 0.1.0\n{license_metadata}")
+        if licensed:
+            archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/licenses/LICENSE", license_contents)
+            archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/licenses/NOTICE", notice_contents)
         if zip_member is not None:
             archive.writestr(zip_member, b"")
     manifest = {"version": "0.1.0", "source": "a" * 40,
@@ -225,6 +239,50 @@ class ReleaseArtifactTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
         result = self.invoke("check-version", "--version", "0.1.0")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_integrity_gate_rejects_artifacts_without_the_approved_license(self):
+        with tempfile.TemporaryDirectory(prefix="cogneris-unlicensed-release-") as directory:
+            arguments = fixture_bundle(Path(directory) / "artifacts", licensed=False)
+            result = self.invoke("verify", *arguments, "--integrity-only")
+            self.assertNotEqual(result.returncode, 0, "unlicensed release artifacts must be rejected")
+            self.assertIn("license", result.stderr.lower())
+
+    def test_built_artifacts_carry_the_approved_apache_license_and_notice(self):
+        with tempfile.TemporaryDirectory(prefix="cogneris-license-test-") as directory:
+            self.checkout = clean_checkout(Path(directory) / "checkout")
+            license_file = self.checkout / "LICENSE"
+            notice_file = self.checkout / "NOTICE"
+            self.assertTrue(license_file.is_file(), "repository must carry the approved Apache-2.0 text")
+            self.assertTrue(notice_file.is_file(), "repository must carry the approved Cogneris notice")
+            approved_license = license_file.read_bytes()
+            approved_notice = notice_file.read_bytes()
+
+            output = Path(directory) / "artifacts"
+            result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            for package in ("sdk", "cli"):
+                with self.subTest(package=package):
+                    archive = output / f"cogneris-ai-document-ai-{package}-0.1.0.tgz"
+                    with tarfile.open(archive, "r:gz") as contents:
+                        metadata = json.load(contents.extractfile("package/package.json"))
+                        self.assertEqual(metadata["license"], "Apache-2.0")
+                        self.assertIn("package/LICENSE", contents.getnames())
+                        self.assertIn("package/NOTICE", contents.getnames())
+                        self.assertEqual(contents.extractfile("package/LICENSE").read(), approved_license)
+                        self.assertEqual(contents.extractfile("package/NOTICE").read(), approved_notice)
+
+            wheel = output / "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"
+            with zipfile.ZipFile(wheel) as contents:
+                metadata_name = next(name for name in contents.namelist() if name.endswith(".dist-info/METADATA"))
+                metadata = email.parser.BytesParser().parsebytes(contents.read(metadata_name))
+                self.assertEqual(metadata["License-Expression"], "Apache-2.0")
+                licenses = {
+                    name.rsplit("/", 1)[-1]: contents.read(name)
+                    for name in contents.namelist()
+                    if ".dist-info/licenses/" in name and not name.endswith("/")
+                }
+                self.assertEqual(licenses, {"LICENSE": approved_license, "NOTICE": approved_notice})
 
     def test_real_artifacts_install_and_reject_tampering_before_publication(self):
         with tempfile.TemporaryDirectory(prefix="cogneris-release-test-") as directory:
@@ -264,10 +322,16 @@ class ReleaseArtifactTests(unittest.TestCase):
             artifact.write_bytes(original)
             # A self-consistent checksum is insufficient if package metadata lies.
             with tarfile.open(artifact, "w:gz") as archive:
-                encoded = json.dumps({"name": "@cogneris-ai/document-ai-sdk", "version": "9.9.9"}).encode()
+                encoded = json.dumps({"name": "@cogneris-ai/document-ai-sdk", "version": "9.9.9",
+                                      "license": "Apache-2.0"}).encode()
                 member = tarfile.TarInfo("package/package.json")
                 member.size = len(encoded)
                 archive.addfile(member, io.BytesIO(encoded))
+                for name in ("LICENSE", "NOTICE"):
+                    contents = (ROOT / name).read_bytes()
+                    member = tarfile.TarInfo(f"package/{name}")
+                    member.size = len(contents)
+                    archive.addfile(member, io.BytesIO(contents))
             forged_manifest = dict(manifest, files=dict(manifest["files"]))
             forged_manifest["files"][artifact.name] = hashlib.sha256(artifact.read_bytes()).hexdigest()
             forged_bytes = json.dumps(forged_manifest).encode()

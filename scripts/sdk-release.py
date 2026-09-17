@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIRECTORIES = ("sdks/typescript", "sdks/python", "cli")
-BUILD_FILES = ("package.json", "package-lock.json", "scripts/sdk-release.py")
+BUILD_FILES = ("LICENSE", "NOTICE", "package.json", "package-lock.json", "scripts/sdk-release.py")
 EXCLUDED_BUILD_NAMES = {"dist", "node_modules", ".venv", "__pycache__", ".ruff_cache"}
 # Current packages are small source distributions. These limits bound parsing,
 # hashing and decompression before any dependency installer sees the archives.
@@ -210,23 +210,41 @@ def package_metadata(file):
     require(file.stat().st_size <= MAX_ARCHIVE_BYTES, "archive byte size limit exceeded")
     if file.suffix == ".tgz":
         with tarfile.open(file, "r:gz", tarinfo=BoundedTarInfo) as archive:
-            members = [member for member in inspect_tar(archive) if member.name == "package/package.json"]
-            require(len(members) == 1 and members[0].isfile(), "invalid npm package metadata")
-            require(members[0].size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
-            return json.loads(archive.extractfile(members[0]).read(MAX_METADATA_BYTES + 1))
+            members = inspect_tar(archive)
+            metadata = [member for member in members if member.name == "package/package.json"]
+            require(len(metadata) == 1 and metadata[0].isfile(), "invalid npm package metadata")
+            require(metadata[0].size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
+            parsed = json.loads(archive.extractfile(metadata[0]).read(MAX_METADATA_BYTES + 1))
+            for name in ("LICENSE", "NOTICE"):
+                legal = [member for member in members if member.name == f"package/{name}"]
+                require(len(legal) == 1 and legal[0].isfile(), f"approved license {name} is missing")
+                require(legal[0].size <= MAX_METADATA_BYTES, f"approved license {name} size limit exceeded")
+                parsed[f"{name.lower()}_text"] = archive.extractfile(legal[0]).read(MAX_METADATA_BYTES + 1)
+            return parsed
     inspect_zip_directory(file)
     with zipfile.ZipFile(file) as archive:
-        metadata = [member for member in inspect_zip(archive) if member.filename.endswith(".dist-info/METADATA")]
+        members = inspect_zip(archive)
+        metadata = [member for member in members if member.filename.endswith(".dist-info/METADATA")]
         require(len(metadata) == 1, "invalid wheel metadata")
         require(metadata[0].file_size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
         with archive.open(metadata[0]) as stream:
             parsed = email.parser.BytesParser().parsebytes(stream.read(MAX_METADATA_BYTES + 1))
-        return {"name": parsed["Name"], "version": parsed["Version"]}
+        package = {"name": parsed["Name"], "version": parsed["Version"],
+                   "license": parsed["License-Expression"]}
+        for name in ("LICENSE", "NOTICE"):
+            legal = [member for member in members
+                     if member.filename.endswith(f".dist-info/licenses/{name}")]
+            require(len(legal) == 1 and not legal[0].is_dir(), f"approved license {name} is missing")
+            require(legal[0].file_size <= MAX_METADATA_BYTES, f"approved license {name} size limit exceeded")
+            package[f"{name.lower()}_text"] = archive.read(legal[0])
+        return package
 
 
 def integrity(arguments):
     source_versions(arguments.version)
     directory = Path(arguments.artifacts)
+    approved_license = (ROOT / "LICENSE").read_bytes()
+    approved_notice = (ROOT / "NOTICE").read_bytes()
     expected_files = filenames(arguments.version)
     require(directory.is_dir() and not directory.is_symlink(), "artifact directory must be real")
     require({file.name for file in directory.iterdir()} == set(expected_files) | {"manifest.json"},
@@ -252,6 +270,12 @@ def integrity(arguments):
         package = package_metadata(file)
         require(package["name"] == name and package["version"] == arguments.version,
                 "artifact package identity/version mismatch")
+        require(package.get("license") == "Apache-2.0",
+                "artifact license metadata must be Apache-2.0")
+        require(package.get("license_text") == approved_license,
+                "artifact LICENSE must match approved license")
+        require(package.get("notice_text") == approved_notice,
+                "artifact NOTICE must match approved notice")
         require("publishConfig" not in package, "package cannot override publication registry/configuration")
         if name.endswith("-cli"):
             require(package.get("dependencies", {}).get("@cogneris-ai/document-ai-sdk") == arguments.version,
@@ -322,6 +346,9 @@ def build(arguments):
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_bytes(contents)
                 file.chmod(0o755 if mode == "100755" else 0o644)
+        for legal_file in ("LICENSE", "NOTICE"):
+            contents, _ = snapshot[legal_file]
+            (checkout / "cli" / legal_file).write_bytes(contents)
         (checkout / "package.json").write_text('{"private":true}\n')
         compiler = ROOT / "node_modules/.bin/tsc"
         run([compiler, "-p", checkout / "sdks/typescript/tsconfig.json"], checkout)

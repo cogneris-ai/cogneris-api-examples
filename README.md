@@ -5,6 +5,14 @@ Document AI API: TypeScript, Python, the `cogneris` CLI, and Postman. All of
 them are built from [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
 OpenAPI contract version `2026-08-07`.
 
+## License
+
+The SDKs, CLI, examples, documentation, and distributed artifacts in this
+repository are licensed under the [Apache License 2.0](LICENSE). Copyright
+2026 COGNERIS,INC. See [NOTICE](NOTICE) for scope and attribution. This license
+does not grant rights to Cogneris trademarks or logos, access to Cogneris
+services, or Cogneris backend code.
+
 ## Before you start
 
 The TypeScript SDK and CLI require Node.js `>=20.0.0` for built-in `File`,

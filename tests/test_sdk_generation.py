@@ -49,6 +49,8 @@ class SdkGenerationTests(unittest.TestCase):
             for name in ("scripts", "openapi", "sdks"):
                 shutil.copytree(ROOT / name, checkout / name,
                                 ignore=shutil.ignore_patterns("dist", "__pycache__", "node_modules"))
+            for name in ("LICENSE", "NOTICE"):
+                shutil.copy2(ROOT / name, checkout / name)
             (checkout / "node_modules").symlink_to(ROOT / "node_modules", target_is_directory=True)
             binary = checkout / "bin"
             binary.mkdir()
