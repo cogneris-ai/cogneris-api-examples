@@ -17,9 +17,9 @@ class DocumentationContractTests(unittest.TestCase):
     def test_readme_is_the_complete_truthful_quickstart(self):
         readme = (ROOT / "README.md").read_text().lower()
         required_terms = (
-            "@cogneris/document-ai-sdk",
+            "@cogneris-ai/document-ai-sdk",
             "cogneris-document-ai-sdk",
-            "@cogneris/document-ai-cli",
+            "@cogneris-ai/document-ai-cli",
             "cognerisclient",
             "cogneris_api_key",
             "cogneris_region",
@@ -49,6 +49,9 @@ class DocumentationContractTests(unittest.TestCase):
         for term in ("github issues", "security", "public release", "owner-approved"):
             self.assertIn(term, support)
         self.assertIn("do not report", support)
+        self.assertIn("security/advisories/new", support)
+        self.assertIn("privately report", support)
+        self.assertNotIn("does not yet", support)
         for term in ("semantic versioning", "2026-08-07", "deprecation", "openapi"):
             self.assertIn(term, versioning)
         self.assertIn("unpublished", versioning)

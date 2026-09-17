@@ -61,8 +61,8 @@ def source_versions(version):
 
 def filenames(version):
     return {
-        f"cogneris-document-ai-sdk-{version}.tgz": "@cogneris/document-ai-sdk",
-        f"cogneris-document-ai-cli-{version}.tgz": "@cogneris/document-ai-cli",
+        f"cogneris-ai-document-ai-sdk-{version}.tgz": "@cogneris-ai/document-ai-sdk",
+        f"cogneris-ai-document-ai-cli-{version}.tgz": "@cogneris-ai/document-ai-cli",
         f"cogneris_document_ai_sdk-{version}-py3-none-any.whl": "cogneris-document-ai-sdk",
     }
 
@@ -167,7 +167,7 @@ def integrity(arguments):
                 "artifact package identity/version mismatch")
         require("publishConfig" not in package, "package cannot override publication registry/configuration")
         if name.endswith("-cli"):
-            require(package.get("dependencies", {}).get("@cogneris/document-ai-sdk") == arguments.version,
+            require(package.get("dependencies", {}).get("@cogneris-ai/document-ai-sdk") == arguments.version,
                     "CLI SDK dependency must exactly match release version")
         metadata[name] = package
     return metadata
@@ -239,7 +239,7 @@ def build(arguments):
         compiler = ROOT / "node_modules/.bin/tsc"
         run([compiler, "-p", checkout / "sdks/typescript/tsconfig.json"], checkout)
         run(["npm", "pack", "./sdks/typescript", "--ignore-scripts", "--pack-destination", staged], checkout)
-        sdk_tarball = staged / f"cogneris-document-ai-sdk-{arguments.version}.tgz"
+        sdk_tarball = staged / f"cogneris-ai-document-ai-sdk-{arguments.version}.tgz"
         run(["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--no-save", sdk_tarball], checkout)
         run([compiler, "-p", checkout / "cli/tsconfig.json", "--typeRoots", ROOT / "node_modules/@types"], checkout)
         run(["npm", "pack", "./cli", "--ignore-scripts", "--pack-destination", staged], checkout)
@@ -276,9 +276,9 @@ def clean_install(arguments):
             (consumer / "package.json").write_text('{"private":true}\n')
             tarballs = [directory / name for name in filenames(arguments.version) if name.endswith(".tgz")]
             run(["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", *tarballs], consumer, environment)
-            run(["node", "-e", "const s = require('@cogneris/document-ai-sdk'); "
+            run(["node", "-e", "const s = require('@cogneris-ai/document-ai-sdk'); "
                  "if(typeof s.CognerisClient !== 'function') process.exit(1); "
-                 "if(!require.resolve('@cogneris/document-ai-sdk').includes('/node_modules/')) process.exit(1);"],
+                 "if(!require.resolve('@cogneris-ai/document-ai-sdk').includes('/node_modules/')) process.exit(1);"],
                 consumer, environment)
             invoked = subprocess.run([str(consumer / "node_modules/.bin/cogneris"), "jobs", "get", "job-id"],
                                      cwd=consumer, env=environment, capture_output=True, text=True)
@@ -293,14 +293,14 @@ def check_publish(arguments, metadata):
     require(os.environ.get(ready) == "true", f"{ready} must confirm the registry trusted publisher setup")
     if arguments.registry == "npm":
         repository = os.environ.get("GITHUB_REPOSITORY", "")
-        for name in ("@cogneris/document-ai-sdk", "@cogneris/document-ai-cli"):
+        for name in ("@cogneris-ai/document-ai-sdk", "@cogneris-ai/document-ai-cli"):
             require(metadata[name].get("repository", {}).get("url") == f"git+https://github.com/{repository}.git",
                     "npm repository.url must match the approved GitHub repository before OIDC publication")
         npm_version = tuple(int(part) for part in run(["npm", "--version"]).split("."))
         require(npm_version >= (11, 5, 1), "npm >=11.5.1 is required for trusted publishing")
         require(os.environ.get("REPOSITORY_PRIVATE") == "false", "npm provenance requires a public repository")
         # Trusted publishing cannot bootstrap an unregistered npm package.
-        for name in ("@cogneris/document-ai-sdk", "@cogneris/document-ai-cli"):
+        for name in ("@cogneris-ai/document-ai-sdk", "@cogneris-ai/document-ai-cli"):
             with urllib.request.urlopen(f"https://registry.npmjs.org/{name}", timeout=20) as response:
                 require(json.load(response).get("name") == name, "npm registry ownership/bootstrap gate failed")
     require(os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GITHUB_REF") == "refs/heads/main",

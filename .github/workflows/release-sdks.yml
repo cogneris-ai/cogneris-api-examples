@@ -133,8 +133,8 @@ jobs:
       - name: Publish the verified npm tarballs with OIDC
         working-directory: ${{ runner.temp }}/sdk-release
         run: |
-          npm publish "./cogneris-document-ai-sdk-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts
-          npm publish "./cogneris-document-ai-cli-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts
+          npm publish "./cogneris-ai-document-ai-sdk-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts
+          npm publish "./cogneris-ai-document-ai-cli-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts
 
   publish-pypi:
     if: ${{ inputs.dry_run == false && github.ref == 'refs/heads/main' }}

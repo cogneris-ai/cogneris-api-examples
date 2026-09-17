@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CognerisClient, CognerisError } from "@cogneris/document-ai-sdk";
+import { CognerisClient, CognerisError } from "@cogneris-ai/document-ai-sdk";
 
 const USAGE = `Usage:
   node quickstart.mjs extract <file>

@@ -1,8 +1,8 @@
 # Versioning and compatibility
 
-The TypeScript SDK (`@cogneris/document-ai-sdk`), Python SDK
+The TypeScript SDK (`@cogneris-ai/document-ai-sdk`), Python SDK
 (`cogneris-document-ai-sdk`), and TypeScript CLI
-(`@cogneris/document-ai-cli`) use Semantic Versioning. Their current `0.1.0`
+(`@cogneris-ai/document-ai-cli`) use Semantic Versioning. Their current `0.1.0`
 artifacts are unpublished development artifacts; a package version alone does
 not mean that an npm or PyPI release exists.
 

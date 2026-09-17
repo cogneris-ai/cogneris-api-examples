@@ -38,10 +38,10 @@ def fixture_bundle(directory, tar_member=None, zip_member=None):
     """Self-consistent untrusted archives: no installation or package code execution."""
     directory.mkdir()
     for kind in ("sdk", "cli"):
-        metadata = {"name": f"@cogneris/document-ai-{kind}", "version": "0.1.0"}
+        metadata = {"name": f"@cogneris-ai/document-ai-{kind}", "version": "0.1.0"}
         if kind == "cli":
-            metadata["dependencies"] = {"@cogneris/document-ai-sdk": "0.1.0"}
-        with tarfile.open(directory / f"cogneris-document-ai-{kind}-0.1.0.tgz", "w:gz") as archive:
+            metadata["dependencies"] = {"@cogneris-ai/document-ai-sdk": "0.1.0"}
+        with tarfile.open(directory / f"cogneris-ai-document-ai-{kind}-0.1.0.tgz", "w:gz") as archive:
             encoded = json.dumps(metadata).encode()
             member = tarfile.TarInfo("package/package.json")
             member.size = len(encoded)
@@ -86,7 +86,7 @@ class ReleaseArtifactTests(unittest.TestCase):
             manifest = json.loads(manifest_bytes)
             digest = hashlib.sha256(manifest_bytes).hexdigest()
             self.assertEqual(set(manifest["files"]), {
-                "cogneris-document-ai-sdk-0.1.0.tgz", "cogneris-document-ai-cli-0.1.0.tgz",
+                "cogneris-ai-document-ai-sdk-0.1.0.tgz", "cogneris-ai-document-ai-cli-0.1.0.tgz",
                 "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"})
             arguments = ["--version", "0.1.0", "--artifacts", str(output),
                          "--manifest-sha256", digest, "--source", manifest["source"]]
@@ -105,7 +105,7 @@ class ReleaseArtifactTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, "extra files must be rejected")
             marker.unlink()
 
-            artifact = output / "cogneris-document-ai-sdk-0.1.0.tgz"
+            artifact = output / "cogneris-ai-document-ai-sdk-0.1.0.tgz"
             original = artifact.read_bytes()
             artifact.write_bytes(original + b"tampered")
             result = self.invoke("verify", *arguments)
@@ -114,7 +114,7 @@ class ReleaseArtifactTests(unittest.TestCase):
             artifact.write_bytes(original)
             # A self-consistent checksum is insufficient if package metadata lies.
             with tarfile.open(artifact, "w:gz") as archive:
-                encoded = json.dumps({"name": "@cogneris/document-ai-sdk", "version": "9.9.9"}).encode()
+                encoded = json.dumps({"name": "@cogneris-ai/document-ai-sdk", "version": "9.9.9"}).encode()
                 member = tarfile.TarInfo("package/package.json")
                 member.size = len(encoded)
                 archive.addfile(member, io.BytesIO(encoded))
@@ -143,7 +143,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("SDK_RELEASE_READY", result.stderr)
             env.update(SDK_RELEASE_READY="true", SDK_NPM_TRUSTED_PUBLISHING_READY="true",
-                       SDK_PYPI_TRUSTED_PUBLISHING_READY="true", GITHUB_REPOSITORY="cogneris-ai/cogneris-api-examples")
+                       SDK_PYPI_TRUSTED_PUBLISHING_READY="true", GITHUB_REPOSITORY="cogneris-ai/not-the-repo")
             result = self.invoke("check-publish", *arguments, "--registry", "npm", environment=env)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("repository", result.stderr.lower())

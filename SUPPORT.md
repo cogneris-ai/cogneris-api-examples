@@ -21,11 +21,11 @@ grant access, change a tenant, or authorize publication or deployment.
 ## Security reporting
 
 Do not report suspected vulnerabilities, credentials, customer documents, or
-other sensitive details in public GitHub Issues. This repository does not yet
-document an owner-approved private security reporting channel. An
-owner-approved channel must be configured and documented before public release
-of these artifacts. Until then, stop and obtain that channel from the Cogneris
-service owner; do not guess an email address or disclose the report publicly.
+other sensitive details in public GitHub Issues. The owner-approved private
+security reporting channel is GitHub Security Advisories: use
+[privately report a security vulnerability](https://github.com/cogneris-ai/cogneris-api-examples/security/advisories/new).
+Do not report the same information in a public issue. This private channel must
+remain enabled before public release of the artifacts.
 
 Version compatibility and deprecation rules are documented in
 [`VERSIONING.md`](VERSIONING.md).

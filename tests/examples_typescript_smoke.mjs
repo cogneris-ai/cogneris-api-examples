@@ -60,7 +60,7 @@ before(async () => {
     { cwd: consumerDirectory, stdio: "pipe" },
   );
   const requireFromInstall = createRequire(path.join(consumerDirectory, "package.json"));
-  sdk = requireFromInstall("@cogneris/document-ai-sdk");
+  sdk = requireFromInstall("@cogneris-ai/document-ai-sdk");
   example = await import(pathToFileURL(path.join(consumerDirectory, "quickstart.mjs")));
 
   server = createServer(async (request, response) => {

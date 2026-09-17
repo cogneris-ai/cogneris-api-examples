@@ -54,7 +54,7 @@ before(async () => {
     { cwd: temporaryDirectory, stdio: "pipe" },
   );
   const requireFromInstall = createRequire(path.join(temporaryDirectory, "package.json"));
-  sdk = requireFromInstall("@cogneris/document-ai-sdk");
+  sdk = requireFromInstall("@cogneris-ai/document-ai-sdk");
 
   server = createServer(async (request, response) => {
     const chunks = [];

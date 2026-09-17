@@ -10,7 +10,7 @@ import {
   type DocumentJobOperation,
   type Envelope,
   type SubmitDocumentJobResponse,
-} from '@cogneris/document-ai-sdk';
+} from '@cogneris-ai/document-ai-sdk';
 
 const USAGE = `Usage:
   cogneris [--region us|eu] extract <file>

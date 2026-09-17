@@ -146,8 +146,8 @@ def expected_jobs(release):
             ])
             if registry == "npm":
                 steps.append(command(
-                    'npm publish "./cogneris-document-ai-sdk-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts\n'
-                    'npm publish "./cogneris-document-ai-cli-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts',
+                    'npm publish "./cogneris-ai-document-ai-sdk-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts\n'
+                    'npm publish "./cogneris-ai-document-ai-cli-$RELEASE_VERSION.tgz" --registry https://registry.npmjs.org --access public --provenance --ignore-scripts',
                     **{"working-directory": "${{ runner.temp }}/sdk-release"}))
             else:
                 steps.extend([

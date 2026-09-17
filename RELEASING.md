@@ -1,7 +1,8 @@
 # SDK release workflow
 
-All registry names remain provisional and all three packages remain unpublished.
-This repository change does not authorize running a release or publishing a package.
+The registry names are `@cogneris-ai/document-ai-sdk`,
+`@cogneris-ai/document-ai-cli`, and `cogneris-document-ai-sdk`. All three
+packages remain unpublished until the first authorized release completes.
 
 `.github/workflows/release-sdks.yml` accepts only a manual `workflow_dispatch`.
 Supply the exact SemVer already committed in all three package versions (currently
@@ -29,18 +30,16 @@ the verified tarballs or a byte-for-byte copy of the verified wheel.
 
 An owner must complete these steps outside this workflow:
 
-1. Confirm package-name ownership, public distribution/license permission, and an
-   owner-approved private security contact as required by `SUPPORT.md`. Configure
-   `sdk-release` as a protected GitHub environment with required reviewers,
-   prevention of self-review, and deployment restricted to `main`. YAML referencing
+1. Confirm package-name ownership and public distribution/license permission.
+   Keep the owner-approved GitHub Security Advisories channel documented in
+   `SUPPORT.md` enabled. Configure `sdk-release` as a protected GitHub environment
+   with an owner review gate and deployment restricted to `main`. YAML referencing
    an environment cannot itself create its reviewer protection. Only then set the
    environment configuration variable `SDK_RELEASE_READY` to the string `true`.
-2. For npm, confirm ownership/bootstrap of **both** provisional scoped package
-   names. Add matching `repository.url` metadata to the generator configuration
-   and CLI in a separately reviewed change, regenerate and verify the SDK, and
-   use `git+https://github.com/cogneris-ai/cogneris-api-examples.git`. Current package
-   metadata omits this field, so npm publication deliberately fails closed.
-   Register a trusted publisher for each package, specifying this repository,
+2. For npm, confirm ownership/bootstrap of **both** `@cogneris-ai` package names.
+   Their committed metadata must use
+   `git+https://github.com/cogneris-ai/cogneris-api-examples.git`. Register a
+   trusted publisher for each package, specifying this repository,
    `release-sdks.yml`, and `sdk-release`; authorize direct `npm publish` explicitly.
    Initial npm registration/bootstrap needs an owner-controlled process outside
    this workflow; there is no token-based bootstrap fallback here. Confirm the

@@ -73,10 +73,10 @@
       }
     },
     "typescript": {
-      "name": "@cogneris/document-ai-sdk",
+      "name": "@cogneris-ai/document-ai-sdk",
       "version": "0.1.0",
       "files": {
-        "package.json": "d0a39ff68c80c254c34443cbb18a41d1b877d98979f1b436f590aee8f040b4eb",
+        "package.json": "cc76e577376bc46a725f9efeb11ebd4e567a75e64283f6afe38082774c42e152",
         "src/client/client.gen.ts": "8a17b0bf1540258734a128f176f6cb915c849b97d8064a613dba5ef8390e58d9",
         "src/client/index.ts": "949cc7333527c91928c32410c4a4a2dd2b90b99fe080eb8ce4505647852fbe1b",
         "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",
