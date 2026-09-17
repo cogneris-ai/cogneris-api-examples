@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -26,14 +27,14 @@ def run_sdk_check() -> subprocess.CompletedProcess[str]:
     )
 
 
-def sdk_snapshot() -> Dict[str, Tuple[bytes, int, int]]:
+def sdk_snapshot(directory: Path = SDKS) -> Dict[str, Tuple[bytes, int, int]]:
     return {
-        path.relative_to(SDKS).as_posix(): (
+        path.relative_to(directory).as_posix(): (
             path.read_bytes(),
             path.stat().st_mode,
             path.stat().st_mtime_ns,
         )
-        for path in sorted(SDKS.rglob("*"))
+        for path in sorted(directory.rglob("*"))
         if path.is_file()
     }
 
@@ -43,7 +44,7 @@ def file_hash(path: Path) -> str:
 
 
 class SdkGenerationTests(unittest.TestCase):
-    def test_generation_invokes_the_exact_formatter_pin(self):
+    def run_generation_with_uvx_shim(self, fail_second_openapi=False):
         with tempfile.TemporaryDirectory(prefix="cogneris-generator-pin-") as directory:
             checkout = Path(directory)
             for name in ("scripts", "openapi", "sdks"):
@@ -54,26 +55,54 @@ class SdkGenerationTests(unittest.TestCase):
             (checkout / "node_modules").symlink_to(ROOT / "node_modules", target_is_directory=True)
             binary = checkout / "bin"
             binary.mkdir()
-            captured = checkout / "uvx-arguments.json"
+            captured = checkout / "uvx-arguments.jsonl"
             shim = binary / "uvx"
             real_uvx = shutil.which("uvx")
             self.assertIsNotNone(real_uvx)
             shim.write_text(
                 f"#!{sys.executable}\nimport json, os, sys\n"
-                f"with open({str(captured)!r}, 'w') as output: json.dump(sys.argv[1:], output)\n"
+                f"with open({str(captured)!r}, 'a') as output: output.write(json.dumps(sys.argv[1:]) + '\\n')\n"
+                f"calls = [json.loads(line) for line in open({str(captured)!r})]\n"
+                f"if {fail_second_openapi!r} and sum('openapi-generator-cli' in call for call in calls) == 2: sys.exit(42)\n"
                 f"os.execv({real_uvx!r}, [{real_uvx!r}, *sys.argv[1:]])\n"
             )
             shim.chmod(0o755)
-            result = subprocess.run(["node", "scripts/generate-sdks.mjs", "--check"], cwd=checkout,
+            before = sdk_snapshot(checkout / "sdks")
+            arguments = ["node", "scripts/generate-sdks.mjs"]
+            if not fail_second_openapi:
+                arguments.append("--check")
+            result = subprocess.run(arguments, cwd=checkout,
                                     env={**os.environ, "PATH": str(binary) + os.pathsep + os.environ["PATH"]},
                                     text=True, capture_output=True)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            arguments = json.loads(captured.read_text())
-            self.assertIn(["--with", "ruff==0.13.3"],
-                          [arguments[index:index + 2] for index in range(len(arguments))])
+            after = sdk_snapshot(checkout / "sdks")
+            calls = [json.loads(line) for line in captured.read_text().splitlines()]
+            return result, calls, before, after
+
+    def test_generation_invokes_the_exact_formatter_and_openapi_runtime_pins(self):
+        result, calls, before, after = self.run_generation_with_uvx_shim()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        python_call = next(call for call in calls if "openapi-python-client" in call)
+        self.assertIn(["--with", "ruff==0.13.3"],
+                      [python_call[index:index + 2] for index in range(len(python_call))])
+        openapi_calls = [call for call in calls if "openapi-generator-cli" in call]
+        self.assertEqual(len(openapi_calls), 2, calls)
+        self.assertEqual([call[call.index("-g") + 1] for call in openapi_calls], ["csharp", "java"])
+        for arguments in openapi_calls:
+            pairs = [arguments[index:index + 2] for index in range(len(arguments))]
+            self.assertIn(["--from", "openapi-generator-cli==7.25.0"], pairs)
+            self.assertIn(["--with", "jdk4py==17.0.9.2"], pairs)
+            self.assertNotIn("--skip-validate-spec", arguments)
+        self.assertEqual(after, before)
+
+    def test_second_openapi_generator_failure_preserves_all_committed_outputs(self):
+        result, calls, before, after = self.run_generation_with_uvx_shim(fail_second_openapi=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("uvx exited with 42", result.stderr)
+        self.assertEqual(len([call for call in calls if "openapi-generator-cli" in call]), 2)
+        self.assertEqual(after, before)
 
     def test_generated_sdk_outputs_are_committed(self):
-        for relative_path in ("sdks/typescript", "sdks/python", "sdks/manifest.json"):
+        for relative_path in ("sdks/typescript", "sdks/python", "sdks/csharp", "sdks/java", "sdks/manifest.json"):
             with self.subTest(path=relative_path):
                 self.assertTrue(
                     (ROOT / relative_path).exists(),
@@ -196,7 +225,12 @@ class SdkGenerationTests(unittest.TestCase):
         self.assertEqual(manifest["source"]["path"], "openapi/cogneris-openapi.yaml")
         self.assertEqual(manifest["source"]["sha256"], file_hash(source))
 
-        for sdk_name in ("typescript", "python"):
+        self.assertEqual(set(manifest["packages"]), {"typescript", "python", "csharp", "java"})
+        self.assertEqual(manifest["packages"]["csharp"]["name"], "Cogneris.DocumentAI")
+        self.assertEqual(manifest["packages"]["java"]["name"], "ai.cogneris:cogneris-document-ai-sdk")
+        self.assertIn("LICENSE", manifest["packages"]["csharp"]["files"])
+        self.assertIn("NOTICE", manifest["packages"]["java"]["files"])
+        for sdk_name in ("typescript", "python", "csharp", "java"):
             expected_files = {
                 path.relative_to(SDKS / sdk_name).as_posix()
                 for path in (SDKS / sdk_name).rglob("*")
@@ -232,6 +266,46 @@ class SdkGenerationTests(unittest.TestCase):
         self.assertTrue(
             (SDKS / "python" / "cogneris_document_ai_sdk" / "__init__.py").is_file()
         )
+
+    def test_csharp_and_java_metadata_and_legal_files_are_normalized(self):
+        self.assertTrue((SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj").is_file(), "missing generated C# project")
+        project = ET.parse(SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj")
+        for tag, value in (("PackageId", "Cogneris.DocumentAI"), ("Version", "0.1.0"),
+                           ("TargetFramework", "net8.0"), ("PackageLicenseExpression", "Apache-2.0")):
+            self.assertEqual(project.findtext(f".//{tag}"), value)
+        for legal in ("LICENSE", "NOTICE"):
+            item = project.find(f".//None[@Include='../../{legal}']")
+            self.assertIsNotNone(item)
+            self.assertEqual(item.attrib, {"Include": f"../../{legal}", "Pack": "true", "PackagePath": ""})
+        pom = ET.parse(SDKS / "java/pom.xml")
+        ns = {"m": "http://maven.apache.org/POM/4.0.0"}
+        for tag, value in (("groupId", "ai.cogneris"), ("artifactId", "cogneris-document-ai-sdk"), ("version", "0.1.0")):
+            self.assertEqual(pom.findtext(f"m:{tag}", namespaces=ns), value)
+        for target in ("source", "target"):
+            self.assertEqual(pom.findtext(f"m:properties/m:maven.compiler.{target}", namespaces=ns), "17")
+        self.assertEqual(pom.findtext(".//m:requireJavaVersion/m:version", namespaces=ns), "17")
+        gradle = (SDKS / "java/build.gradle").read_text()
+        self.assertEqual(gradle.count("JavaVersion.VERSION_17"), 2)
+        self.assertNotIn("JavaVersion.VERSION_11", gradle)
+        properties = (SDKS / "java/gradle/wrapper/gradle-wrapper.properties").read_text()
+        self.assertIn("gradle-8.14.5-bin.zip", properties)
+        self.assertEqual(properties.count("distributionSha256Sum=6f74b601422d6d6fc4e1f9a1ab6522f642c2fdcbc15ae33ebd30ba3d7198e854"), 1)
+        for sdk in ("typescript", "python", "csharp", "java"):
+            for legal in ("LICENSE", "NOTICE"):
+                self.assertEqual((SDKS / sdk / legal).read_bytes(), (ROOT / legal).read_bytes())
+        for legal in ("LICENSE", "NOTICE"):
+            self.assertEqual((SDKS / "java/src/main/resources/META-INF" / legal).read_bytes(), (ROOT / legal).read_bytes())
+        self.assertTrue((SDKS / "java/src/main/java/ai/cogneris/documentai").is_dir())
+
+    def test_csharp_and_java_generator_scaffolding_is_removed(self):
+        removed = {
+            "csharp": (".gitignore", ".openapi-generator-ignore", ".openapi-generator", "appveyor.yml", "api", "docs", "docs/scripts", "src/Cogneris.DocumentAI.Test", "Cogneris.DocumentAI.sln", "src/Cogneris.DocumentAI/README.md"),
+            "java": (".github", ".gitignore", ".openapi-generator-ignore", ".openapi-generator", ".travis.yml", "api", "docs", "git_push.sh", "build.sbt", "src/test"),
+        }
+        for sdk, paths in removed.items():
+            self.assertTrue((SDKS / sdk).is_dir(), f"missing generated SDK output: sdks/{sdk}")
+            for path in paths:
+                self.assertFalse((SDKS / sdk / path).exists(), f"unwanted scaffolding: {sdk}/{path}")
 
     def test_typescript_package_builds(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -385,7 +459,7 @@ console.log(JSON.stringify({
     def test_generated_artifacts_exclude_internal_platform_and_admin_routes(self):
         generated_text = "\n".join(
             path.read_text(errors="ignore")
-            for directory in (SDKS / "typescript", SDKS / "python")
+            for directory in (SDKS / name for name in ("typescript", "python", "csharp", "java"))
             for path in directory.rglob("*")
             if path.is_file()
         )
@@ -400,10 +474,14 @@ console.log(JSON.stringify({
 
     def test_generated_text_has_no_trailing_whitespace(self):
         offenders = []
-        for directory in (SDKS / "typescript", SDKS / "python"):
+        for directory in (SDKS / name for name in ("typescript", "python", "csharp", "java")):
             for path in directory.rglob("*"):
                 if not path.is_file():
                     continue
+                if b"\0" in path.read_bytes():
+                    continue
+                if path.read_bytes().endswith((b"\n\n", b"\r\n\r\n")):
+                    offenders.append(f"{path.relative_to(ROOT).as_posix()}:blank lines at EOF")
                 for line_number, line in enumerate(
                     path.read_text(errors="ignore").splitlines(), start=1
                 ):

@@ -36,6 +36,19 @@ function run(command, argumentsList, options = {}) {
   }
 }
 
+function generateOpenApiSdk(generatorName, configPath, outputPath, generators) {
+  const pin = generators[generatorName];
+  run("uvx", [
+    "--from", `${pin.package}==${pin.version}`,
+    "--with", `${pin.runtime.package}==${pin.runtime.version}`,
+    "openapi-generator-cli", "generate",
+    "-g", generatorName,
+    "-i", sourcePath,
+    "-o", outputPath,
+    "-c", configPath,
+  ]);
+}
+
 async function sha256(filePath) {
   return crypto
     .createHash("sha256")
@@ -94,7 +107,7 @@ async function appendOverlay(targetPath, overlayPath) {
 }
 
 async function applyApprovedLicense(stagedOutput) {
-  for (const packageDirectory of ["typescript", "python"]) {
+  for (const packageDirectory of ["typescript", "python", "csharp", "java"]) {
     for (const legalFile of ["LICENSE", "NOTICE"]) {
       await fs.copyFile(
         path.join(root, legalFile),
@@ -116,6 +129,73 @@ async function applyApprovedLicense(stagedOutput) {
       `${readmeDeclaration}license = "Apache-2.0"\nlicense-files = ["LICENSE", "NOTICE"]\n`,
     ),
   );
+
+  const csharpProjectPath = path.join(stagedOutput, "csharp", "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj");
+  const csharpProject = await fs.readFile(csharpProjectPath, "utf8");
+  if (!csharpProject.includes("<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>")) {
+    throw new Error("generated C# project is missing the approved license expression");
+  }
+  await fs.writeFile(csharpProjectPath, csharpProject.replace("</Project>", `  <ItemGroup>
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../../NOTICE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>`));
+
+  const javaLegalDirectory = path.join(stagedOutput, "java", "src", "main", "resources", "META-INF");
+  await fs.mkdir(javaLegalDirectory, { recursive: true });
+  for (const legalFile of ["LICENSE", "NOTICE"]) {
+    await fs.copyFile(path.join(root, legalFile), path.join(javaLegalDirectory, legalFile));
+  }
+}
+
+async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
+  const scaffolding = sdkName === "csharp"
+    ? [".gitignore", ".openapi-generator-ignore", ".openapi-generator", "appveyor.yml", "api", "docs", "docs/scripts", "src/Cogneris.DocumentAI.Test", "Cogneris.DocumentAI.sln", "src/Cogneris.DocumentAI/README.md"]
+    : [".github", ".gitignore", ".openapi-generator-ignore", ".openapi-generator", ".travis.yml", "api", "docs", "git_push.sh", "build.sbt", "src/test"];
+  for (const relativePath of scaffolding) {
+    await fs.rm(path.join(outputPath, relativePath), { recursive: true, force: true });
+  }
+
+  if (sdkName === "java") {
+    const buildPath = path.join(outputPath, "build.gradle");
+    const build = await fs.readFile(buildPath, "utf8");
+    if (build.split("JavaVersion.VERSION_11").length !== 3) {
+      throw new Error("generated Java runtime targets do not match the expected template");
+    }
+    await fs.writeFile(buildPath, build.replaceAll("JavaVersion.VERSION_11", "JavaVersion.VERSION_17"));
+    const pomPath = path.join(outputPath, "pom.xml");
+    let pom = await fs.readFile(pomPath, "utf8");
+    for (const target of ["source", "target"]) {
+      const declaration = `<maven.compiler.${target}>11</maven.compiler.${target}>`;
+      if (!pom.includes(declaration)) throw new Error(`generated Java POM is missing ${declaration}`);
+      pom = pom.replace(declaration, `<maven.compiler.${target}>17</maven.compiler.${target}>`);
+    }
+    const enforcer = /(<requireJavaVersion>\s*<version>)11(<\/version>\s*<\/requireJavaVersion>)/;
+    if (!enforcer.test(pom)) throw new Error("generated Java POM is missing its Java 11 enforcer template");
+    pom = pom.replace(enforcer, (_, opening, closing) => `${opening}17${closing}`);
+    await fs.writeFile(pomPath, pom);
+    const wrapperPath = path.join(outputPath, "gradle", "wrapper", "gradle-wrapper.properties");
+    const wrapper = await fs.readFile(wrapperPath, "utf8");
+    const gradle = generators.java.gradle;
+    if (!wrapper.includes(`gradle-${gradle.version}-bin.zip`) || wrapper.includes("distributionSha256Sum=")) {
+      throw new Error("generated Gradle wrapper does not match the pinned distribution template");
+    }
+    await fs.writeFile(wrapperPath, `${wrapper.trimEnd()}\ndistributionSha256Sum=${gradle.distributionSha256}\n`);
+  }
+}
+
+async function normalizeGeneratedText(directory) {
+  for (const relativePath of await listFiles(directory)) {
+    const filePath = path.join(directory, relativePath);
+    const bytes = await fs.readFile(filePath);
+    if (bytes.includes(0)) continue;
+    const text = bytes.toString("utf8");
+    // Never decode/rewrite binary artifacts such as the Gradle wrapper JAR.
+    if (!Buffer.from(text, "utf8").equals(bytes)) continue;
+    const normalized = text.replace(/[^\S\r\n]+(?=\r?$)/gm, "").replace(/(?:\r?\n){2,}$/, "\n");
+    if (normalized !== text) await fs.writeFile(filePath, normalized);
+  }
 }
 
 async function validatePackages(stagedOutput) {
@@ -155,8 +235,55 @@ async function validatePackages(stagedOutput) {
     ),
   );
 
+  const csharpProject = await fs.readFile(path.join(stagedOutput, "csharp", "src", "Cogneris.DocumentAI", "Cogneris.DocumentAI.csproj"), "utf8");
+  for (const metadata of [
+    "<PackageId>Cogneris.DocumentAI</PackageId>",
+    "<AssemblyName>Cogneris.DocumentAI</AssemblyName>",
+    "<RootNamespace>Cogneris.DocumentAI</RootNamespace>",
+    "<Version>0.1.0</Version>",
+    "<TargetFramework>net8.0</TargetFramework>",
+    "<Nullable>enable</Nullable>",
+    "<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>",
+    '<None Include="../../LICENSE" Pack="true" PackagePath="" />',
+    '<None Include="../../NOTICE" Pack="true" PackagePath="" />',
+  ]) {
+    if (!csharpProject.includes(metadata)) throw new Error(`generated C# metadata is invalid: missing ${metadata}`);
+  }
+
+  const javaPom = await fs.readFile(path.join(stagedOutput, "java", "pom.xml"), "utf8");
+  for (const metadata of [
+    "<groupId>ai.cogneris</groupId>",
+    "<artifactId>cogneris-document-ai-sdk</artifactId>",
+    "<version>0.1.0</version>",
+    "<packaging>jar</packaging>",
+    "<maven.compiler.source>17</maven.compiler.source>",
+    "<maven.compiler.target>17</maven.compiler.target>",
+  ]) {
+    if (!javaPom.includes(metadata)) throw new Error(`generated Java POM identity is invalid: missing ${metadata}`);
+  }
+  if (!/<requireJavaVersion>\s*<version>17<\/version>\s*<\/requireJavaVersion>/.test(javaPom)) {
+    throw new Error("generated Java POM must enforce Java 17");
+  }
+  await fs.access(path.join(stagedOutput, "java", "src", "main", "java", "ai", "cogneris", "documentai", "ApiClient.java"));
+  const javaBuild = await fs.readFile(path.join(stagedOutput, "java", "build.gradle"), "utf8");
+  if (javaBuild.split("JavaVersion.VERSION_17").length !== 3 || javaBuild.includes("JavaVersion.VERSION_11")) {
+    throw new Error("generated Java runtime targets must both be Java 17");
+  }
+
+  for (const sdkName of ["typescript", "python", "csharp", "java"]) {
+    for (const legalFile of ["LICENSE", "NOTICE"]) {
+      const expected = await fs.readFile(path.join(root, legalFile));
+      const actual = await fs.readFile(path.join(stagedOutput, sdkName, legalFile));
+      if (!expected.equals(actual)) throw new Error(`generated ${sdkName} ${legalFile} is invalid`);
+      if (sdkName === "java") {
+        const resource = await fs.readFile(path.join(stagedOutput, sdkName, "src", "main", "resources", "META-INF", legalFile));
+        if (!expected.equals(resource)) throw new Error(`generated Java META-INF/${legalFile} is invalid`);
+      }
+    }
+  }
+
   const forbiddenRoutes = ["/platform", "platform/v1", "/admin", "admincontroller"];
-  for (const sdkName of ["typescript", "python"]) {
+  for (const sdkName of ["typescript", "python", "csharp", "java"]) {
     for (const relativePath of await listFiles(path.join(stagedOutput, sdkName))) {
       const contents = await fs.readFile(
         path.join(stagedOutput, sdkName, relativePath),
@@ -211,6 +338,8 @@ async function main() {
   const stagedOutput = path.join(temporaryRoot, "sdks");
   const typescriptOutput = path.join(stagedOutput, "typescript");
   const pythonOutput = path.join(stagedOutput, "python");
+  const csharpOutput = path.join(stagedOutput, "csharp");
+  const javaOutput = path.join(stagedOutput, "java");
 
   try {
     await fs.mkdir(typescriptOutput, { recursive: true });
@@ -276,6 +405,11 @@ async function main() {
       path.join(pythonOutput, "README.md"),
     );
 
+    for (const [sdkName, outputPath] of [["csharp", csharpOutput], ["java", javaOutput]]) {
+      generateOpenApiSdk(sdkName, path.join(configDirectory, `${sdkName}.json`), outputPath, generators);
+      await normalizeOpenApiSdk(sdkName, outputPath, generators);
+    }
+
     await applyOverlayFiles(
       path.join(overlayDirectory, "typescript", "files"),
       typescriptOutput,
@@ -292,6 +426,10 @@ async function main() {
       path.join(pythonOutput, "cogneris_document_ai_sdk", "__init__.py"),
       path.join(overlayDirectory, "python", "__init__.append.py"),
     );
+    for (const [sdkName, outputPath] of [["csharp", csharpOutput], ["java", javaOutput]]) {
+      await applyOverlayFiles(path.join(overlayDirectory, sdkName, "files"), outputPath);
+      await normalizeGeneratedText(outputPath);
+    }
 
     await applyApprovedLicense(stagedOutput);
 
@@ -304,6 +442,16 @@ async function main() {
       },
       generators,
       packages: {
+        csharp: {
+          name: "Cogneris.DocumentAI",
+          version: "0.1.0",
+          files: await hashFiles(csharpOutput),
+        },
+        java: {
+          name: "ai.cogneris:cogneris-document-ai-sdk",
+          version: "0.1.0",
+          files: await hashFiles(javaOutput),
+        },
         python: {
           name: "cogneris-document-ai-sdk",
           version: "0.1.0",
