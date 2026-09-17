@@ -83,7 +83,9 @@
         "cogneris_document_ai_sdk/models/zero_shot_document_body.py": "a5466aefff41e125e5f74ddf5e227beeac87da418bf8c39664a27658b8aa952f",
         "cogneris_document_ai_sdk/py.typed": "f19254b31662b8ecb5a0979586c4d64214c6ffaa535475579398492fbf5e6d39",
         "cogneris_document_ai_sdk/types.py": "017e28af14194096addef66b82327e4d86f6b0d04bf24368f72a980d3fa7f32f",
-        "pyproject.toml": "16235b278261b76a7cbcb25fd603cc08fca0f8338ddb420fabdb8b6f737df248",
+        "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
+        "pyproject.toml": "9f3a47d3b2ff54ff816388f3fb2f3acbfab697d3695767eb18805f52ff544660",
         "README.md": "c3f0ced0110f729fb49679a27f69a38b835dee2d5988e2bda7abedc0a0642034"
       }
     },
@@ -91,7 +93,9 @@
       "name": "@cogneris-ai/document-ai-sdk",
       "version": "0.1.0",
       "files": {
-        "package.json": "8311f77b4a02f65280a217be0b6f5ad70ef5e2d81000715c2536c70b6c6ce433",
+        "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
+        "package.json": "749d3f776da6d2a8b354aa93c9bb822d266eb21ed481f8bb6c71f48d09562946",
         "src/client/client.gen.ts": "8a17b0bf1540258734a128f176f6cb915c849b97d8064a613dba5ef8390e58d9",
         "src/client/index.ts": "949cc7333527c91928c32410c4a4a2dd2b90b99fe080eb8ce4505647852fbe1b",
         "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",

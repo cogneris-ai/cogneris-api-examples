@@ -5,6 +5,8 @@ description = "A client library for accessing Cogneris Document AI API"
 authors = []
 requires-python = ">=3.9,<4.0"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 dependencies = [
     "httpx>=0.23.0,<0.29.0",
     "attrs>=22.2.0",

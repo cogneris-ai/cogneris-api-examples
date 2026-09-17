@@ -93,6 +93,31 @@ async function appendOverlay(targetPath, overlayPath) {
   await fs.writeFile(targetPath, `${current.trimEnd()}\n${addition}`);
 }
 
+async function applyApprovedLicense(stagedOutput) {
+  for (const packageDirectory of ["typescript", "python"]) {
+    for (const legalFile of ["LICENSE", "NOTICE"]) {
+      await fs.copyFile(
+        path.join(root, legalFile),
+        path.join(stagedOutput, packageDirectory, legalFile),
+      );
+    }
+  }
+
+  const pythonProjectPath = path.join(stagedOutput, "python", "pyproject.toml");
+  const pythonProject = await fs.readFile(pythonProjectPath, "utf8");
+  const readmeDeclaration = 'readme = "README.md"\n';
+  if (!pythonProject.includes(readmeDeclaration)) {
+    throw new Error("generated Python package metadata is missing its README declaration");
+  }
+  await fs.writeFile(
+    pythonProjectPath,
+    pythonProject.replace(
+      readmeDeclaration,
+      `${readmeDeclaration}license = "Apache-2.0"\nlicense-files = ["LICENSE", "NOTICE"]\n`,
+    ),
+  );
+}
+
 async function validatePackages(stagedOutput) {
   const typescriptPackage = await readJson(
     path.join(stagedOutput, "typescript", "package.json"),
@@ -113,6 +138,8 @@ async function validatePackages(stagedOutput) {
     'name = "cogneris-document-ai-sdk"',
     'version = "0.1.0"',
     'requires-python = ">=3.9,<4.0"',
+    'license = "Apache-2.0"',
+    'license-files = ["LICENSE", "NOTICE"]',
   ];
   for (const metadata of requiredPythonMetadata) {
     if (!pythonProject.split("\n").includes(metadata)) {
@@ -265,6 +292,8 @@ async function main() {
       path.join(pythonOutput, "cogneris_document_ai_sdk", "__init__.py"),
       path.join(overlayDirectory, "python", "__init__.append.py"),
     );
+
+    await applyApprovedLicense(stagedOutput);
 
     await validatePackages(stagedOutput);
     const manifest = {

@@ -3,6 +3,9 @@
 The registry names are `@cogneris-ai/document-ai-sdk`,
 `@cogneris-ai/document-ai-cli`, and `cogneris-document-ai-sdk`. All three
 packages remain unpublished until the first authorized release completes.
+Public distribution of version `0.1.0` under Apache License 2.0 was authorized
+by COGNERIS,INC. on 2026-09-17. The release artifacts must carry the repository
+`LICENSE` and `NOTICE` files and matching SPDX metadata.
 
 For local generation, builds, and verification, install Node.js 24, npm 10+,
 Python 3.12, and `uv`/`uvx` on `PATH`, then run `npm ci`. The TypeScript
@@ -45,7 +48,9 @@ the verified tarballs or a byte-for-byte copy of the verified wheel.
 
 An owner must complete these steps outside this workflow:
 
-1. Confirm package-name ownership and public distribution/license permission.
+1. Confirm package-name ownership and that the committed Apache-2.0 license,
+   NOTICE, and public-release authorization remain applicable to the exact
+   source commit being released.
    Keep the owner-approved GitHub Security Advisories channel documented in
    `SUPPORT.md` enabled. Configure `sdk-release` as a protected GitHub environment
    with an owner review gate and deployment restricted to `main`. YAML referencing
