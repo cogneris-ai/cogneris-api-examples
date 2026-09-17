@@ -4,6 +4,21 @@ The registry names are `@cogneris-ai/document-ai-sdk`,
 `@cogneris-ai/document-ai-cli`, and `cogneris-document-ai-sdk`. All three
 packages remain unpublished until the first authorized release completes.
 
+For local generation, builds, and verification, install Node.js 24, npm 10+,
+Python 3.12, and `uv`/`uvx` on `PATH`, then run `npm ci`. The TypeScript
+generator requires Node.js >=22.18.0; the installed SDK and CLI require only
+Node.js >=20.0.0 for their built-in `File`/`fetch` runtime and npm 9+ for local
+installation. The Python wheel requires Python `>=3.9,<4.0`; uv is used for
+building and isolated verification here, and is not needed for ordinary Python
+runtime use or installation of an existing wheel with pip. `uv build` resolves
+the wheel build backend declared in `pyproject.toml`.
+
+Python generation uses `openapi-python-client==0.26.2` with an explicit
+`uvx --with ruff==0.13.3` dependency pin from `scripts/sdk-config/generators.json`.
+This is the formatter version resolved by the existing generator environment;
+the manifest records both pins. Do not upgrade the formatter independently
+without regenerating and checking the committed SDK output.
+
 `.github/workflows/release-sdks.yml` accepts only a manual `workflow_dispatch`.
 Supply the exact SemVer already committed in all three package versions (currently
 `0.1.0`, without a `v` prefix). The default `dry_run: true` executes public validation
@@ -90,6 +105,14 @@ regular files and canonical empty directory markers are accepted; links, special
 files, unsafe or colliding paths, tar PAX extensions, and ZIP extra metadata are
 rejected. The current package builders need no such extensions. Local and central
 ZIP headers must agree, preventing alternate filename/link interpretations.
+Inspection caps each archive at 16 MiB, 4,096 entries, 4 MiB per uncompressed
+entry, and 32 MiB total uncompressed content. Package/manifest metadata is
+limited to 64 KiB, names to 1 KiB, ZIP comments to 4 KiB, and the ZIP central
+directory to 1 MiB. Only stored/deflate ZIP compression is accepted, avoiding
+codecs with additional dictionary memory requirements. Size checks precede
+archive hashing or bulk metadata reads;
+tar extension headers are rejected before their payload is parsed. These
+conservative limits cover the current npm and uv output without extraction.
 Registry dependency downloads may be needed for clean installation; tests contact
 only loopback API fixtures.
 

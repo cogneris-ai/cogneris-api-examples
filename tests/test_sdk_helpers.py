@@ -1,4 +1,6 @@
 import os
+import hashlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -86,6 +88,41 @@ class PythonInstalledSdkSmokeTests(unittest.TestCase):
 
 
 class TypeScriptSdkSmokeTests(unittest.TestCase):
+    def test_cli_suite_preserves_existing_checkout_build_and_dependency_state(self):
+        # Run the real npm entrypoint in a private copy: a failing regression
+        # must never delete output or alter dependencies in the active checkout.
+        with tempfile.TemporaryDirectory(prefix="cogneris-cli-isolation-") as directory:
+            checkout = Path(directory)
+            for name in ("cli", "sdks/typescript", "node_modules"):
+                shutil.copytree(ROOT / name, checkout / name, symlinks=True,
+                                ignore=shutil.ignore_patterns("@cogneris-ai"))
+            for name in ("package.json", "package-lock.json", "scripts/build-cli.mjs", "tests/cli_smoke.mjs"):
+                destination = checkout / name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(ROOT / name, destination)
+            roots = ("cli/dist", "node_modules/@cogneris-ai/document-ai-sdk")
+            for name in roots:
+                sentinel = checkout / name / "pre-existing-sentinel"
+                sentinel.parent.mkdir(parents=True, exist_ok=True)
+                sentinel.write_bytes(b"pre-existing user artifact: do not change")
+
+            def snapshot(name):
+                base = checkout / name
+                files = [base] if base.is_file() else sorted(base.rglob("*"))
+                return {str(file.relative_to(checkout)): (
+                    file.lstat().st_mode,
+                    os.readlink(file) if file.is_symlink() else hashlib.sha256(file.read_bytes()).hexdigest(),
+                ) for file in files if file.is_file() or file.is_symlink()}
+
+            names = (*roots, "package-lock.json", "node_modules/.package-lock.json")
+            before = {name: snapshot(name) for name in names}
+            result = subprocess.run(["npm", "run", "test:cli"], cwd=checkout,
+                                    text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            for name in names:
+                with self.subTest(path=name):
+                    self.assertEqual(snapshot(name), before[name], "CLI tests changed existing checkout state")
+
     def test_packed_typescript_sdk_against_loopback(self):
         result = subprocess.run(
             ["node", "--test", str(ROOT / "tests" / "sdk_typescript_smoke.mjs")],

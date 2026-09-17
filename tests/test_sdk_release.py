@@ -1,4 +1,5 @@
 import hashlib
+import importlib.util
 import io
 import json
 import os
@@ -16,6 +17,140 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/sdk-release.py"
+
+
+def release_module():
+    spec = importlib.util.spec_from_file_location("sdk_release", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class ArchiveResourceTests(unittest.TestCase):
+    """Real compressed fixtures use small chunks, never huge in-memory payloads."""
+
+    def make_archive(self, file, entries):
+        if file.suffix == ".tgz":
+            class Spaces:
+                def read(self, size):
+                    return b" " * size
+
+            with tarfile.open(file, "w:gz", format=tarfile.USTAR_FORMAT) as archive:
+                encoded = b'{"name":"test-package","version":"0.1.0"}'
+                header = tarfile.TarInfo("package/package.json")
+                header.size = len(encoded)
+                archive.addfile(header, io.BytesIO(encoded))
+                for name, size in entries:
+                    header = tarfile.TarInfo(name)
+                    header.size = size
+                    archive.addfile(header, Spaces())
+        else:
+            with zipfile.ZipFile(file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("test-0.1.0.dist-info/METADATA", "Name: test-package\nVersion: 0.1.0\n")
+                for name, size in entries:
+                    with archive.open(name, "w") as member:
+                        for offset in range(0, size, 65536):
+                            member.write(b" " * min(65536, size - offset))
+
+    def test_archives_reject_compressed_byte_limits_before_opening(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-archive-size-") as directory:
+            for suffix in (".tgz", ".whl"):
+                with self.subTest(suffix=suffix):
+                    file = Path(directory) / ("oversized" + suffix)
+                    # Valid archives with sparse unused space stay tiny on disk.
+                    # The guard must reject them before archive parsing.
+                    if suffix == ".tgz":
+                        self.make_archive(file, [])
+                        with file.open("r+b") as stream:
+                            stream.truncate(16 * 1024 * 1024 + 1)
+                    else:
+                        with file.open("wb") as stream:
+                            stream.seek(16 * 1024 * 1024)
+                            with zipfile.ZipFile(stream, "w") as archive:
+                                archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.1.0\n")
+                    with self.assertRaisesRegex(ValueError, "archive.*limit"):
+                        release.package_metadata(file)
+
+    def test_archives_bound_entry_count_and_compressed_expansion(self):
+        release = release_module()
+        cases = {
+            "entries": [(f"package/entry-{index}", 0) for index in range(4096)],
+            "entry expansion": [("package/expanded", 4 * 1024 * 1024 + 1)],
+            "total expansion": [(f"package/entry-{index}", 4 * 1024 * 1024) for index in range(9)],
+        }
+        with tempfile.TemporaryDirectory(prefix="cogneris-archive-bounds-") as directory:
+            for suffix in (".tgz", ".whl"):
+                for label, entries in cases.items():
+                    with self.subTest(suffix=suffix, case=label):
+                        file = Path(directory) / (label + suffix)
+                        self.make_archive(file, entries)
+                        self.assertLess(file.stat().st_size, 512 * 1024)
+                        with self.assertRaisesRegex(ValueError, "archive.*limit"):
+                            release.package_metadata(file)
+
+    def test_package_metadata_and_zip_name_sizes_are_bounded(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-archive-metadata-") as directory:
+            for suffix in (".tgz", ".whl"):
+                with self.subTest(suffix=suffix):
+                    file = Path(directory) / ("metadata" + suffix)
+                    if suffix == ".tgz":
+                        payload = b'{"name":"test"}' + b" " * (64 * 1024)
+                        with tarfile.open(file, "w:gz") as archive:
+                            header = tarfile.TarInfo("package/package.json")
+                            header.size = len(payload)
+                            archive.addfile(header, io.BytesIO(payload))
+                    else:
+                        with zipfile.ZipFile(file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                            archive.writestr("test.dist-info/METADATA", b"Name: test\n" + b" " * (64 * 1024))
+                    with self.assertRaisesRegex(ValueError, "archive.*limit"):
+                        release.package_metadata(file)
+            file = Path(directory) / "long-name.whl"
+            self.make_archive(file, [("x" * 1025, 0)])
+            with self.assertRaisesRegex(ValueError, "archive.*limit"):
+                release.package_metadata(file)
+
+    def test_zip_directory_and_comment_are_bounded_before_metadata_parsing(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-zip-metadata-") as directory:
+            for label in ("directory", "count", "comment"):
+                with self.subTest(case=label):
+                    file = Path(directory) / (label + ".whl")
+                    entries = [(f"package/{index}-" + "x" * 500, 0) for index in range(2000)] if label == "directory" else []
+                    self.make_archive(file, entries)
+                    data = bytearray(file.read_bytes())
+                    end = data.rfind(b"PK\x05\x06")
+                    if label == "count":
+                        struct.pack_into("<HH", data, end + 8, 4097, 4097)
+                    elif label == "comment":
+                        struct.pack_into("<H", data, end + 20, 4097)
+                        data.extend(b"x" * 4097)
+                    file.write_bytes(data)
+                    with self.assertRaisesRegex(ValueError, "archive.*limit"):
+                        release.package_metadata(file)
+
+    def test_file_directory_collisions_are_rejected_in_both_orders(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-archive-collision-") as directory:
+            for suffix in (".tgz", ".whl"):
+                for names in (("package/a", "package/a/b"), ("package/a/b", "package/a")):
+                    with self.subTest(suffix=suffix, names=names):
+                        file = Path(directory) / ("collision" + suffix)
+                        self.make_archive(file, [(name, 0) for name in names])
+                        with self.assertRaisesRegex(ValueError, "collision"):
+                            release.package_metadata(file)
+
+    def test_zip_rejects_codecs_outside_the_stored_deflate_resource_policy(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-zip-compression-") as directory:
+            for compression in (zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA):
+                with self.subTest(compression=compression):
+                    file = Path(directory) / f"compression-{compression}.whl"
+                    with zipfile.ZipFile(file, "w", compression=compression) as archive:
+                        archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.1.0\n")
+                    with self.assertRaisesRegex(ValueError, "archive.*compression"):
+                        release.package_metadata(file)
 
 
 def clean_checkout(directory):

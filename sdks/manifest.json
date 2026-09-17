@@ -7,7 +7,10 @@
   "generators": {
     "python": {
       "package": "openapi-python-client",
-      "version": "0.26.2"
+      "version": "0.26.2",
+      "dependencies": {
+        "ruff": "0.13.3"
+      }
     },
     "typescript": {
       "package": "@hey-api/openapi-ts",
@@ -76,7 +79,7 @@
       "name": "@cogneris-ai/document-ai-sdk",
       "version": "0.1.0",
       "files": {
-        "package.json": "cc76e577376bc46a725f9efeb11ebd4e567a75e64283f6afe38082774c42e152",
+        "package.json": "8311f77b4a02f65280a217be0b6f5ad70ef5e2d81000715c2536c70b6c6ce433",
         "src/client/client.gen.ts": "8a17b0bf1540258734a128f176f6cb915c849b97d8064a613dba5ef8390e58d9",
         "src/client/index.ts": "949cc7333527c91928c32410c4a4a2dd2b90b99fe080eb8ce4505647852fbe1b",
         "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",

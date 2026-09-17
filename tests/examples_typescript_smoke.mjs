@@ -15,7 +15,7 @@ const consumerDirectory = path.join(temporaryDirectory, "consumer");
 const documentMarker = "document-content-must-not-be-logged";
 const extractedMarker = "extracted-field-must-not-be-logged";
 const responseMarker = "raw-response-must-not-be-logged";
-const apiKey = "test-api-key-must-not-be-logged";
+const apiKey = "xtkt_live_TEST_ONLY_NOT_A_SECRET-must-not-be-logged";
 const jobId = "11111111-1111-4111-8111-111111111111";
 
 let sdk;

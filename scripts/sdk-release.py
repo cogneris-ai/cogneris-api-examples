@@ -25,6 +25,16 @@ ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIRECTORIES = ("sdks/typescript", "sdks/python", "cli")
 BUILD_FILES = ("package.json", "package-lock.json", "scripts/sdk-release.py")
 EXCLUDED_BUILD_NAMES = {"dist", "node_modules", ".venv", "__pycache__", ".ruff_cache"}
+# Current packages are small source distributions. These limits bound parsing,
+# hashing and decompression before any dependency installer sees the archives.
+MAX_ARCHIVE_BYTES = 16 * 1024 * 1024
+MAX_ARCHIVE_ENTRIES = 4096
+MAX_ENTRY_BYTES = 4 * 1024 * 1024
+MAX_TOTAL_UNCOMPRESSED_BYTES = 32 * 1024 * 1024
+MAX_METADATA_BYTES = 64 * 1024
+MAX_NAME_BYTES = 1024
+MAX_ZIP_DIRECTORY_BYTES = 1024 * 1024
+MAX_COMMENT_BYTES = 4096
 SEMVER = re.compile(
     r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
     r"(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
@@ -44,7 +54,11 @@ def run(arguments, cwd=ROOT, env=None):
 
 
 def digest(file):
-    return hashlib.sha256(file.read_bytes()).hexdigest()
+    value = hashlib.sha256()
+    with file.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(65536), b""):
+            value.update(chunk)
+    return value.hexdigest()
 
 
 def source_versions(version):
@@ -67,8 +81,9 @@ def filenames(version):
     }
 
 
-def archive_path(name, directory, seen):
+def archive_path(name, directory, seen, ancestors):
     """Validate portable logical paths without normalizing away unsafe syntax."""
+    require(len(name.encode("utf-8")) <= MAX_NAME_BYTES, "archive name size limit exceeded")
     logical = name[:-1] if directory and name.endswith("/") else name
     parts = logical.split("/")
     require(logical and not any(character in logical for character in ("\\", ":"))
@@ -79,30 +94,85 @@ def archive_path(name, directory, seen):
     require(folded not in seen, "unsafe archive duplicate or case-colliding path")
     parents = ["/".join(parts[:index]).casefold() for index in range(1, len(parts))]
     require(all(seen.get(parent) != "file" for parent in parents), "unsafe archive file/directory collision")
-    require(directory or not any(previous.startswith(folded + "/") for previous in seen),
+    require(directory or folded not in ancestors,
             "unsafe archive file/directory collision")
     seen[folded] = "directory" if directory else "file"
+    # Each bounded-length name contributes its parents once. Avoid rescanning
+    # all previous names for every entry (quadratic for large archives).
+    ancestors.update(parents)
+
+
+class BoundedTarInfo(tarfile.TarInfo):
+    @classmethod
+    def frombuf(cls, buf, encoding, errors):
+        member = super().frombuf(buf, encoding, errors)
+        # TarInfo processes PAX/GNU extension payloads while reading a header,
+        # before callers can inspect the returned member. Reject at that boundary.
+        require(member.type in {tarfile.REGTYPE, tarfile.AREGTYPE, tarfile.DIRTYPE},
+                "unsafe archive non-regular tar member")
+        require(0 <= member.size <= MAX_ENTRY_BYTES, "archive entry size limit exceeded")
+        require(len(member.name.encode("utf-8")) <= MAX_NAME_BYTES, "archive name size limit exceeded")
+        if member.name == "package/package.json":
+            require(member.size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
+        return member
 
 
 def inspect_tar(archive):
     seen = {}
-    members = archive.getmembers()
-    for member in members:
+    ancestors = set()
+    members = []
+    total = 0
+    for member in archive:
+        require(len(members) < MAX_ARCHIVE_ENTRIES, "archive entry count limit exceeded")
+        require(0 <= member.size <= MAX_ENTRY_BYTES, "archive entry size limit exceeded")
+        total += member.size
+        require(total <= MAX_TOTAL_UNCOMPRESSED_BYTES, "archive expanded size limit exceeded")
         directory = member.type == tarfile.DIRTYPE
         require((member.type in {tarfile.REGTYPE, tarfile.AREGTYPE} or directory)
                 and member.sparse is None and not member.linkname and not member.pax_headers,
                 "unsafe archive non-regular tar member")
         require(not directory or member.size == 0, "unsafe archive directory payload")
-        archive_path(member.name, directory, seen)
+        archive_path(member.name, directory, seen, ancestors)
         require(member.name == "package/" or member.name.startswith("package/"),
                 "unsafe archive npm root")
+        members.append(member)
     return members
+
+
+def inspect_zip_directory(file):
+    # ZipFile reads the entire central directory at construction time. Inspect
+    # its fixed footer first, before allocating directory bytes/ZipInfo objects.
+    with file.open("rb") as stream:
+        size = file.stat().st_size
+        stream.seek(max(0, size - 65557))  # ZIP's 22-byte footer + uint16 comment
+        tail = stream.read(65557)
+    end = tail.rfind(b"PK\x05\x06")
+    require(end >= 0 and len(tail) >= end + 22, "unsafe archive missing ZIP footer")
+    _, disk, directory_disk, disk_count, count, directory_size, offset, comment_size = struct.unpack(
+        "<4s4H2IH", tail[end:end + 22])
+    require(count <= MAX_ARCHIVE_ENTRIES, "archive entry count limit exceeded")
+    require(directory_size <= MAX_ZIP_DIRECTORY_BYTES, "archive ZIP directory size limit exceeded")
+    require(comment_size <= MAX_COMMENT_BYTES, "archive comment size limit exceeded")
+    require(disk == directory_disk == 0 and disk_count == count,
+            "unsafe archive multidisk or ZIP64 directory")
+    require(end + 22 + comment_size == len(tail)
+            and offset + directory_size == size - len(tail) + end,
+            "unsafe archive inconsistent ZIP directory")
 
 
 def inspect_zip(archive):
     seen = {}
+    ancestors = set()
     members = archive.infolist()
+    require(len(members) <= MAX_ARCHIVE_ENTRIES, "archive entry count limit exceeded")
+    total = 0
     for member in members:
+        require(member.compress_type in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED},
+                "unsafe archive unsupported ZIP compression")
+        require(0 <= member.file_size <= MAX_ENTRY_BYTES, "archive entry size limit exceeded")
+        total += member.file_size
+        require(total <= MAX_TOTAL_UNCOMPRESSED_BYTES, "archive expanded size limit exceeded")
+        require(len(member.comment) <= MAX_COMMENT_BYTES, "archive comment size limit exceeded")
         mode = stat.S_IFMT(member.external_attr >> 16)
         directory = member.is_dir()
         require(member.orig_filename == member.filename, "unsafe archive ambiguous ZIP filename")
@@ -110,7 +180,7 @@ def inspect_zip(archive):
                 "unsafe archive non-regular ZIP member")
         require(not (member.external_attr & 0x10) or directory, "unsafe archive ZIP directory mode")
         require(not directory or member.file_size == 0, "unsafe archive directory payload")
-        archive_path(member.filename, directory, seen)
+        archive_path(member.filename, directory, seen, ancestors)
         # Our generated wheels require no ZIP extra metadata. In particular,
         # PKWARE/ASi Unix extras can encode hardlinks even with a regular mode.
         require(not member.extra and not member.flag_bits & 1, "unsafe archive ZIP extension or encryption")
@@ -118,6 +188,7 @@ def inspect_zip(archive):
         header = archive.fp.read(30)
         require(len(header) == 30, "unsafe archive truncated ZIP header")
         signature, _, flags, compression, _, _, _, _, _, name_size, extra_size = struct.unpack("<4s5H3I2H", header)
+        require(name_size <= MAX_NAME_BYTES, "archive name size limit exceeded")
         require(signature == b"PK\x03\x04" and extra_size == 0 and flags == member.flag_bits
                 and compression == member.compress_type, "unsafe archive inconsistent ZIP local header")
         raw_name = archive.fp.read(name_size)
@@ -130,15 +201,20 @@ def inspect_zip(archive):
 
 
 def package_metadata(file):
+    require(file.stat().st_size <= MAX_ARCHIVE_BYTES, "archive byte size limit exceeded")
     if file.suffix == ".tgz":
-        with tarfile.open(file, "r:gz") as archive:
+        with tarfile.open(file, "r:gz", tarinfo=BoundedTarInfo) as archive:
             members = [member for member in inspect_tar(archive) if member.name == "package/package.json"]
             require(len(members) == 1 and members[0].isfile(), "invalid npm package metadata")
-            return json.load(archive.extractfile(members[0]))
+            require(members[0].size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
+            return json.loads(archive.extractfile(members[0]).read(MAX_METADATA_BYTES + 1))
+    inspect_zip_directory(file)
     with zipfile.ZipFile(file) as archive:
-        metadata = [member.filename for member in inspect_zip(archive) if member.filename.endswith(".dist-info/METADATA")]
+        metadata = [member for member in inspect_zip(archive) if member.filename.endswith(".dist-info/METADATA")]
         require(len(metadata) == 1, "invalid wheel metadata")
-        parsed = email.parser.BytesParser().parsebytes(archive.read(metadata[0]))
+        require(metadata[0].file_size <= MAX_METADATA_BYTES, "archive package metadata size limit exceeded")
+        with archive.open(metadata[0]) as stream:
+            parsed = email.parser.BytesParser().parsebytes(stream.read(MAX_METADATA_BYTES + 1))
         return {"name": parsed["Name"], "version": parsed["Version"]}
 
 
@@ -151,6 +227,11 @@ def integrity(arguments):
             "unexpected or missing artifact files")
     require(all(file.is_file() and not file.is_symlink() for file in directory.iterdir()),
             "artifact files must be regular files")
+    require((directory / "manifest.json").stat().st_size <= MAX_METADATA_BYTES,
+            "archive manifest size limit exceeded")
+    for filename in expected_files:
+        require((directory / filename).stat().st_size <= MAX_ARCHIVE_BYTES,
+                "archive byte size limit exceeded")
     require(re.fullmatch(r"[0-9a-f]{64}", arguments.manifest_sha256 or ""), "manifest digest is required")
     require(digest(directory / "manifest.json") == arguments.manifest_sha256, "manifest digest mismatch")
     manifest = json.loads((directory / "manifest.json").read_text())

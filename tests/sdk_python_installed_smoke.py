@@ -19,7 +19,7 @@ PARSE_JOB_ID = "55555555-5555-4555-8555-555555555555"
 TRANSPORT_JOB_ID = "66666666-6666-4666-8666-666666666666"
 NAN_HINT_JOB_ID = "77777777-7777-4777-8777-777777777777"
 INFINITY_HINT_JOB_ID = "88888888-8888-4888-8888-888888888888"
-REFLECTED_API_KEY = "test-api-key-reflected-sentinel"
+REFLECTED_API_KEY = "xtkt_live_TEST_ONLY_NOT_A_SECRET-reflected-sentinel"
 REFLECTED_DOCUMENT = "document-reflected-sentinel"
 
 
@@ -202,7 +202,7 @@ class InstalledPythonSdkTests(unittest.TestCase):
         _Handler.requests = []
         _Handler.polling_counts = {}
 
-    def client(self, api_key="test-api-key", region="us"):
+    def client(self, api_key="xtkt_live_TEST_ONLY_NOT_A_SECRET", region="us"):
         return sdk.CognerisClient(
             api_key=api_key,
             region=region,
@@ -218,7 +218,7 @@ class InstalledPythonSdkTests(unittest.TestCase):
         self.assertEqual(sdk.cogneris_base_url("eu"), "https://api-eu.cogneris.ai")
         with self.assertRaisesRegex(ValueError, "us.*eu"):
             sdk.CognerisClient(
-                api_key="test-api-key",
+                api_key="xtkt_live_TEST_ONLY_NOT_A_SECRET",
                 region="apac",
                 _base_url_for_testing=self.base_url,
             )
@@ -298,7 +298,7 @@ class InstalledPythonSdkTests(unittest.TestCase):
         extracted = client.extract(b"ordinary-document", file_name="sample.pdf")
         self.assertTrue(extracted.data.to_dict()["accepted"])
         upload = _Handler.requests[-1]
-        self.assertEqual(upload["authorization"], "Bearer test-api-key")
+        self.assertEqual(upload["authorization"], "Bearer xtkt_live_TEST_ONLY_NOT_A_SECRET")
         self.assertRegex(upload["content_type"], r"^multipart/form-data; boundary=")
         self.assertIn(b"ordinary-document", upload["body"])
         self.assertIn(b"sample.pdf", upload["body"])

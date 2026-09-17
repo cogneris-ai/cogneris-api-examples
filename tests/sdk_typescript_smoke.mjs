@@ -21,7 +21,7 @@ let pollingCounts = new Map();
 const jobId = "11111111-1111-4111-8111-111111111111";
 const failedJobId = "22222222-2222-4222-8222-222222222222";
 const endlessJobId = "33333333-3333-4333-8333-333333333333";
-const reflectedApiKey = "test-api-key-reflected-sentinel";
+const reflectedApiKey = "xtkt_live_TEST_ONLY_NOT_A_SECRET-reflected-sentinel";
 const reflectedDocument = "document-reflected-sentinel";
 
 function json(response, status, body, headers = {}) {
@@ -137,7 +137,7 @@ test("installed package exports the maintained helper surface", () => {
     assert.throws(() => sdk.cognerisBaseUrl(invalidRegion), /us.*eu/);
     assert.throws(
       () => new sdk.CognerisClient({
-        apiKey: "test-api-key",
+        apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET",
         region: invalidRegion,
         _baseUrlForTesting: baseUrl,
       }),
@@ -145,7 +145,7 @@ test("installed package exports the maintained helper surface", () => {
     );
   }
   assert.doesNotThrow(() => new sdk.CognerisClient({
-    apiKey: "test-api-key",
+    apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET",
     region: "us",
     _baseUrlForTesting: "http://[::1]:4321",
   }));
@@ -188,7 +188,7 @@ test("client sends bearer auth and multipart bytes without including them in err
 test("job helpers submit, honor Retry-After, stop on success, and cancel", async () => {
   requests = [];
   pollingCounts = new Map();
-  const client = new sdk.CognerisClient({ apiKey: "test-api-key", region: "eu", _baseUrlForTesting: baseUrl });
+  const client = new sdk.CognerisClient({ apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET", region: "eu", _baseUrlForTesting: baseUrl });
   const submission = await client.submitJob("Extraction", "input/ref");
   assert.equal(submission.jobId, jobId);
   const submitted = requests.at(-1);
@@ -204,12 +204,12 @@ test("job helpers submit, honor Retry-After, stop on success, and cancel", async
 
   const cancelled = await client.cancelJob(jobId);
   assert.equal(cancelled.status, "Cancelled");
-  assert.equal(requests.every((request) => request.authorization === "Bearer test-api-key"), true);
+  assert.equal(requests.every((request) => request.authorization === "Bearer xtkt_live_TEST_ONLY_NOT_A_SECRET"), true);
 });
 
 test("wait surfaces terminal failures and bounded-attempt exhaustion as typed errors", async () => {
   pollingCounts = new Map();
-  const client = new sdk.CognerisClient({ apiKey: "test-api-key", _baseUrlForTesting: baseUrl });
+  const client = new sdk.CognerisClient({ apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET", _baseUrlForTesting: baseUrl });
   await assert.rejects(
     () => client.waitForJob(failedJobId, { maxAttempts: 3 }),
     (error) => {

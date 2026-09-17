@@ -7,9 +7,26 @@ OpenAPI contract version `2026-08-07`.
 
 ## Before you start
 
+The TypeScript SDK and CLI require Node.js `>=20.0.0` for built-in `File`,
+`fetch`, and multipart support; use npm 9+ to install the local tarballs. The
+Python SDK requires Python `>=3.9,<4.0`. Installing an existing wheel with pip
+and running the Python SDK does not require Node.js, npm, or uv.
+
+For building from this checkout and running its verification commands, use
+Node.js 24 (the CI version), npm 10+, Python 3.12, and `uv`/`uvx` on `PATH`.
+The pinned TypeScript generator requires at least Node.js 22.18.0, which is
+separate from the installed packages' runtime minimum. Use Python 3.12 for
+generation/CI; the Python package is also tested on 3.9–3.14. `npm ci` installs
+the pinned TypeScript compiler/generator; `uv build` obtains the declared wheel
+build backend, and `uvx` obtains the pinned Python generator and formatter.
+The setup commands below use uv for virtual environments and wheel installation;
+it is a build/setup tool, not a Python SDK runtime dependency.
+
 Use a tenant-scoped API key and select exactly `us` and `eu` as the region. The
 SDK examples and CLI read credentials only from `COGNERIS_API_KEY`; they never
 accept the key as an argument. `COGNERIS_REGION` defaults to `us`.
+The CLI requires the public `xtkt_live_` prefix and a non-empty suffix with
+visible ASCII characters, without whitespace or control characters.
 
 ```bash
 export COGNERIS_API_KEY='xtkt_live_...'
