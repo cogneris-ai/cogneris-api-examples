@@ -18,10 +18,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-tasks.withType(JavaCompile).configureEach { options.compilerArgs += ['-Werror'] }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Werror']
+}
 
 test {
     useJUnitPlatform()
+    systemProperty 'file.encoding', 'windows-1252'
     testLogging { events 'passed', 'failed'; showStandardStreams = true; exceptionFormat = 'full' }
     doFirst {
         def artifact = configurations.testRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.find {

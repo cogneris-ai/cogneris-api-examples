@@ -272,6 +272,47 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
       throw new Error("generated Gradle wrapper does not match the pinned distribution template");
     }
     await fs.writeFile(wrapperPath, `${wrapper.trimEnd()}\ndistributionSha256Sum=${gradle.distributionSha256}\n`);
+    await normalizeJavaNativeSources(outputPath);
+  }
+}
+
+async function normalizeJavaNativeSources(outputPath) {
+  const apiDirectory = path.join(outputPath, "src", "main", "java", "ai", "cogneris", "documentai", "api");
+  for (const [name, expectedDecoders] of [["DocumentsApi", 7], ["JobsApi", 5], ["PortalApi", 4]]) {
+    const filePath = path.join(apiDirectory, `${name}.java`);
+    let source = await fs.readFile(filePath, "utf8");
+    const decoder = /new String\(((?:localVarResponseBody|responseBody)\.readAllBytes\(\))\)/g;
+    if ([...source.matchAll(decoder)].length !== expectedDecoders) {
+      throw new Error(`generated Java ${name} response decoder template changed`);
+    }
+    source = source.replace(decoder, "new String($1, java.nio.charset.StandardCharsets.UTF_8)");
+    if (name === "DocumentsApi") {
+      const prompt = 'multiPartBuilder.addTextBody("ComplementaryPrompt", complementaryPrompt.toString());';
+      if (source.split(prompt).length !== 2) throw new Error("generated Java multipart prompt template changed");
+      source = source.replace(prompt,
+        'multiPartBuilder.addTextBody("ComplementaryPrompt", complementaryPrompt.toString(), org.apache.http.entity.ContentType.TEXT_PLAIN.withCharset(java.nio.charset.StandardCharsets.UTF_8));');
+      const pipeProducer = /        Pipe pipe;[\s\S]*?        formDataPublisher = HttpRequest\.BodyPublishers\.ofInputStream\(\(\) -> Channels\.newInputStream\(pipe\.source\(\)\)\);/g;
+      if ([...source.matchAll(pipeProducer)].length !== 6) throw new Error("generated Java multipart producer template changed");
+      source = source.replace(pipeProducer, "        formDataPublisher = new MultipartBodyPublisher(entity);");
+      const operation = /(    HttpRequest\.Builder localVarRequestBuilder = \w+RequestBuilder\([^\n]+;\n)    try \{/g;
+      if ([...source.matchAll(operation)].length !== 6) throw new Error("generated Java document operation template changed");
+      source = source.replace(operation, "$1    HttpRequest localVarRequest = localVarRequestBuilder.build();\n    try {");
+      source = source.replaceAll("          localVarRequestBuilder.build(),", "          localVarRequest,");
+      const interrupted = `    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }`;
+      if (source.split(interrupted).length !== 7) throw new Error("generated Java document interruption template changed");
+      source = source.replaceAll(interrupted, `${interrupted} finally {
+      localVarRequest.bodyPublisher().ifPresent(publisher -> {
+        if (publisher instanceof MultipartBodyPublisher multipart) multipart.close();
+      });
+    }`);
+      const publisher = await fs.readFile(path.join(overlayDirectory, "java", "multipart-publisher.append.java"), "utf8");
+      if (!/}\s*$/.test(source)) throw new Error("generated Java document class template changed");
+      source = source.replace(/}\s*$/, `${publisher}\n}\n`);
+    }
+    await fs.writeFile(filePath, source);
   }
 }
 

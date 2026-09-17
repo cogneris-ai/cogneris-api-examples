@@ -106,7 +106,7 @@ public class JobsApi {
     InputStream responseBody = ApiClient.getResponseBody(response);
     String body = null;
     try {
-      body = responseBody == null ? null : new String(responseBody.readAllBytes());
+      body = responseBody == null ? null : new String(responseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
     } finally {
       if (responseBody != null) {
         responseBody.close();
@@ -242,7 +242,7 @@ public class JobsApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         DocumentJobCancellationEnvelope responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<DocumentJobCancellationEnvelope>() {});
 
 
@@ -360,7 +360,7 @@ public class JobsApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         DocumentJobEnvelope responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<DocumentJobEnvelope>() {});
 
 
@@ -478,7 +478,7 @@ public class JobsApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         DocumentJobListEnvelope responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<DocumentJobListEnvelope>() {});
 
 
@@ -606,7 +606,7 @@ public class JobsApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         DocumentJobSubmissionEnvelope responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<DocumentJobSubmissionEnvelope>() {});
 
 

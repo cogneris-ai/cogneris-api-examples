@@ -124,7 +124,15 @@ public final class CognerisClient {
     private ApiClient configuredApi(int expectedStatus, Duration timeout, InFlight inFlight) {
         return new ApiClient().setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort())
                 .setBasePath("").setConnectTimeout(timeout).setReadTimeout(timeout)
-                .setRequestInterceptor(request -> request.setHeader("Authorization", "Bearer " + apiKey))
+                .setRequestInterceptor(request -> {
+                    request.setHeader("Authorization", "Bearer " + apiKey);
+                    request.build().bodyPublisher().ifPresent(publisher -> {
+                        // Only the private generated publisher we own is eligible for closure.
+                        if (publisher.getClass().getEnclosingClass() == DocumentsApi.class
+                                && publisher.getClass().getSimpleName().equals("MultipartBodyPublisher")
+                                && publisher instanceof AutoCloseable upload) inFlight.attachUpload(upload);
+                    });
+                })
                 .setResponseInterceptor(response -> {
                     inFlight.attach(response.body());
                     try {
@@ -188,7 +196,16 @@ public final class CognerisClient {
     /** Coordinates cancellation before or after the generated response interceptor runs. */
     private static final class InFlight {
         private InputStream body;
+        private AutoCloseable upload;
         private boolean closed;
+
+        synchronized void attachUpload(AutoCloseable publisher) {
+            if (closed) {
+                closeUpload(publisher);
+                throw new CognerisTransportException(false);
+            }
+            upload = publisher;
+        }
 
         synchronized void attach(InputStream stream) {
             if (closed) {
@@ -202,6 +219,14 @@ public final class CognerisClient {
             closed = true;
             closeBody(body);
             body = null;
+            closeUpload(upload);
+            upload = null;
+        }
+
+        private static void closeUpload(AutoCloseable publisher) {
+            if (publisher != null) {
+                try { publisher.close(); } catch (Exception ignored) { }
+            }
         }
 
         private static void closeBody(InputStream stream) {

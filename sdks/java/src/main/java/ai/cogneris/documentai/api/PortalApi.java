@@ -104,7 +104,7 @@ public class PortalApi {
     InputStream responseBody = ApiClient.getResponseBody(response);
     String body = null;
     try {
-      body = responseBody == null ? null : new String(responseBody.readAllBytes());
+      body = responseBody == null ? null : new String(responseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
     } finally {
       if (responseBody != null) {
         responseBody.close();
@@ -244,7 +244,7 @@ public class PortalApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         PortalMagicLink responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<PortalMagicLink>() {});
 
 
@@ -366,7 +366,7 @@ public class PortalApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         PortalChannels responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<PortalChannels>() {});
 
 
@@ -475,7 +475,7 @@ public class PortalApi {
 
 
 
-        String responseBody = new String(localVarResponseBody.readAllBytes());
+        String responseBody = new String(localVarResponseBody.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         List<PortalForm> responseValue = responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<List<PortalForm>>() {});
 
 

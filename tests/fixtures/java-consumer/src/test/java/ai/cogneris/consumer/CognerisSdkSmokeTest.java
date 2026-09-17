@@ -120,6 +120,25 @@ class CognerisSdkSmokeTest {
         }
     }
 
+    @Test void multipartPromptPreservesNonLatinUtf8() throws Exception {
+        try (var server = new Loopback(new Reply(200, envelope("{\"id\":\"" + JOB + "\"}")))) {
+            client(server).extract(document(), "提取姓名");
+            assertTrue(server.requests.get(0).body.contains("提取姓名"), "multipart prompt bytes must be UTF-8");
+            assertTrue(server.requests.get(0).body.toLowerCase(java.util.Locale.ROOT).contains("charset=utf-8"));
+        }
+    }
+
+    @Test void utf8JsonIgnoresNonUtf8JvmDefault() throws Exception {
+        assertEquals("windows-1252", java.nio.charset.Charset.defaultCharset().name());
+        try (var server = new Loopback(
+                new Reply(200, envelope("{\"id\":\"" + JOB + "\",\"metadata\":{\"name\":\"José\"}}")),
+                new Reply(200, job("Succeeded").replace("artifact://tenant/output/result", "artifact://tenant/output/José")))) {
+            var client = client(server);
+            assertEquals("José", client.extract(document(), null).getData().getMetadata().get("name"));
+            assertEquals("artifact://tenant/output/José", client.getJob(JOB).getOutputReference());
+        }
+    }
+
     @Test void invalidHeadersFallBackToBodyAndNegativeBodyFallsBackToInterval() throws Exception {
         for (String hint : List.of("-1", "+1", "0.5", "Thu, 17 Sep 2026 12:00:00 GMT", "999999999999999999999", "garbage")) {
             try (var server = new Loopback(new Reply(202, submission(1), hint))) {
@@ -226,6 +245,98 @@ class CognerisSdkSmokeTest {
         try (var server = new Loopback()) { uri = server.uri; }
         var client = new CognerisClient(new CognerisClient.Options(KEY, CognerisClient.Region.US, uri));
         safe(CognerisTransportException.class, () -> client.getJob(JOB));
+    }
+
+    @Test void refusedLargeUploadClosesProducerAndDocumentHandle() throws Exception {
+        URI uri;
+        try (var server = new Loopback()) { uri = server.uri; }
+        Path file = Files.write(files.resolve("refused-upload.pdf"), new byte[4 * 1024 * 1024]);
+        var client = new CognerisClient(new CognerisClient.Options(KEY, CognerisClient.Region.US, uri));
+        safe(CognerisTransportException.class, () -> client.extract(file, "提取"));
+        awaitNoUploadProducers();
+        assertDocumentHandleClosed(file);
+    }
+
+    @Test void interruptedLargeUploadClosesProducerAndDocumentHandleWithoutLogging() throws Exception {
+        Path file = Files.write(files.resolve("interrupted-upload.pdf"), new byte[16 * 1024 * 1024]);
+        var server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        var executor = Executors.newCachedThreadPool();
+        var received = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        server.setExecutor(executor);
+        server.createContext("/", exchange -> {
+            received.countDown();
+            try { release.await(10, TimeUnit.SECONDS); }
+            catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
+            finally { exchange.close(); }
+        });
+        server.start();
+        var originalError = System.err;
+        var capturedError = new java.io.ByteArrayOutputStream();
+        try (var sink = new java.io.PrintStream(capturedError, true, StandardCharsets.UTF_8)) {
+            System.setErr(sink);
+            var client = new CognerisClient(new CognerisClient.Options(KEY, CognerisClient.Region.US,
+                    URI.create("http://localhost:" + server.getAddress().getPort())));
+            var observed = new AtomicReference<Throwable>();
+            var interrupted = new AtomicBoolean();
+            var caller = new Thread(() -> {
+                try { client.extract(file, "提取"); }
+                catch (Throwable failure) { observed.set(failure); interrupted.set(Thread.currentThread().isInterrupted()); }
+            });
+            caller.setDaemon(true);
+            caller.start();
+            assertTrue(received.await(3, TimeUnit.SECONDS), "upload must reach the actual server");
+            assertFalse(uploadProducers().isEmpty(), "large body must start a real streaming producer");
+            caller.interrupt();
+            caller.join(2000);
+            assertFalse(caller.isAlive());
+            assertInstanceOf(CognerisTransportException.class, observed.get());
+            assertTrue(interrupted.get());
+            assertNull(observed.get().getCause());
+            awaitNoUploadProducers();
+            assertDocumentHandleClosed(file);
+            assertEquals("", capturedError.toString(StandardCharsets.UTF_8), "upload cancellation must not print exceptions");
+        } finally {
+            System.setErr(originalError);
+            release.countDown();
+            server.stop(0);
+            executor.shutdownNow();
+        }
+    }
+
+    static List<Thread> uploadProducers() {
+        return Thread.getAllStackTraces().entrySet().stream().filter(entry -> entry.getKey().isAlive()
+                && (entry.getKey().getName().equals("cogneris-sdk-upload") || java.util.Arrays.stream(entry.getValue())
+                    .anyMatch(frame -> frame.getClassName().equals("ai.cogneris.documentai.api.DocumentsApi")
+                            && frame.getMethodName().contains("RequestBuilder"))))
+                .map(java.util.Map.Entry::getKey).toList();
+    }
+
+    static void awaitNoUploadProducers() throws InterruptedException {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            if (uploadProducers().isEmpty()) return;
+            Thread.sleep(20);
+        }
+        fail("multipart producer must terminate after refused/interrupted upload");
+    }
+
+    static void assertDocumentHandleClosed(Path file) throws Exception {
+        // Inspect the current JVM's real open descriptors on the supported Unix test hosts.
+        if (Files.isDirectory(Path.of("/proc/self/fd"))) {
+            try (var descriptors = Files.list(Path.of("/proc/self/fd"))) {
+                for (Path descriptor : descriptors.toList()) {
+                    try { assertNotEquals(file.toRealPath(), descriptor.toRealPath(), "document handle leaked"); }
+                    catch (java.nio.file.NoSuchFileException ignored) { }
+                }
+            }
+        } else if (Files.isExecutable(Path.of("/usr/sbin/lsof"))) {
+            var process = new ProcessBuilder("/usr/sbin/lsof", "-a", "-p", Long.toString(ProcessHandle.current().pid()),
+                    "-Fn", "--", file.toString()).redirectErrorStream(true).start();
+            assertTrue(process.waitFor(3, TimeUnit.SECONDS));
+            String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            assertEquals(1, process.exitValue(), "document handle leaked: " + output);
+            assertEquals("", output, "descriptor inspection must report no document handle or diagnostic");
+        }
     }
 
     @Test void onlyExplicitLoopbackOriginsAreAccepted() {
