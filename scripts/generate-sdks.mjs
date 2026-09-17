@@ -159,11 +159,27 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
 
   if (sdkName === "java") {
     const buildPath = path.join(outputPath, "build.gradle");
-    const build = await fs.readFile(buildPath, "utf8");
+    let build = await fs.readFile(buildPath, "utf8");
     if (build.split("JavaVersion.VERSION_11").length !== 3) {
       throw new Error("generated Java runtime targets do not match the expected template");
     }
-    await fs.writeFile(buildPath, build.replaceAll("JavaVersion.VERSION_11", "JavaVersion.VERSION_17"));
+    build = build.replaceAll("JavaVersion.VERSION_11", "JavaVersion.VERSION_17");
+    if (!build.includes("apply plugin: 'java'")) throw new Error("generated Java library plugin template is missing");
+    build = build.replace("apply plugin: 'java'", "apply plugin: 'java-library'");
+    // Generated public models and ApiClient expose these types. The published
+    // Gradle POM must make them available when an external consumer compiles.
+    for (const dependency of [
+      "com.google.code.findbugs:jsr305",
+      "com.fasterxml.jackson.core:jackson-core",
+      "com.fasterxml.jackson.core:jackson-annotations",
+      "com.fasterxml.jackson.core:jackson-databind",
+      "org.openapitools:jackson-databind-nullable",
+    ]) {
+      const declaration = `implementation "${dependency}:`;
+      if (!build.includes(declaration)) throw new Error(`generated Java public dependency is missing: ${dependency}`);
+      build = build.replace(declaration, `api "${dependency}:`);
+    }
+    await fs.writeFile(buildPath, build);
     const pomPath = path.join(outputPath, "pom.xml");
     let pom = await fs.readFile(pomPath, "utf8");
     for (const target of ["source", "target"]) {

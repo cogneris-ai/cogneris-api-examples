@@ -1,0 +1,34 @@
+plugins { id 'java' }
+
+repositories {
+    exclusiveContent {
+        forRepository { maven { url = uri(System.getenv('COGNERIS_MAVEN_REPOSITORY')) } }
+        filter { includeGroup 'ai.cogneris' }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'ai.cogneris:cogneris-document-ai-sdk:0.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach { options.compilerArgs += ['-Werror'] }
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'failed'; showStandardStreams = true; exceptionFormat = 'full' }
+    doFirst {
+        def artifact = configurations.testRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.find {
+            it.moduleVersion.id.toString() == 'ai.cogneris:cogneris-document-ai-sdk:0.1.0'
+        }
+        assert artifact != null
+        println "Resolved Maven artifact: ${artifact.file.canonicalPath}"
+        environment 'COGNERIS_RESOLVED_JAR', artifact.file.canonicalPath
+    }
+}
