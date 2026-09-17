@@ -4,7 +4,7 @@
 
 **Ticket:** XTRAK-1615
 
-**Status:** Approved architecture, pending written-spec review
+**Status:** Approved
 
 **Repositories:** `cogneris-api-examples`, then `cogneris-site`
 
