@@ -22,21 +22,42 @@ export type Envelope = {
     hasErrors?: boolean;
 };
 
-export type DocumentJobOperation = 'Extraction' | 'Classification' | 'ZeroShot' | 'Crop' | 'Split';
+export type DocumentJobOperation = 'Extraction' | 'Classification' | 'ZeroShot' | 'Crop' | 'Split' | 'Redaction' | 'Facematch';
+
+export type DocumentJobSubmitOperation = 'Extraction' | 'Classification' | 'ZeroShot' | 'Crop' | 'Split' | 'Facematch';
 
 export type DocumentJobStatus = 'Queued' | 'Processing' | 'Succeeded' | 'Failed' | 'Cancelled';
 
+export type DocumentJobSubmitStatus = 'Queued';
+
 export type ServiceResponseMeta = {
     httpStatusCode: number;
-    messages: Array<string>;
-    errors: Array<{
+    messages?: Array<string>;
+    errors?: Array<ApiError>;
+    creditsConsumed?: number | null;
+};
+
+export type ApiError = {
+    code: string;
+    message: string;
+    field?: string | null;
+    retryable: boolean;
+    details?: {
+        [key: string]: string;
+    } | null;
+};
+
+export type ServiceErrorEnvelope = {
+    data: {
         [key: string]: unknown;
-    }>;
+    } | null;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
 };
 
 export type DocumentJobSubmission = {
     jobId: string;
-    status: DocumentJobStatus;
+    status: DocumentJobSubmitStatus;
     statusUrl: string;
     retryAfterSeconds: number;
 };
@@ -486,9 +507,9 @@ export type ListDocumentJobsResponse = ListDocumentJobsResponses[keyof ListDocum
 
 export type SubmitDocumentJobData = {
     body: {
-        operation: DocumentJobOperation;
+        operation: DocumentJobSubmitOperation;
         /**
-         * Reference to the already-uploaded input.
+         * Artifact reference to the already-uploaded input.
          */
         inputReference: string;
     };
@@ -565,14 +586,16 @@ export type CancelDocumentJobErrors = {
      */
     401: unknown;
     /**
-     * No job with that id in this tenant.
+     * The job does not exist or can no longer be cancelled.
      */
-    404: unknown;
+    409: ServiceErrorEnvelope;
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
     429: unknown;
 };
+
+export type CancelDocumentJobError = CancelDocumentJobErrors[keyof CancelDocumentJobErrors];
 
 export type CancelDocumentJobResponses = {
     /**

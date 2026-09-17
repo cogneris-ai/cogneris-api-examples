@@ -52,7 +52,7 @@ class _Handler(BaseHTTPRequestHandler):
             status,
             {
                 "data": data,
-                "meta": {"httpStatusCode": status, "messages": [], "errors": []},
+                "meta": {"httpStatusCode": status, "messages": []},
                 "hasErrors": False,
             },
             headers,
@@ -257,7 +257,7 @@ class InstalledPythonSdkTests(unittest.TestCase):
 
     def test_submit_hint_delays_first_poll(self):
         client = self.client()
-        submission = client.submit_job("Extraction", "input/ref")
+        submission = client.submit_job("Facematch", "artifact://input/ref")
         submitted = _Handler.requests[-1]
         job = client.wait_for_job(
             submission.job_id, max_attempts=3, poll_interval_seconds=0

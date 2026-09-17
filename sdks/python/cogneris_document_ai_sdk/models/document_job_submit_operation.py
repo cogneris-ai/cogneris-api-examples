@@ -1,12 +1,11 @@
 from enum import Enum
 
 
-class DocumentJobOperation(str, Enum):
+class DocumentJobSubmitOperation(str, Enum):
     CLASSIFICATION = "Classification"
     CROP = "Crop"
     EXTRACTION = "Extraction"
     FACEMATCH = "Facematch"
-    REDACTION = "Redaction"
     SPLIT = "Split"
     ZEROSHOT = "ZeroShot"
 

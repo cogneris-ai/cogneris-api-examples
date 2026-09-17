@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.document_job_operation import DocumentJobOperation
+from ..models.document_job_submit_operation import DocumentJobSubmitOperation
 
 T = TypeVar("T", bound="SubmitDocumentJobBody")
 
@@ -13,11 +13,12 @@ T = TypeVar("T", bound="SubmitDocumentJobBody")
 class SubmitDocumentJobBody:
     """
     Attributes:
-        operation (DocumentJobOperation):
-        input_reference (str): Reference to the already-uploaded input.
+        operation (DocumentJobSubmitOperation):
+        input_reference (str): Artifact reference to the already-uploaded input. Example:
+            artifact://documents/input.pdf.
     """
 
-    operation: DocumentJobOperation
+    operation: DocumentJobSubmitOperation
     input_reference: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -40,7 +41,7 @@ class SubmitDocumentJobBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        operation = DocumentJobOperation(d.pop("operation"))
+        operation = DocumentJobSubmitOperation(d.pop("operation"))
 
         input_reference = d.pop("inputReference")
 

@@ -139,7 +139,7 @@ function json(response, status, body, headers = {}) {
 function serviceEnvelope(status, data) {
   return {
     data,
-    meta: { httpStatusCode: status, messages: [], errors: [] },
+    meta: { httpStatusCode: status, messages: [] },
     hasErrors: false,
   };
 }
@@ -256,8 +256,8 @@ test("installed CLI delegates every public command to CognerisClient", async () 
       ["extract", "test-document-bytes", { fileName: "sample.pdf" }],
     ],
     [
-      ["jobs", "submit", "--operation", "Extraction", "--input-reference", "gs://bucket/input.pdf"],
-      ["submitJob", "Extraction", "gs://bucket/input.pdf"],
+      ["jobs", "submit", "--operation", "Facematch", "--input-reference", "artifact://bucket/input.pdf"],
+      ["submitJob", "Facematch", "artifact://bucket/input.pdf"],
     ],
     [["jobs", "get", "job-get"], ["getJob", "job-get"]],
     [["jobs", "wait", "job-wait"], ["waitForJob", "job-wait"]],
@@ -470,7 +470,7 @@ test("installed CLI uses the SDK loopback seam for multipart and job requests", 
 
   for (const argumentsList of [
     ["extract", filePath],
-    ["jobs", "submit", "--operation", "Extraction", "--input-reference", "gs://bucket/input.pdf"],
+    ["jobs", "submit", "--operation", "Extraction", "--input-reference", "artifact://bucket/input.pdf"],
     ["jobs", "get", "get-job"],
     ["jobs", "wait", "wait-job"],
     ["jobs", "cancel", "cancel-job"],
@@ -488,7 +488,7 @@ test("installed CLI uses the SDK loopback seam for multipart and job requests", 
   assert.match(extraction.body.toString(), /input\.pdf/);
   const submission = requests.find(({ path: requestPath }) => requestPath === "/api/v1/document-jobs");
   assert.deepEqual(JSON.parse(submission.body.toString()), {
-    inputReference: "gs://bucket/input.pdf",
+    inputReference: "artifact://bucket/input.pdf",
     operation: "Extraction",
   });
   assert.equal(waitCount, 2);

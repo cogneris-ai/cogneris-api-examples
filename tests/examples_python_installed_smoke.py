@@ -42,7 +42,7 @@ class Handler(BaseHTTPRequestHandler):
             status,
             {
                 "data": data,
-                "meta": {"httpStatusCode": status, "messages": [], "errors": []},
+                "meta": {"httpStatusCode": status, "messages": []},
                 "hasErrors": False,
             },
             headers,
@@ -174,12 +174,12 @@ class InstalledPythonExampleTests(unittest.TestCase):
 
     def test_async_submission_and_polling_omit_output_reference(self):
         Handler.requests = []
-        input_reference = "private/input/reference.pdf"
-        exit_code, _, stdout, stderr = self.invoke(["async", "Extraction", input_reference])
+        input_reference = "artifact://private/input/reference.pdf"
+        exit_code, _, stdout, stderr = self.invoke(["async", "Facematch", input_reference])
         self.assertEqual(exit_code, 0, stderr)
         self.assertEqual(
             json.loads(stdout),
-            {"operation": "Extraction", "jobId": JOB_ID, "status": "Succeeded"},
+            {"operation": "Facematch", "jobId": JOB_ID, "status": "Succeeded"},
         )
         self.assertEqual(stderr, "")
         submission = next(
@@ -188,7 +188,7 @@ class InstalledPythonExampleTests(unittest.TestCase):
         )
         self.assertEqual(
             json.loads(submission["body"]),
-            {"operation": "Extraction", "inputReference": input_reference},
+            {"operation": "Facematch", "inputReference": input_reference},
         )
         self.assertNotIn(RESPONSE_MARKER, stdout)
         self.assertNotIn(input_reference, stdout)
