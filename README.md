@@ -23,8 +23,8 @@ only controlled status summaries and identifiers.
 
 ## Install local release artifacts
 
-`@cogneris/document-ai-sdk`, `cogneris-document-ai-sdk`, and
-`@cogneris/document-ai-cli` are not published to npm or PyPI. Until registry
+`@cogneris-ai/document-ai-sdk`, `cogneris-document-ai-sdk`, and
+`@cogneris-ai/document-ai-cli` are not published to npm or PyPI. Until registry
 ownership and a release are explicitly authorized, install only locally built
 or owner-provided local release artifacts. Do not run a registry install by
 package name alone.
@@ -67,7 +67,7 @@ cp "$COGNERIS_CHECKOUT/examples/typescript/quickstart.mjs" "$COGNERIS_CONSUMER/e
 cp "$COGNERIS_CHECKOUT/examples/python/quickstart.py" "$COGNERIS_CONSUMER/examples/python/"
 cd "$COGNERIS_CONSUMER"
 test -f package.json || npm init --yes
-npm install "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.tgz" "$COGNERIS_RELEASE/cogneris-document-ai-cli-0.1.0.tgz"
+npm install "$COGNERIS_RELEASE/cogneris-ai-document-ai-sdk-0.1.0.tgz" "$COGNERIS_RELEASE/cogneris-ai-document-ai-cli-0.1.0.tgz"
 uv venv --python "${PYTHON_BIN:-python3}" .venv
 uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"
 ```
@@ -76,7 +76,7 @@ uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai
 ## TypeScript: upload or submit and poll
 
 The runnable example imports `CognerisClient` from the official installed
-`@cogneris/document-ai-sdk` package. Synchronous extraction sends the file as
+`@cogneris-ai/document-ai-sdk` package. Synchronous extraction sends the file as
 `multipart/form-data` and prints only envelope status:
 
 ```bash

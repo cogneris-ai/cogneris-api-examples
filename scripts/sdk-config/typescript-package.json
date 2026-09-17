@@ -1,8 +1,12 @@
 {
-  "name": "@cogneris/document-ai-sdk",
+  "name": "@cogneris-ai/document-ai-sdk",
   "version": "0.1.0",
   "description": "Generated TypeScript client for the Cogneris Document AI API",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cogneris-ai/cogneris-api-examples.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

@@ -98,7 +98,7 @@ async function validatePackages(stagedOutput) {
     path.join(stagedOutput, "typescript", "package.json"),
   );
   if (
-    typescriptPackage.name !== "@cogneris/document-ai-sdk" ||
+    typescriptPackage.name !== "@cogneris-ai/document-ai-sdk" ||
     typescriptPackage.version !== "0.1.0" ||
     typescriptPackage.private === true
   ) {
@@ -279,7 +279,7 @@ async function main() {
           files: await hashFiles(pythonOutput),
         },
         typescript: {
-          name: "@cogneris/document-ai-sdk",
+          name: "@cogneris-ai/document-ai-sdk",
           version: "0.1.0",
           files: await hashFiles(typescriptOutput),
         },

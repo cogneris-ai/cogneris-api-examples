@@ -52,7 +52,7 @@ async function installedPackages() {
       `${JSON.stringify({
         private: true,
         dependencies: {
-          "@cogneris/document-ai-sdk": `file:${sdkDirectory}`,
+          "@cogneris-ai/document-ai-sdk": `file:${sdkDirectory}`,
         },
       }, null, 2)}\n`,
     );
@@ -85,8 +85,8 @@ async function installedPackages() {
       `${JSON.stringify({
         private: true,
         dependencies: {
-          "@cogneris/document-ai-cli": `file:${path.join(temporaryDirectory, cliTarball)}`,
-          "@cogneris/document-ai-sdk": `file:${path.join(temporaryDirectory, sdkTarball)}`,
+          "@cogneris-ai/document-ai-cli": `file:${path.join(temporaryDirectory, cliTarball)}`,
+          "@cogneris-ai/document-ai-sdk": `file:${path.join(temporaryDirectory, sdkTarball)}`,
         },
       }, null, 2)}\n`,
     );
@@ -96,13 +96,13 @@ async function installedPackages() {
 
     const requireFromInstall = createRequire(path.join(consumerDirectory, "package.json"));
     const cliPackagePath = requireFromInstall.resolve(
-      "@cogneris/document-ai-cli/package.json",
+      "@cogneris-ai/document-ai-cli/package.json",
     );
     return {
       bin: path.join(consumerDirectory, "node_modules", ".bin", "cogneris"),
       cli: requireFromInstall(path.join(path.dirname(cliPackagePath), "dist", "run.js")),
       consumerDirectory,
-      sdk: requireFromInstall("@cogneris/document-ai-sdk"),
+      sdk: requireFromInstall("@cogneris-ai/document-ai-sdk"),
     };
   })();
   return installation;
@@ -150,10 +150,14 @@ after(async () => {
 
 test("CLI package has the public identity, binary, and exact SDK dependency", async () => {
   const packageJson = JSON.parse(await readFile(path.join(root, "cli", "package.json"), "utf8"));
-  assert.equal(packageJson.name, "@cogneris/document-ai-cli");
+  assert.equal(packageJson.name, "@cogneris-ai/document-ai-cli");
   assert.equal(packageJson.version, "0.1.0");
   assert.deepEqual(packageJson.bin, { cogneris: "dist/bin.js" });
-  assert.equal(packageJson.dependencies["@cogneris/document-ai-sdk"], "0.1.0");
+  assert.equal(packageJson.dependencies["@cogneris-ai/document-ai-sdk"], "0.1.0");
+  assert.deepEqual(packageJson.repository, {
+    type: "git",
+    url: "git+https://github.com/cogneris-ai/cogneris-api-examples.git",
+  });
 });
 
 test("build leaves a durable installed SDK after temporary cleanup", async (context) => {
@@ -163,7 +167,7 @@ test("build leaves a durable installed SDK after temporary cleanup", async (cont
   const dependencyPath = path.join(
     root,
     "node_modules",
-    "@cogneris",
+    "@cogneris-ai",
     "document-ai-sdk",
   );
   assert.equal((await lstat(dependencyPath)).isSymbolicLink(), false);
@@ -506,7 +510,7 @@ test("installed binary handles success, safe API failure, and broken stdout with
     preloadPath,
     `const Module = require("node:module");
 const originalLoad = Module._load;
-const sdk = originalLoad.call(Module, "@cogneris/document-ai-sdk", module, false);
+const sdk = originalLoad.call(Module, "@cogneris-ai/document-ai-sdk", module, false);
 class LoopbackCognerisClient extends sdk.CognerisClient {
   constructor(options) {
     super({ ...options, _baseUrlForTesting: process.env.TEST_COGNERIS_BASE_URL });
@@ -514,7 +518,7 @@ class LoopbackCognerisClient extends sdk.CognerisClient {
 }
 const replacement = { ...sdk, CognerisClient: LoopbackCognerisClient };
 Module._load = function(request, parent, isMain) {
-  return request === "@cogneris/document-ai-sdk"
+  return request === "@cogneris-ai/document-ai-sdk"
     ? replacement
     : originalLoad.call(this, request, parent, isMain);
 };

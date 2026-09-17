@@ -99,10 +99,17 @@ class SdkGenerationTests(unittest.TestCase):
 
     def test_package_identities_and_versions_are_publishable(self):
         typescript = json.loads((SDKS / "typescript" / "package.json").read_text())
-        self.assertEqual(typescript["name"], "@cogneris/document-ai-sdk")
+        self.assertEqual(typescript["name"], "@cogneris-ai/document-ai-sdk")
         self.assertEqual(typescript["version"], "0.1.0")
         self.assertFalse(typescript.get("private", False))
         self.assertEqual(typescript["scripts"]["build"], "tsc -p tsconfig.json")
+        self.assertEqual(
+            typescript["repository"],
+            {
+                "type": "git",
+                "url": "git+https://github.com/cogneris-ai/cogneris-api-examples.git",
+            },
+        )
 
         pyproject = (SDKS / "python" / "pyproject.toml").read_text()
         self.assertRegex(pyproject, r'(?m)^name = "cogneris-document-ai-sdk"$')
