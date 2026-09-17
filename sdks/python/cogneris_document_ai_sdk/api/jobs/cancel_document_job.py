@@ -6,7 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.document_job import DocumentJob
+from ...models.document_job_cancellation_envelope import DocumentJobCancellationEnvelope
 from ...types import Response
 
 
@@ -23,11 +23,11 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, DocumentJob]]:
-    if response.status_code == 200:
-        response_200 = DocumentJob.from_dict(response.json())
+) -> Optional[Union[Any, DocumentJobCancellationEnvelope]]:
+    if response.status_code == 202:
+        response_202 = DocumentJobCancellationEnvelope.from_dict(response.json())
 
-        return response_200
+        return response_202
 
     if response.status_code == 401:
         response_401 = cast(Any, None)
@@ -49,7 +49,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, DocumentJob]]:
+) -> Response[Union[Any, DocumentJobCancellationEnvelope]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -62,7 +62,7 @@ def sync_detailed(
     job_id: UUID,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, DocumentJob]]:
+) -> Response[Union[Any, DocumentJobCancellationEnvelope]]:
     """Cancel a document job
 
     Args:
@@ -73,7 +73,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, DocumentJob]]
+        Response[Union[Any, DocumentJobCancellationEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -91,7 +91,7 @@ def sync(
     job_id: UUID,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, DocumentJob]]:
+) -> Optional[Union[Any, DocumentJobCancellationEnvelope]]:
     """Cancel a document job
 
     Args:
@@ -102,7 +102,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, DocumentJob]
+        Union[Any, DocumentJobCancellationEnvelope]
     """
 
     return sync_detailed(
@@ -115,7 +115,7 @@ async def asyncio_detailed(
     job_id: UUID,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, DocumentJob]]:
+) -> Response[Union[Any, DocumentJobCancellationEnvelope]]:
     """Cancel a document job
 
     Args:
@@ -126,7 +126,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, DocumentJob]]
+        Response[Union[Any, DocumentJobCancellationEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -142,7 +142,7 @@ async def asyncio(
     job_id: UUID,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, DocumentJob]]:
+) -> Optional[Union[Any, DocumentJobCancellationEnvelope]]:
     """Cancel a document job
 
     Args:
@@ -153,7 +153,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, DocumentJob]
+        Union[Any, DocumentJobCancellationEnvelope]
     """
 
     return (

@@ -22,6 +22,9 @@ class DocumentJob:
         operation (Union[Unset, DocumentJobOperation]):
         status (Union[Unset, DocumentJobStatus]):
         output_reference (Union[None, Unset, str]):
+        stage (Union[None, Unset, str]):
+        processed_pages (Union[None, Unset, int]):
+        total_pages (Union[None, Unset, int]):
         attempt_count (Union[Unset, int]):
         failure_code (Union[None, Unset, str]):
         retryable (Union[Unset, bool]):
@@ -35,6 +38,9 @@ class DocumentJob:
     operation: Union[Unset, DocumentJobOperation] = UNSET
     status: Union[Unset, DocumentJobStatus] = UNSET
     output_reference: Union[None, Unset, str] = UNSET
+    stage: Union[None, Unset, str] = UNSET
+    processed_pages: Union[None, Unset, int] = UNSET
+    total_pages: Union[None, Unset, int] = UNSET
     attempt_count: Union[Unset, int] = UNSET
     failure_code: Union[None, Unset, str] = UNSET
     retryable: Union[Unset, bool] = UNSET
@@ -62,6 +68,24 @@ class DocumentJob:
             output_reference = UNSET
         else:
             output_reference = self.output_reference
+
+        stage: Union[None, Unset, str]
+        if isinstance(self.stage, Unset):
+            stage = UNSET
+        else:
+            stage = self.stage
+
+        processed_pages: Union[None, Unset, int]
+        if isinstance(self.processed_pages, Unset):
+            processed_pages = UNSET
+        else:
+            processed_pages = self.processed_pages
+
+        total_pages: Union[None, Unset, int]
+        if isinstance(self.total_pages, Unset):
+            total_pages = UNSET
+        else:
+            total_pages = self.total_pages
 
         attempt_count = self.attempt_count
 
@@ -112,6 +136,12 @@ class DocumentJob:
             field_dict["status"] = status
         if output_reference is not UNSET:
             field_dict["outputReference"] = output_reference
+        if stage is not UNSET:
+            field_dict["stage"] = stage
+        if processed_pages is not UNSET:
+            field_dict["processedPages"] = processed_pages
+        if total_pages is not UNSET:
+            field_dict["totalPages"] = total_pages
         if attempt_count is not UNSET:
             field_dict["attemptCount"] = attempt_count
         if failure_code is not UNSET:
@@ -161,6 +191,33 @@ class DocumentJob:
             return cast(Union[None, Unset, str], data)
 
         output_reference = _parse_output_reference(d.pop("outputReference", UNSET))
+
+        def _parse_stage(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        stage = _parse_stage(d.pop("stage", UNSET))
+
+        def _parse_processed_pages(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        processed_pages = _parse_processed_pages(d.pop("processedPages", UNSET))
+
+        def _parse_total_pages(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        total_pages = _parse_total_pages(d.pop("totalPages", UNSET))
 
         attempt_count = d.pop("attemptCount", UNSET)
 
@@ -238,6 +295,9 @@ class DocumentJob:
             operation=operation,
             status=status,
             output_reference=output_reference,
+            stage=stage,
+            processed_pages=processed_pages,
+            total_pages=total_pages,
             attempt_count=attempt_count,
             failure_code=failure_code,
             retryable=retryable,

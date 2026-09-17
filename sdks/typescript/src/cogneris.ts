@@ -7,9 +7,10 @@ import {
 } from './sdk.gen';
 import type {
   DocumentJob,
+  DocumentJobCancellation,
   DocumentJobOperation,
+  DocumentJobSubmission,
   Envelope,
-  SubmitDocumentJobResponse,
 } from './types.gen';
 
 export const COGNERIS_REGION_URLS = {
@@ -121,7 +122,7 @@ function parseRetryAfter(response: Response | undefined, fallback: number): numb
 }
 
 function submissionRetryAfter(
-  submission: SubmitDocumentJobResponse,
+  submission: DocumentJobSubmission,
   response: Response | undefined,
 ): number | undefined {
   const headerValue = response?.headers.get('Retry-After');
@@ -138,6 +139,13 @@ function submissionRetryAfter(
 async function requireData<T>(result: GeneratedResult<T>): Promise<T> {
   if (result.data !== undefined) return result.data;
   throw apiError(result.error, result.response);
+}
+
+async function requireEnvelopeData<T>(
+  result: GeneratedResult<{ data: T }>,
+): Promise<T> {
+  const envelope = await requireData(result);
+  return envelope.data;
 }
 
 export class CognerisClient {
@@ -177,12 +185,12 @@ export class CognerisClient {
   async submitJob(
     operation: DocumentJobOperation,
     inputReference: string,
-  ): Promise<SubmitDocumentJobResponse> {
+  ): Promise<DocumentJobSubmission> {
     const result = await submitDocumentJob({
       body: { operation, inputReference },
       client: this.generatedClient,
     });
-    const submission = await requireData(result);
+    const submission = await requireEnvelopeData<DocumentJobSubmission>(result);
     const hint = submissionRetryAfter(submission, result.response);
     if (typeof submission.jobId === 'string' && hint !== undefined) {
       this.initialRetryHints.set(submission.jobId, hint);
@@ -192,7 +200,7 @@ export class CognerisClient {
 
   async getJob(jobId: string): Promise<DocumentJob> {
     const result = await this.getJobDetailed(jobId);
-    return requireData(result);
+    return requireEnvelopeData<DocumentJob>(result);
   }
 
   async waitForJob(jobId: string, options: WaitForJobOptions = {}): Promise<DocumentJob> {
@@ -213,7 +221,7 @@ export class CognerisClient {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       const result = await this.getJobDetailed(jobId);
-      const job = await requireData(result);
+      const job = await requireEnvelopeData<DocumentJob>(result);
       if (job.status === 'Succeeded') return job;
       if (job.status === 'Failed' || job.status === 'Cancelled') {
         throw new CognerisJobTerminalError(job);
@@ -226,12 +234,12 @@ export class CognerisClient {
     throw new CognerisMaxAttemptsError(maxAttempts);
   }
 
-  async cancelJob(jobId: string): Promise<DocumentJob> {
+  async cancelJob(jobId: string): Promise<DocumentJobCancellation> {
     const result = await cancelDocumentJob({
       path: { jobId },
       client: this.generatedClient,
     });
-    return requireData(result);
+    return requireEnvelopeData<DocumentJobCancellation>(result);
   }
 
   private getJobDetailed(jobId: string) {

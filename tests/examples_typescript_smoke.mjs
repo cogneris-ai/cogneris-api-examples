@@ -29,6 +29,14 @@ function json(response, status, body, headers = {}) {
   response.end(JSON.stringify(body));
 }
 
+function serviceEnvelope(status, data) {
+  return {
+    data,
+    meta: { httpStatusCode: status, messages: [], errors: [] },
+    hasErrors: false,
+  };
+}
+
 before(async () => {
   await cp(path.join(root, "sdks", "typescript"), sdkDirectory, {
     recursive: true,
@@ -92,21 +100,21 @@ before(async () => {
       return;
     }
     if (request.method === "POST" && request.url === "/api/v1/document-jobs") {
-      json(response, 202, {
+      json(response, 202, serviceEnvelope(202, {
         jobId,
         status: "Queued",
         statusUrl: `/api/v1/document-jobs/${jobId}`,
         retryAfterSeconds: 0,
-      }, { "Retry-After": "0" });
+      }), { "Retry-After": "0" });
       return;
     }
     if (request.method === "GET" && request.url === `/api/v1/document-jobs/${jobId}`) {
-      json(response, 200, {
+      json(response, 200, serviceEnvelope(200, {
         jobId,
         operation: "Extraction",
         status: "Succeeded",
         outputReference: responseMarker,
-      });
+      }));
       return;
     }
     json(response, 404, { title: responseMarker });

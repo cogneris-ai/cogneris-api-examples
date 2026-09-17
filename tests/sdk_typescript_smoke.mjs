@@ -29,6 +29,14 @@ function json(response, status, body, headers = {}) {
   response.end(JSON.stringify(body));
 }
 
+function serviceEnvelope(status, data) {
+  return {
+    data,
+    meta: { httpStatusCode: status, messages: [], errors: [] },
+    hasErrors: false,
+  };
+}
+
 before(async () => {
   await cp(sdkDirectory, packageDirectory, {
     recursive: true,
@@ -81,7 +89,12 @@ before(async () => {
       json(
         response,
         202,
-        { jobId, status: "Queued", statusUrl: `/api/v1/document-jobs/${jobId}`, retryAfterSeconds: 1 },
+        serviceEnvelope(202, {
+          jobId,
+          status: "Queued",
+          statusUrl: `/api/v1/document-jobs/${jobId}`,
+          retryAfterSeconds: 1,
+        }),
         { Location: `/api/v1/document-jobs/${jobId}`, "Retry-After": "1" },
       );
       return;
@@ -91,25 +104,25 @@ before(async () => {
       const count = (pollingCounts.get(id) ?? 0) + 1;
       pollingCounts.set(id, count);
       if (id === failedJobId) {
-        json(response, 200, {
+        json(response, 200, serviceEnvelope(200, {
           jobId: id,
           operation: "Extraction",
           status: "Failed",
           failureCode: reflectedDocument,
           outputReference: reflectedApiKey,
           retryable: false,
-        });
+        }));
       } else if (id === endlessJobId) {
-        json(response, 200, { jobId: id, operation: "Extraction", status: "Processing" }, { "Retry-After": "0" });
+        json(response, 200, serviceEnvelope(200, { jobId: id, operation: "Extraction", status: "Processing" }), { "Retry-After": "0" });
       } else if (count === 1) {
-        json(response, 200, { jobId: id, operation: "Extraction", status: "Processing" }, { "Retry-After": "1" });
+        json(response, 200, serviceEnvelope(200, { jobId: id, operation: "Extraction", status: "Processing" }), { "Retry-After": "1" });
       } else {
-        json(response, 200, { jobId: id, operation: "Extraction", status: "Succeeded", outputReference: "result/ref" });
+        json(response, 200, serviceEnvelope(200, { jobId: id, operation: "Extraction", status: "Succeeded", outputReference: "result/ref" }));
       }
       return;
     }
     if (request.method === "POST" && request.url === `/api/v1/document-jobs/${jobId}/cancel`) {
-      json(response, 200, { jobId, operation: "Extraction", status: "Cancelled" });
+      json(response, 202, serviceEnvelope(202, { jobId, cancellationRequested: true }));
       return;
     }
     json(response, 404, { code: "not_found", title: "Not found" });
@@ -203,7 +216,7 @@ test("job helpers submit, honor Retry-After, stop on success, and cancel", async
   assert.ok(firstPoll.receivedAt - submitted.receivedAt >= 900, "submit Retry-After: 1 should delay the first poll");
 
   const cancelled = await client.cancelJob(jobId);
-  assert.equal(cancelled.status, "Cancelled");
+  assert.deepEqual(cancelled, { jobId, cancellationRequested: true });
   assert.equal(requests.every((request) => request.authorization === "Bearer xtkt_live_TEST_ONLY_NOT_A_SECRET"), true);
 });
 

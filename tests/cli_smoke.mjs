@@ -136,6 +136,14 @@ function json(response, status, body, headers = {}) {
   response.end(JSON.stringify(body));
 }
 
+function serviceEnvelope(status, data) {
+  return {
+    data,
+    meta: { httpStatusCode: status, messages: [], errors: [] },
+    hasErrors: false,
+  };
+}
+
 async function listen(server) {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
@@ -427,18 +435,23 @@ test("installed CLI uses the SDK loopback seam for multipart and job requests", 
     if (request.method === "POST" && request.url === "/Document/extraction") {
       json(response, 200, { data: { accepted: true }, meta: { status: 200 }, hasErrors: false });
     } else if (request.method === "POST" && request.url === "/api/v1/document-jobs") {
-      json(response, 202, { jobId: "submitted-job", status: "Queued" }, { "Retry-After": "0" });
+      json(response, 202, serviceEnvelope(202, {
+        jobId: "submitted-job",
+        status: "Queued",
+        statusUrl: "/api/v1/document-jobs/submitted-job",
+        retryAfterSeconds: 0,
+      }), { "Retry-After": "0" });
     } else if (request.method === "POST" && request.url === "/api/v1/document-jobs/cancel-job/cancel") {
-      json(response, 200, { jobId: "cancel-job", operation: "Extraction", status: "Cancelled" });
+      json(response, 202, serviceEnvelope(202, { jobId: "cancel-job", cancellationRequested: true }));
     } else if (request.method === "GET" && request.url === "/api/v1/document-jobs/wait-job") {
       waitCount += 1;
-      json(response, 200, {
+      json(response, 200, serviceEnvelope(200, {
         jobId: "wait-job",
         operation: "Extraction",
         status: waitCount === 1 ? "Processing" : "Succeeded",
-      }, { "Retry-After": "0" });
+      }), { "Retry-After": "0" });
     } else if (request.method === "GET" && request.url === "/api/v1/document-jobs/get-job") {
-      json(response, 200, { jobId: "get-job", operation: "Extraction", status: "Processing" });
+      json(response, 200, serviceEnvelope(200, { jobId: "get-job", operation: "Extraction", status: "Processing" }));
     } else {
       json(response, 404, { code: "not-found" });
     }
@@ -545,7 +558,7 @@ test("installed binary handles success, API and application failures, and broken
   const server = createServer(async (request, response) => {
     for await (const _chunk of request) { /* consume request */ }
     if (request.url === "/api/v1/document-jobs/success-job") {
-      json(response, 200, { jobId: "success-job", operation: "Extraction", status: "Succeeded" });
+      json(response, 200, serviceEnvelope(200, { jobId: "success-job", operation: "Extraction", status: "Succeeded" }));
     } else if (request.url === "/api/v1/document-jobs/failure-job") {
       json(response, 500, { code: apiKey, title: serverDetail });
     } else if (request.url === "/Document/extraction") {
@@ -558,12 +571,12 @@ test("installed binary handles success, API and application failures, and broken
     } else if (request.url === "/api/v1/document-jobs/broken-pipe-job") {
       observeBrokenPipeRequest();
       await brokenPipeResponseReleased;
-      json(response, 200, {
+      json(response, 200, serviceEnvelope(200, {
         jobId: "broken-pipe-job",
         operation: "Extraction",
         status: "Succeeded",
         outputReference: resultBody.repeat(200_000),
-      });
+      }));
     } else {
       json(response, 404, { code: "not-found" });
     }

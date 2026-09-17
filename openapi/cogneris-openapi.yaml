@@ -50,9 +50,9 @@ info:
 
     ## Response envelope
 
-    Successful responses from the **document** endpoints share one wrapper: `data`
-    for the payload, `meta` for the status and any messages, and `hasErrors` for a
-    fast failure check.
+    Successful responses from the **document and job** endpoints share one wrapper:
+    `data` for the payload, `meta` for the status and any messages, and `hasErrors`
+    for a fast failure check.
 
     The **Portal** endpoints do not use that wrapper. They return the payload
     directly, and their errors are RFC 9457 problem documents sent as
@@ -264,12 +264,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  jobId: { type: string, format: uuid }
-                  status: { $ref: '#/components/schemas/DocumentJobStatus' }
-                  statusUrl: { type: string }
-                  retryAfterSeconds: { type: integer }
+                $ref: '#/components/schemas/DocumentJobSubmissionEnvelope'
         '401': { $ref: '#/components/responses/Unauthorized' }
         '429': { $ref: '#/components/responses/RateLimited' }
     get:
@@ -286,12 +281,7 @@ paths:
           description: Jobs for the tenant.
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  jobs:
-                    type: array
-                    items: { $ref: '#/components/schemas/DocumentJob' }
+              schema: { $ref: '#/components/schemas/DocumentJobListEnvelope' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '429': { $ref: '#/components/responses/RateLimited' }
 
@@ -310,7 +300,7 @@ paths:
           description: The job.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DocumentJob' }
+              schema: { $ref: '#/components/schemas/DocumentJobEnvelope' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { description: No job with that id in this tenant. }
         '429': { $ref: '#/components/responses/RateLimited' }
@@ -326,11 +316,11 @@ paths:
       summary: Cancel a document job
       operationId: cancelDocumentJob
       responses:
-        '200':
+        '202':
           description: Cancellation requested.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DocumentJob' }
+              schema: { $ref: '#/components/schemas/DocumentJobCancellationEnvelope' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { description: No job with that id in this tenant. }
         '429': { $ref: '#/components/responses/RateLimited' }
@@ -509,6 +499,79 @@ components:
       type: string
       enum: [Queued, Processing, Succeeded, Failed, Cancelled]
 
+    ServiceResponseMeta:
+      type: object
+      required: [httpStatusCode, messages, errors]
+      properties:
+        httpStatusCode: { type: integer }
+        messages:
+          type: array
+          items: { type: string }
+        errors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    DocumentJobSubmission:
+      type: object
+      required: [jobId, status, statusUrl, retryAfterSeconds]
+      properties:
+        jobId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/DocumentJobStatus' }
+        statusUrl: { type: string }
+        retryAfterSeconds: { type: integer }
+
+    DocumentJobList:
+      type: object
+      required: [jobs, hasMore, limit]
+      properties:
+        jobs:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentJob' }
+        nextCursor: { type: [string, 'null'] }
+        hasMore: { type: boolean }
+        limit: { type: integer }
+
+    DocumentJobCancellation:
+      type: object
+      required: [jobId, cancellationRequested]
+      properties:
+        jobId: { type: string, format: uuid }
+        cancellationRequested: { type: boolean }
+
+    DocumentJobSubmissionEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/DocumentJobSubmission' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    DocumentJobEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/DocumentJob' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    DocumentJobListEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/DocumentJobList' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    DocumentJobCancellationEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/DocumentJobCancellation' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
     DocumentJob:
       type: object
       properties:
@@ -516,6 +579,9 @@ components:
         operation: { $ref: '#/components/schemas/DocumentJobOperation' }
         status: { $ref: '#/components/schemas/DocumentJobStatus' }
         outputReference: { type: [string, 'null'] }
+        stage: { type: [string, 'null'] }
+        processedPages: { type: [integer, 'null'] }
+        totalPages: { type: [integer, 'null'] }
         attemptCount: { type: integer }
         failureCode: { type: [string, 'null'] }
         retryable: { type: boolean }

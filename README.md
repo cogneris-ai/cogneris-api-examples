@@ -171,6 +171,11 @@ operation payload, `meta` carries status/messages, and `hasErrors` is the fast
 failure indicator. Application code may inspect `data`, but the quickstart
 examples deliberately do not print extracted field values or raw bodies.
 
+Asynchronous job endpoints use the same wire envelope. The maintained SDK
+helpers unwrap its `data` payload, so `submitJob`/`submit_job`, `getJob`/`get_job`,
+and polling return the typed job payload directly. Cancellation is accepted with
+HTTP 202 and returns `{jobId, cancellationRequested}` after unwrapping.
+
 The maintained SDK helpers raise typed, locally controlled errors. TypeScript
 uses `CognerisApiError`, `CognerisJobTerminalError`, and
 `CognerisMaxAttemptsError`; Python additionally distinguishes

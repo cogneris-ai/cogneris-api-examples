@@ -26,11 +26,65 @@ export type DocumentJobOperation = 'Extraction' | 'Classification' | 'ZeroShot' 
 
 export type DocumentJobStatus = 'Queued' | 'Processing' | 'Succeeded' | 'Failed' | 'Cancelled';
 
+export type ServiceResponseMeta = {
+    httpStatusCode: number;
+    messages: Array<string>;
+    errors: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type DocumentJobSubmission = {
+    jobId: string;
+    status: DocumentJobStatus;
+    statusUrl: string;
+    retryAfterSeconds: number;
+};
+
+export type DocumentJobList = {
+    jobs: Array<DocumentJob>;
+    nextCursor?: string | null;
+    hasMore: boolean;
+    limit: number;
+};
+
+export type DocumentJobCancellation = {
+    jobId: string;
+    cancellationRequested: boolean;
+};
+
+export type DocumentJobSubmissionEnvelope = {
+    data: DocumentJobSubmission;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type DocumentJobEnvelope = {
+    data: DocumentJob;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type DocumentJobListEnvelope = {
+    data: DocumentJobList;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type DocumentJobCancellationEnvelope = {
+    data: DocumentJobCancellation;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
 export type DocumentJob = {
     jobId?: string;
     operation?: DocumentJobOperation;
     status?: DocumentJobStatus;
     outputReference?: string | null;
+    stage?: string | null;
+    processedPages?: number | null;
+    totalPages?: number | null;
     attemptCount?: number;
     failureCode?: string | null;
     retryable?: boolean;
@@ -425,9 +479,7 @@ export type ListDocumentJobsResponses = {
     /**
      * Jobs for the tenant.
      */
-    200: {
-        jobs?: Array<DocumentJob>;
-    };
+    200: DocumentJobListEnvelope;
 };
 
 export type ListDocumentJobsResponse = ListDocumentJobsResponses[keyof ListDocumentJobsResponses];
@@ -460,12 +512,7 @@ export type SubmitDocumentJobResponses = {
     /**
      * Job accepted.
      */
-    202: {
-        jobId?: string;
-        status?: DocumentJobStatus;
-        statusUrl?: string;
-        retryAfterSeconds?: number;
-    };
+    202: DocumentJobSubmissionEnvelope;
 };
 
 export type SubmitDocumentJobResponse = SubmitDocumentJobResponses[keyof SubmitDocumentJobResponses];
@@ -498,7 +545,7 @@ export type GetDocumentJobResponses = {
     /**
      * The job.
      */
-    200: DocumentJob;
+    200: DocumentJobEnvelope;
 };
 
 export type GetDocumentJobResponse = GetDocumentJobResponses[keyof GetDocumentJobResponses];
@@ -531,7 +578,7 @@ export type CancelDocumentJobResponses = {
     /**
      * Cancellation requested.
      */
-    200: DocumentJob;
+    202: DocumentJobCancellationEnvelope;
 };
 
 export type CancelDocumentJobResponse = CancelDocumentJobResponses[keyof CancelDocumentJobResponses];
