@@ -130,6 +130,21 @@ class ArchiveResourceTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "archive.*limit"):
                         release.package_metadata(file)
 
+    def test_zip64_records_are_rejected_before_zipfile_parsing(self):
+        release = release_module()
+        with tempfile.TemporaryDirectory(prefix="cogneris-zip64-") as directory:
+            file = Path(directory) / "zip64.whl"
+            self.make_archive(file, [])
+            data = bytearray(file.read_bytes())
+            end = data.rfind(b"PK\x05\x06")
+            directory_size = struct.unpack_from("<I", data, end + 12)[0]
+            struct.pack_into("<I", data, end + 12, directory_size + 20)
+            data[end:end] = b"PK\x06\x07" + b"\0" * 16
+            file.write_bytes(data)
+
+            with self.assertRaisesRegex(ValueError, "ZIP64"):
+                release.inspect_zip_directory(file)
+
     def test_file_directory_collisions_are_rejected_in_both_orders(self):
         release = release_module()
         with tempfile.TemporaryDirectory(prefix="cogneris-archive-collision-") as directory:
