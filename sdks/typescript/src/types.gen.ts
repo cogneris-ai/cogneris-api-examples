@@ -15,10 +15,7 @@ export type Envelope = {
         };
         createdDate?: string;
     };
-    meta?: {
-        httpStatusCode?: number;
-        messages?: Array<string>;
-    };
+    meta?: ServiceResponseMeta;
     hasErrors?: boolean;
 };
 

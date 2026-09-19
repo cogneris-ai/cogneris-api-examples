@@ -489,13 +489,7 @@ components:
               description: Operation-specific payload.
               additionalProperties: true
             createdDate: { type: string, format: date-time }
-        meta:
-          type: object
-          properties:
-            httpStatusCode: { type: integer }
-            messages:
-              type: array
-              items: { type: string }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
         hasErrors: { type: boolean }
 
     DocumentJobOperation:

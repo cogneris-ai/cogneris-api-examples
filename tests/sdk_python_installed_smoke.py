@@ -88,7 +88,19 @@ class _Handler(BaseHTTPRequestHandler):
                     200,
                     {
                         "data": {"accepted": True},
-                        "meta": {"status": 200},
+                        "meta": {
+                            "httpStatusCode": 200,
+                            "messages": [],
+                            "errors": [
+                                {
+                                    "code": "ocr.low_confidence",
+                                    "message": "page 2 was read at 0.41 confidence",
+                                    "field": None,
+                                    "retryable": False,
+                                }
+                            ],
+                            "creditsConsumed": 14.5,
+                        },
                         "hasErrors": False,
                     },
                 )
@@ -308,6 +320,13 @@ class InstalledPythonSdkTests(unittest.TestCase):
         client = self.client(region="eu")
         extracted = client.extract(b"ordinary-document", file_name="sample.pdf")
         self.assertTrue(extracted.data.to_dict()["accepted"])
+        # XTRAK-1687: /Document/* meta carries the credit charge and structured
+        # errors as typed fields, exactly like the job envelopes.
+        self.assertEqual(extracted.meta.http_status_code, 200)
+        self.assertEqual(extracted.meta.credits_consumed, 14.5)
+        self.assertEqual(
+            [error.code for error in extracted.meta.errors], ["ocr.low_confidence"]
+        )
         upload = _Handler.requests[-1]
         self.assertEqual(upload["authorization"], "Bearer xtkt_live_TEST_ONLY_NOT_A_SECRET")
         self.assertRegex(upload["content_type"], r"^multipart/form-data; boundary=")

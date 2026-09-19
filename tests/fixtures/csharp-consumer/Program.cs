@@ -33,6 +33,15 @@ static class Smoke
     static CognerisClient Client(Loopback server) => new(new(Key, BaseUriForTesting: server.BaseUri));
     static string Envelope(object? data, bool hasErrors = false) => JsonSerializer.Serialize(new {
         data, meta = new { httpStatusCode = 200, messages = new[] { Reflected } }, hasErrors });
+    // XTRAK-1687: /Document/* answers carry the credit charge and structured errors in meta.
+    static string DocumentEnvelope(object? data) => JsonSerializer.Serialize(new {
+        data,
+        meta = new {
+            httpStatusCode = 200, messages = new[] { Reflected },
+            errors = new[] { new { code = "ocr.low_confidence", message = Reflected, field = (string?)null, retryable = false } },
+            creditsConsumed = 14.5,
+        },
+        hasErrors = false });
     static string Job(string status) => Envelope(new {
         jobId = JobId, operation = "Extraction", status, outputReference = "artifact://tenant/output/result",
         stage = "complete", processedPages = 1, totalPages = 1, attemptCount = 1,
@@ -45,7 +54,7 @@ static class Smoke
     static async Task Workflow()
     {
         await using var server = new Loopback(
-            new(200, Envelope(new { id = JobId, metadata = new { identity = "123" }, createdDate = "2026-09-17T12:00:00Z" })),
+            new(200, DocumentEnvelope(new { id = JobId, metadata = new { identity = "123" }, createdDate = "2026-09-17T12:00:00Z" })),
             new(202, Submission(), "0"), new(200, Job("Queued"), "0"),
             new(200, Job("Processing"), "0"), new(200, Job("Succeeded")),
             new(202, Envelope(new { jobId = JobId, status = "Cancelled", cancellationRequested = true })));
@@ -54,6 +63,10 @@ static class Smoke
             "identity.pdf", "application/pdf", "return id");
         Check(extracted.Data?.Id == JobId && extracted.HasErrors == false, "extraction must decode envelope");
         Check(extracted.Data?.Metadata?["identity"].ToString() == "123", "metadata must survive generated model");
+        Check(extracted.Meta?.HttpStatusCode == 200, "document meta must decode httpStatusCode");
+        Check(extracted.Meta?.CreditsConsumed == 14.5m, "document meta must decode creditsConsumed (XTRAK-1687)");
+        Check(extracted.Meta?.Errors?.Count == 1 && extracted.Meta.Errors[0].Code == "ocr.low_confidence",
+            "document meta must decode structured errors (XTRAK-1687)");
         var submission = await client.SubmitJobAsync(DocumentJobSubmitOperation.Extraction, "artifact://tenant/input/reference");
         Check(submission.JobId == JobId, "submission must unwrap data");
         var completed = await client.WaitForJobAsync(submission.JobId, maxAttempts: 3, pollInterval: TimeSpan.Zero);

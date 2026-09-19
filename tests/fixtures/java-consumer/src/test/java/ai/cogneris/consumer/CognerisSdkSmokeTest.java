@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -45,6 +46,12 @@ class CognerisSdkSmokeTest {
         return "{\"data\":" + data + ",\"meta\":{\"httpStatusCode\":200,\"messages\":[\"" + REFLECTED
                 + "\"]},\"hasErrors\":false}";
     }
+    // XTRAK-1687: /Document/* answers carry the credit charge and structured errors in meta.
+    static String documentEnvelope(String data) {
+        return "{\"data\":" + data + ",\"meta\":{\"httpStatusCode\":200,\"messages\":[\"" + REFLECTED
+                + "\"],\"errors\":[{\"code\":\"ocr.low_confidence\",\"message\":\"" + REFLECTED
+                + "\",\"field\":null,\"retryable\":false}],\"creditsConsumed\":14.5},\"hasErrors\":false}";
+    }
     static String job(String status) {
         return envelope("{\"jobId\":\"" + JOB + "\",\"operation\":\"Extraction\",\"status\":\"" + status
                 + "\",\"outputReference\":\"artifact://tenant/output/result\",\"stage\":\"complete\","
@@ -75,7 +82,7 @@ class CognerisSdkSmokeTest {
 
     @Test void workflowAuthenticatesAndUsesGeneratedMultipartAndModels() throws Exception {
         try (var server = new Loopback(
-                new Reply(200, envelope("{\"id\":\"" + JOB + "\",\"metadata\":{\"identity\":\"123\"},\"createdDate\":\"2026-09-17T12:00:00Z\"}")),
+                new Reply(200, documentEnvelope("{\"id\":\"" + JOB + "\",\"metadata\":{\"identity\":\"123\"},\"createdDate\":\"2026-09-17T12:00:00Z\"}")),
                 new Reply(202, submission(0), "0"), new Reply(200, job("Queued"), "0"),
                 new Reply(200, job("Processing"), "0"), new Reply(200, job("Succeeded")),
                 new Reply(202, envelope("{\"jobId\":\"" + JOB + "\",\"status\":\"Cancelled\",\"cancellationRequested\":true}")))) {
@@ -83,6 +90,10 @@ class CognerisSdkSmokeTest {
             var extracted = client.extract(document(), "return id");
             assertEquals(JOB, extracted.getData().getId());
             assertEquals("123", extracted.getData().getMetadata().get("identity"));
+            assertEquals(200, extracted.getMeta().getHttpStatusCode());
+            assertEquals(0, new BigDecimal("14.5").compareTo(extracted.getMeta().getCreditsConsumed()));
+            assertEquals(List.of("ocr.low_confidence"),
+                    extracted.getMeta().getErrors().stream().map(ApiError::getCode).toList());
             var submitted = client.submitJob(DocumentJobSubmitOperation.EXTRACTION, "artifact://tenant/input/reference");
             assertEquals(JOB, submitted.getJobId());
             var completed = client.waitForJob(JOB, 3, Duration.ofSeconds(2), Duration.ZERO);

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "path": "openapi/cogneris-openapi.yaml",
-    "sha256": "178943cea26d23b085707b01e0bb37c9dc6d0aec976133b872de451e6de03470"
+    "sha256": "4a0041d29bdab61c823c5a5828a9cb586838e40277d2a9b4cd32ff0def3a0376"
   },
   "generators": {
     "python": {
@@ -62,7 +62,7 @@
         "src/Cogneris.DocumentAI/Client/DateTimeNullableJsonConverter.cs": "5ed79ae1be6c34da1a766261dfaa7e045469a0048ca12ea61649cad86f8fffe8",
         "src/Cogneris.DocumentAI/Client/ExceptionEventArgs.cs": "04b0ec6b9c313e503d3bcd3e9011209e3b3742f6726c07c6464aa010ab52864e",
         "src/Cogneris.DocumentAI/Client/FileParameter.cs": "8cf8b4966b8fedfe6d3140e8890963a32841e24a4b53862cad99ae2ff80571a8",
-        "src/Cogneris.DocumentAI/Client/HostConfiguration.cs": "b88356c5da477451774c212ac0ad8772cf90595f5076dbb834ad2cb7bb237ed6",
+        "src/Cogneris.DocumentAI/Client/HostConfiguration.cs": "cab6a067ec69e5867b766697eb3cf3c0e4c50aa2c7537e2b2d65f1f910d7d27b",
         "src/Cogneris.DocumentAI/Client/JsonSerializerOptionsProvider.cs": "11d4a5f17f3d013ccd63bbdece30cb9ffb749b86ccb1926433d912071db4884f",
         "src/Cogneris.DocumentAI/Client/Option.cs": "c3742373cff8b1a3dd9433f4bfc65ea63502bd63d2550af9f64d5f42ea61383b",
         "src/Cogneris.DocumentAI/Client/RateLimitProvider`1.cs": "27cbe88f94e858bad6c8f7625c1698793b0d1f09b556e3f2392d546020fa1cdc",
@@ -89,9 +89,8 @@
         "src/Cogneris.DocumentAI/Model/DocumentJobSubmissionEnvelope.cs": "f9fd506c93867c9001c3c525a1431d92ecde6e29035cd48efab101e809c2bcba",
         "src/Cogneris.DocumentAI/Model/DocumentJobSubmitOperation.cs": "1e2d08c6febca9cd0f1f12bba031a523048447aa4d299eddce8f0644b0edd42e",
         "src/Cogneris.DocumentAI/Model/DocumentJobSubmitStatus.cs": "76dd862ede6774b1dd38a5cdfe91c9e56252dd05f420d9c12ed362d0e701bf42",
-        "src/Cogneris.DocumentAI/Model/Envelope.cs": "3a3b4c95e58b7f33d2c5c6eac6797fac1750db9b5d545c3465f99037b0f0441d",
+        "src/Cogneris.DocumentAI/Model/Envelope.cs": "016c577b2d5cc04fc12a632576973246bb685c745deb9c72f01a1dfc00b8aed2",
         "src/Cogneris.DocumentAI/Model/EnvelopeData.cs": "ad41ba40dfefd0dbead25589eca2cdc90f6d73a19394456c6cb9e523c80ac1d5",
-        "src/Cogneris.DocumentAI/Model/EnvelopeMeta.cs": "49e3f344aa8b8d20536eb429eebfcc5cd3b60f3431c2890a696e7a3f9a77c672",
         "src/Cogneris.DocumentAI/Model/PortalChannels.cs": "2db0bd04f8c68e5fb5e8112314e201735ff8bab9147e097a7ff4b5eeaf333349",
         "src/Cogneris.DocumentAI/Model/PortalForm.cs": "e8c64214cffb31d1d108f8028889c4dc5397b33513ecb72e73d1dc127c23b587",
         "src/Cogneris.DocumentAI/Model/PortalMagicLink.cs": "fe024b568d3c9b440deb080bb2215d86459b9ebe9d62c90c842ac0f22c4335f5",
@@ -149,9 +148,8 @@
         "src/main/java/ai/cogneris/documentai/model/DocumentJobSubmissionEnvelope.java": "278c09ae8d3241d0a0753ec910ee0e55f02c22f321c1b8bd726d0d7b55ac0584",
         "src/main/java/ai/cogneris/documentai/model/DocumentJobSubmitOperation.java": "71c0cf2831c43199ce18f7139beb55413c03feab1701c7393f3a2ad2792cb444",
         "src/main/java/ai/cogneris/documentai/model/DocumentJobSubmitStatus.java": "803cc1e70050818d67c0c6dc01519267a5ebf60ef47eb52270f46f1d8c7cc39c",
-        "src/main/java/ai/cogneris/documentai/model/Envelope.java": "407bed4104111202a6ad6a7143c83652e3212451994aed1b3b549a3a07a3a930",
+        "src/main/java/ai/cogneris/documentai/model/Envelope.java": "fe9101d19efa96ab188d970ca816edc8d7e8f04a87c7659fabf7b6922a6b3d8c",
         "src/main/java/ai/cogneris/documentai/model/EnvelopeData.java": "5324f38c755110e44e88bf58ef00b2412fc5966d19236a4ea1de674c8fa1cea0",
-        "src/main/java/ai/cogneris/documentai/model/EnvelopeMeta.java": "c49cd5add79437e9ddf102c44b6e3bd023494713ece56ffa554c0830dfea20fd",
         "src/main/java/ai/cogneris/documentai/model/PortalChannels.java": "ef0a5875b0c30779bf61f2356ce923678f220754f827927722dd5e2c1d5ff17e",
         "src/main/java/ai/cogneris/documentai/model/PortalForm.java": "dc7604e0af3bd84a89af2ab7155e12a925205b2fff51c460ada7e3d05c50960d",
         "src/main/java/ai/cogneris/documentai/model/PortalMagicLink.java": "fcf681a4c080a31fd72ece6ee480e862bb8537bc1427da3655608089fc369bbc",
@@ -177,7 +175,7 @@
       "version": "0.1.0",
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
-        "CHANGELOG.md": "8d355ca3fcc2bd984349f435bb8c3927559b83afdff3e105279b3b3ed2712b3d",
+        "CHANGELOG.md": "48b96c1c2ccfaec82aaf0ba35caae600413c71fd3136ccadc9374fb91259f0be",
         "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/documents/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
@@ -199,7 +197,7 @@
         "cogneris_document_ai_sdk/client.py": "a3f99d2eac81090b2dbb9b52d56645c2a2046c6c24bd643b7908ee089c3fe556",
         "cogneris_document_ai_sdk/cogneris.py": "93a772e2c9f0f2c04c6873336f7fe509c24f845ec2a1e8b95d38e8e322f20cb8",
         "cogneris_document_ai_sdk/errors.py": "80ef060662aa992360020f84e684fea0ecb1cedbe9ed5ffa5c6ece5134f5e6ad",
-        "cogneris_document_ai_sdk/models/__init__.py": "de8dde568a04270ad4cbd7c24cde8f56d5f532d4518cc6a3c790b4a62627bea7",
+        "cogneris_document_ai_sdk/models/__init__.py": "cac5a1171dbf7afc2b90a51839c7bc1c8b97f9b0674280172206ba76afcf387f",
         "cogneris_document_ai_sdk/models/api_error_details_type_0.py": "9cda77d303e00e5cf8db0ebc453b1dab30fc2bc44b93c7dd26e501924124f76e",
         "cogneris_document_ai_sdk/models/api_error.py": "a131ac93b524c99261a7419f06a96c3ec27c64d84c1136b25b6f442c6aac6f4a",
         "cogneris_document_ai_sdk/models/classify_documents_body.py": "3ccfeaa7c2cff584a067ca5a7d0772b73d1f5e2f7a0eda42ff3fda83916b1c2d",
@@ -218,8 +216,7 @@
         "cogneris_document_ai_sdk/models/document_job.py": "32a142b347f1428da58407c1951fd9c8f493c1b264ea415604c2e368281c9a52",
         "cogneris_document_ai_sdk/models/envelope_data_metadata.py": "19d3a0d643c3395b3cb29f0d73bba9233ef5ffdc2da29a64521675187c4a2f52",
         "cogneris_document_ai_sdk/models/envelope_data.py": "3f502e67630f1966d904f9c457a747b01b532f03bdec4a7ce56e8fac0aa1df8f",
-        "cogneris_document_ai_sdk/models/envelope_meta.py": "a47eaf7b2454e3cc1ee3f76f643fb20f2a34627a4be5e752ea9108050e371f63",
-        "cogneris_document_ai_sdk/models/envelope.py": "ea7c816369e1f7d205cd45118906068b51eb9b6ae7da48cb8236030e8ce03fef",
+        "cogneris_document_ai_sdk/models/envelope.py": "bb57ca798a18a9cfb8e417584975f00dd512c96e8ab0192fb796b3f41299128a",
         "cogneris_document_ai_sdk/models/extract_document_body.py": "e99e6e71054f05d7d8caec3ca1c266e2cff13143f4daf17818c56503dd3a849b",
         "cogneris_document_ai_sdk/models/face_match_document_body.py": "fae904ff6fe306d1af0cd02e95bd2f63fa919540bb84465e475256cac7d0e626",
         "cogneris_document_ai_sdk/models/portal_channels.py": "fc406fe340d309a6078523eb7ef2adc3d121eed2b6b2673170465f4b3a0bf8c9",
@@ -266,7 +263,7 @@
         "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
         "src/index.ts": "805d8c358c6353dc9a2e0faf42a627d7718ace378475eb427fdea0d1c403a45e",
         "src/sdk.gen.ts": "8a40647dd9a371a7bb23e1b11cbfc3fba6cafd1d9348c7afcc22e4ee6bac3398",
-        "src/types.gen.ts": "3ce619aed0c495eeb7628a3e228b3c2a854963bc1dc159e671e223feae199101",
+        "src/types.gen.ts": "7a4325d6ce331bb83befc14252c37cfa3d975c13b7524e9cbb250879c0e0a6b8",
         "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
       }
     }

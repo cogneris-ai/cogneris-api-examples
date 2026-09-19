@@ -8,7 +8,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.envelope_data import EnvelopeData
-    from ..models.envelope_meta import EnvelopeMeta
+    from ..models.service_response_meta import ServiceResponseMeta
 
 
 T = TypeVar("T", bound="Envelope")
@@ -19,12 +19,12 @@ class Envelope:
     """
     Attributes:
         data (Union[Unset, EnvelopeData]):
-        meta (Union[Unset, EnvelopeMeta]):
+        meta (Union[Unset, ServiceResponseMeta]):
         has_errors (Union[Unset, bool]):
     """
 
     data: Union[Unset, "EnvelopeData"] = UNSET
-    meta: Union[Unset, "EnvelopeMeta"] = UNSET
+    meta: Union[Unset, "ServiceResponseMeta"] = UNSET
     has_errors: Union[Unset, bool] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -54,7 +54,7 @@ class Envelope:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.envelope_data import EnvelopeData
-        from ..models.envelope_meta import EnvelopeMeta
+        from ..models.service_response_meta import ServiceResponseMeta
 
         d = dict(src_dict)
         _data = d.pop("data", UNSET)
@@ -65,11 +65,11 @@ class Envelope:
             data = EnvelopeData.from_dict(_data)
 
         _meta = d.pop("meta", UNSET)
-        meta: Union[Unset, EnvelopeMeta]
+        meta: Union[Unset, ServiceResponseMeta]
         if isinstance(_meta, Unset):
             meta = UNSET
         else:
-            meta = EnvelopeMeta.from_dict(_meta)
+            meta = ServiceResponseMeta.from_dict(_meta)
 
         has_errors = d.pop("hasErrors", UNSET)
 

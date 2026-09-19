@@ -37,7 +37,7 @@ namespace Cogneris.DocumentAI.Model
         /// <param name="meta">meta</param>
         /// <param name="hasErrors">hasErrors</param>
         [JsonConstructor]
-        public Envelope(Option<EnvelopeData?> data = default, Option<EnvelopeMeta?> meta = default, Option<bool?> hasErrors = default)
+        public Envelope(Option<EnvelopeData?> data = default, Option<ServiceResponseMeta?> meta = default, Option<bool?> hasErrors = default)
         {
             DataOption = data;
             MetaOption = meta;
@@ -65,13 +65,13 @@ namespace Cogneris.DocumentAI.Model
         /// </summary>
         [JsonIgnore]
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<EnvelopeMeta?> MetaOption { get; private set; }
+        public Option<ServiceResponseMeta?> MetaOption { get; private set; }
 
         /// <summary>
         /// Gets or Sets Meta
         /// </summary>
         [JsonPropertyName("meta")]
-        public EnvelopeMeta? Meta { get { return this.MetaOption.Value; } set { this.MetaOption = new(value); } }
+        public ServiceResponseMeta? Meta { get { return this.MetaOption.Value; } set { this.MetaOption = new(value); } }
 
         /// <summary>
         /// Used to track the state of HasErrors
@@ -145,7 +145,7 @@ namespace Cogneris.DocumentAI.Model
             JsonTokenType startingTokenType = utf8JsonReader.TokenType;
 
             Option<EnvelopeData?> data = default;
-            Option<EnvelopeMeta?> meta = default;
+            Option<ServiceResponseMeta?> meta = default;
             Option<bool?> hasErrors = default;
 
             while (utf8JsonReader.Read())
@@ -167,7 +167,7 @@ namespace Cogneris.DocumentAI.Model
                             data = new Option<EnvelopeData?>(JsonSerializer.Deserialize<EnvelopeData>(ref utf8JsonReader, jsonSerializerOptions)!);
                             break;
                         case "meta":
-                            meta = new Option<EnvelopeMeta?>(JsonSerializer.Deserialize<EnvelopeMeta>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            meta = new Option<ServiceResponseMeta?>(JsonSerializer.Deserialize<ServiceResponseMeta>(ref utf8JsonReader, jsonSerializerOptions)!);
                             break;
                         case "hasErrors":
                             hasErrors = new Option<bool?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (bool?)null : utf8JsonReader.GetBoolean());
