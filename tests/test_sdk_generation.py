@@ -485,6 +485,30 @@ console.log(JSON.stringify({
         self.assertIn("/Document/extraction", generated_text)
         self.assertIn("/api/v1/portal/forms", generated_text)
 
+    def test_document_envelope_meta_is_the_service_response_meta_in_every_sdk(self):
+        # XTRAK-1687: the six /Document/* routes answer with `Envelope`. Its
+        # `meta` is the same producer type the job envelopes describe as
+        # ServiceResponseMeta (errors, creditsConsumed). An inline two-field
+        # copy made the generated C#/Java models drop both at runtime.
+        source = (ROOT / "openapi/cogneris-openapi.yaml").read_text()
+        self.assertIn("        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }\n        hasErrors:", source)
+        expectations = {
+            "typescript/src/types.gen.ts": "meta?: ServiceResponseMeta;",
+            "python/cogneris_document_ai_sdk/models/envelope.py": "from ..models.service_response_meta import ServiceResponseMeta",
+            "csharp/src/Cogneris.DocumentAI/Model/Envelope.cs": "Option<ServiceResponseMeta?> MetaOption",
+            "java/src/main/java/ai/cogneris/documentai/model/Envelope.java": "private ServiceResponseMeta meta;",
+        }
+        for relative_path, expected in expectations.items():
+            with self.subTest(sdk=relative_path):
+                self.assertIn(expected, (SDKS / relative_path).read_text())
+        for orphan in (
+            "python/cogneris_document_ai_sdk/models/envelope_meta.py",
+            "csharp/src/Cogneris.DocumentAI/Model/EnvelopeMeta.cs",
+            "java/src/main/java/ai/cogneris/documentai/model/EnvelopeMeta.java",
+        ):
+            with self.subTest(orphan=orphan):
+                self.assertFalse((SDKS / orphan).exists(), orphan)
+
     def test_generated_text_has_no_trailing_whitespace(self):
         offenders = []
         for directory in (SDKS / name for name in ("typescript", "python", "csharp", "java")):

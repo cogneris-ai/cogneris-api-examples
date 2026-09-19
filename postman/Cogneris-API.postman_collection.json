@@ -128,7 +128,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -479,7 +479,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -796,7 +796,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1109,7 +1109,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1422,7 +1422,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1750,7 +1750,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "body": "{\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"metadata\": {\n      \"key_0\": true\n    },\n    \"createdDate\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -2041,7 +2041,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://;y)#4jlxm|\"\n}",
+                      "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://TcIBFv>vv<\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -2088,7 +2088,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://;y)#4jlxm|\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://TcIBFv>vv<\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2123,7 +2123,7 @@
                           "value": "<integer>"
                         }
                       ],
-                      "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"status\": \"Queued\",\n    \"statusUrl\": \"<string>\",\n    \"retryAfterSeconds\": \"<integer>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"status\": \"Queued\",\n    \"statusUrl\": \"<string>\",\n    \"retryAfterSeconds\": \"<integer>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -2159,7 +2159,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://;y)#4jlxm|\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://TcIBFv>vv<\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2206,7 +2206,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://;y)#4jlxm|\"\n}",
+                          "raw": "{\n  \"operation\": \"Extraction\",\n  \"inputReference\": \"artifact://TcIBFv>vv<\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -2315,7 +2315,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"data\": {\n    \"jobs\": [\n      {\n        \"jobId\": \"<uuid>\",\n        \"operation\": \"ZeroShot\",\n        \"status\": \"Succeeded\",\n        \"outputReference\": \"<string,null>\",\n        \"stage\": \"<string,null>\",\n        \"processedPages\": \"<integer,null>\",\n        \"totalPages\": \"<integer,null>\",\n        \"attemptCount\": \"<integer>\",\n        \"failureCode\": \"<string,null>\",\n        \"retryable\": \"<boolean>\",\n        \"startedAt\": \"<string,null-date-time>\",\n        \"completedAt\": \"<string,null-date-time>\",\n        \"cancellationRequestedAt\": \"<string,null-date-time>\",\n        \"expiresAt\": \"<dateTime>\"\n      },\n      {\n        \"jobId\": \"<uuid>\",\n        \"operation\": \"Classification\",\n        \"status\": \"Processing\",\n        \"outputReference\": \"<string,null>\",\n        \"stage\": \"<string,null>\",\n        \"processedPages\": \"<integer,null>\",\n        \"totalPages\": \"<integer,null>\",\n        \"attemptCount\": \"<integer>\",\n        \"failureCode\": \"<string,null>\",\n        \"retryable\": \"<boolean>\",\n        \"startedAt\": \"<string,null-date-time>\",\n        \"completedAt\": \"<string,null-date-time>\",\n        \"cancellationRequestedAt\": \"<string,null-date-time>\",\n        \"expiresAt\": \"<dateTime>\"\n      }\n    ],\n    \"hasMore\": \"<boolean>\",\n    \"limit\": \"<integer>\",\n    \"nextCursor\": \"<string,null>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "body": "{\n  \"data\": {\n    \"jobs\": [\n      {\n        \"jobId\": \"<uuid>\",\n        \"operation\": \"Redaction\",\n        \"status\": \"Cancelled\",\n        \"outputReference\": \"<string,null>\",\n        \"stage\": \"<string,null>\",\n        \"processedPages\": \"<integer,null>\",\n        \"totalPages\": \"<integer,null>\",\n        \"attemptCount\": \"<integer>\",\n        \"failureCode\": \"<string,null>\",\n        \"retryable\": \"<boolean>\",\n        \"startedAt\": \"<string,null-date-time>\",\n        \"completedAt\": \"<string,null-date-time>\",\n        \"cancellationRequestedAt\": \"<string,null-date-time>\",\n        \"expiresAt\": \"<dateTime>\"\n      },\n      {\n        \"jobId\": \"<uuid>\",\n        \"operation\": \"Facematch\",\n        \"status\": \"Succeeded\",\n        \"outputReference\": \"<string,null>\",\n        \"stage\": \"<string,null>\",\n        \"processedPages\": \"<integer,null>\",\n        \"totalPages\": \"<integer,null>\",\n        \"attemptCount\": \"<integer>\",\n        \"failureCode\": \"<string,null>\",\n        \"retryable\": \"<boolean>\",\n        \"startedAt\": \"<string,null-date-time>\",\n        \"completedAt\": \"<string,null-date-time>\",\n        \"cancellationRequestedAt\": \"<string,null-date-time>\",\n        \"expiresAt\": \"<dateTime>\"\n      }\n    ],\n    \"hasMore\": \"<boolean>\",\n    \"limit\": \"<integer>\",\n    \"nextCursor\": \"<string,null>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -2509,7 +2509,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"operation\": \"Split\",\n    \"status\": \"Queued\",\n    \"outputReference\": \"<string,null>\",\n    \"stage\": \"<string,null>\",\n    \"processedPages\": \"<integer,null>\",\n    \"totalPages\": \"<integer,null>\",\n    \"attemptCount\": \"<integer>\",\n    \"failureCode\": \"<string,null>\",\n    \"retryable\": \"<boolean>\",\n    \"startedAt\": \"<string,null-date-time>\",\n    \"completedAt\": \"<string,null-date-time>\",\n    \"cancellationRequestedAt\": \"<string,null-date-time>\",\n    \"expiresAt\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"operation\": \"Classification\",\n    \"status\": \"Succeeded\",\n    \"outputReference\": \"<string,null>\",\n    \"stage\": \"<string,null>\",\n    \"processedPages\": \"<integer,null>\",\n    \"totalPages\": \"<integer,null>\",\n    \"attemptCount\": \"<integer>\",\n    \"failureCode\": \"<string,null>\",\n    \"retryable\": \"<boolean>\",\n    \"startedAt\": \"<string,null-date-time>\",\n    \"completedAt\": \"<string,null-date-time>\",\n    \"cancellationRequestedAt\": \"<string,null-date-time>\",\n    \"expiresAt\": \"<dateTime>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -2755,7 +2755,7 @@
                                   "value": "application/json"
                                 }
                               ],
-                              "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"cancellationRequested\": \"<boolean>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                              "body": "{\n  \"data\": {\n    \"jobId\": \"<uuid>\",\n    \"cancellationRequested\": \"<boolean>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                               "cookie": [],
                               "_postman_previewlanguage": "json"
                             },
@@ -2859,7 +2859,7 @@
                                   "value": "application/json"
                                 }
                               ],
-                              "body": "{\n  \"data\": {\n    \"key_0\": 4975\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                              "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": \"string\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                               "cookie": [],
                               "_postman_previewlanguage": "json"
                             },
@@ -3252,7 +3252,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"channels\": [\n    \"sms\",\n    \"whatsapp\"\n  ]\n}",
+                          "body": "{\n  \"channels\": [\n    \"whatsapp\",\n    \"sms\"\n  ]\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },

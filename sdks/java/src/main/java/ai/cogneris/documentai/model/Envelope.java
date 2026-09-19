@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
 import ai.cogneris.documentai.model.EnvelopeData;
-import ai.cogneris.documentai.model.EnvelopeMeta;
+import ai.cogneris.documentai.model.ServiceResponseMeta;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -47,7 +47,7 @@ public class Envelope {
 
   public static final String JSON_PROPERTY_META = "meta";
   @javax.annotation.Nullable
-  private EnvelopeMeta meta;
+  private ServiceResponseMeta meta;
 
   public static final String JSON_PROPERTY_HAS_ERRORS = "hasErrors";
   @javax.annotation.Nullable
@@ -80,7 +80,7 @@ public class Envelope {
   }
 
 
-  public Envelope meta(@javax.annotation.Nullable EnvelopeMeta meta) {
+  public Envelope meta(@javax.annotation.Nullable ServiceResponseMeta meta) {
     this.meta = meta;
     return this;
   }
@@ -92,14 +92,14 @@ public class Envelope {
   @javax.annotation.Nullable
   @JsonProperty(value = JSON_PROPERTY_META, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public EnvelopeMeta getMeta() {
+  public ServiceResponseMeta getMeta() {
     return meta;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_META, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMeta(@javax.annotation.Nullable EnvelopeMeta meta) {
+  public void setMeta(@javax.annotation.Nullable ServiceResponseMeta meta) {
     this.meta = meta;
   }
 

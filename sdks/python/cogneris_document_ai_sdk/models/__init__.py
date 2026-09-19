@@ -19,7 +19,6 @@ from .document_job_submit_status import DocumentJobSubmitStatus
 from .envelope import Envelope
 from .envelope_data import EnvelopeData
 from .envelope_data_metadata import EnvelopeDataMetadata
-from .envelope_meta import EnvelopeMeta
 from .extract_document_body import ExtractDocumentBody
 from .face_match_document_body import FaceMatchDocumentBody
 from .portal_channels import PortalChannels
@@ -56,7 +55,6 @@ __all__ = (
     "Envelope",
     "EnvelopeData",
     "EnvelopeDataMetadata",
-    "EnvelopeMeta",
     "ExtractDocumentBody",
     "FaceMatchDocumentBody",
     "PortalChannels",

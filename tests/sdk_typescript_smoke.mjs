@@ -81,7 +81,16 @@ before(async () => {
       if (body.includes(reflectedDocument)) {
         json(response, 415, { code: reflectedApiKey, title: reflectedDocument, retryable: true });
       } else {
-        json(response, 200, { data: { accepted: true }, meta: { status: 200 }, hasErrors: false });
+        json(response, 200, {
+          data: { accepted: true },
+          meta: {
+            httpStatusCode: 200,
+            messages: [],
+            errors: [{ code: "ocr.low_confidence", message: "page 2 was read at 0.41 confidence", field: null, retryable: false }],
+            creditsConsumed: 14.5,
+          },
+          hasErrors: false,
+        });
       }
       return;
     }
@@ -177,6 +186,10 @@ test("client sends bearer auth and multipart bytes without including them in err
   });
   const result = await client.extract(new Blob(["ordinary-document"]), { fileName: "sample.pdf" });
   assert.equal(result.data.accepted, true);
+  // XTRAK-1687: /Document/* meta carries the credit charge and structured errors.
+  assert.equal(result.meta.httpStatusCode, 200);
+  assert.equal(result.meta.creditsConsumed, 14.5);
+  assert.deepEqual(result.meta.errors.map((error) => error.code), ["ocr.low_confidence"]);
   const upload = requests.at(-1);
   assert.equal(upload.authorization, `Bearer ${reflectedApiKey}`);
   assert.match(upload.contentType, /^multipart\/form-data; boundary=/);

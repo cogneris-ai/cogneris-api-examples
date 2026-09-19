@@ -284,7 +284,9 @@ safe status summary before sharing it.
 ## Responses and errors
 
 Successful synchronous document calls return an `Envelope`: `data` is the
-operation payload, `meta` carries status/messages, and `hasErrors` is the fast
+operation payload, `meta` is the `ServiceResponseMeta` shared with the job
+endpoints (`httpStatusCode`, `messages`, structured `errors`, and the
+`creditsConsumed` charge for the call), and `hasErrors` is the fast
 failure indicator. Application code may inspect `data`, but the quickstart
 examples deliberately do not print extracted field values or raw bodies.
 
