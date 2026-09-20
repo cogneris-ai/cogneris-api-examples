@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "path": "openapi/cogneris-openapi.yaml",
-    "sha256": "4a0041d29bdab61c823c5a5828a9cb586838e40277d2a9b4cd32ff0def3a0376"
+    "sha256": "17e45707a5363a5b0d8eb750007b6d55d1997a74df652eedc49e7441b4637434"
   },
   "generators": {
     "python": {
@@ -54,7 +54,7 @@
         "src/Cogneris.DocumentAI/Client/ApiResponse`1.cs": "3ded2d496383a5f36c19a436ecadeb99b655f4a94e76da864a696b2e0b41b40f",
         "src/Cogneris.DocumentAI/Client/ApiResponseEventArgs.cs": "74361d6aafbbc3ab8a04dcdcb33297cdeeeb2b499c0b7c8084d4b0b46326870b",
         "src/Cogneris.DocumentAI/Client/BearerToken.cs": "a23bc5622446ae18355c54a81ffd631824823627ff631c93c93a4a26015651b0",
-        "src/Cogneris.DocumentAI/Client/ClientUtils.cs": "63c77f289a9e10eae4d2116dd0742d7bd69f25cc30bcbb483ddd53c43b6b3116",
+        "src/Cogneris.DocumentAI/Client/ClientUtils.cs": "357e60fefbdd3cfba3b9bd04451af52e5b3b962271ed8165aa510e9461a0807f",
         "src/Cogneris.DocumentAI/Client/CookieContainer.cs": "4ce19fa4994dd7a8d8f8e89f3da9811fb52161a7cdddcc29b0ef16eeae013d6b",
         "src/Cogneris.DocumentAI/Client/DateOnlyJsonConverter.cs": "a5927958bf9d4701db82568bcff5718450c243b668e5243ad117054238beabf7",
         "src/Cogneris.DocumentAI/Client/DateOnlyNullableJsonConverter.cs": "ce25ea5536604a772f3fbea6429352ec4617a50d9ea2651d987d2e04778cbd49",
@@ -62,7 +62,7 @@
         "src/Cogneris.DocumentAI/Client/DateTimeNullableJsonConverter.cs": "5ed79ae1be6c34da1a766261dfaa7e045469a0048ca12ea61649cad86f8fffe8",
         "src/Cogneris.DocumentAI/Client/ExceptionEventArgs.cs": "04b0ec6b9c313e503d3bcd3e9011209e3b3742f6726c07c6464aa010ab52864e",
         "src/Cogneris.DocumentAI/Client/FileParameter.cs": "8cf8b4966b8fedfe6d3140e8890963a32841e24a4b53862cad99ae2ff80571a8",
-        "src/Cogneris.DocumentAI/Client/HostConfiguration.cs": "cab6a067ec69e5867b766697eb3cf3c0e4c50aa2c7537e2b2d65f1f910d7d27b",
+        "src/Cogneris.DocumentAI/Client/HostConfiguration.cs": "c6fa8d3c50a2a00723f0a61c68fdff7b0a864b53c834d279bb1963975afd3f80",
         "src/Cogneris.DocumentAI/Client/JsonSerializerOptionsProvider.cs": "11d4a5f17f3d013ccd63bbdece30cb9ffb749b86ccb1926433d912071db4884f",
         "src/Cogneris.DocumentAI/Client/Option.cs": "c3742373cff8b1a3dd9433f4bfc65ea63502bd63d2550af9f64d5f42ea61383b",
         "src/Cogneris.DocumentAI/Client/RateLimitProvider`1.cs": "27cbe88f94e858bad6c8f7625c1698793b0d1f09b556e3f2392d546020fa1cdc",
@@ -93,8 +93,9 @@
         "src/Cogneris.DocumentAI/Model/EnvelopeData.cs": "ad41ba40dfefd0dbead25589eca2cdc90f6d73a19394456c6cb9e523c80ac1d5",
         "src/Cogneris.DocumentAI/Model/PortalChannels.cs": "2db0bd04f8c68e5fb5e8112314e201735ff8bab9147e097a7ff4b5eeaf333349",
         "src/Cogneris.DocumentAI/Model/PortalForm.cs": "e8c64214cffb31d1d108f8028889c4dc5397b33513ecb72e73d1dc127c23b587",
-        "src/Cogneris.DocumentAI/Model/PortalMagicLink.cs": "fe024b568d3c9b440deb080bb2215d86459b9ebe9d62c90c842ac0f22c4335f5",
-        "src/Cogneris.DocumentAI/Model/PortalMagicLinkRequest.cs": "511d8687ff161c71bf5090a5c18aac2ade3022987b56cd39764b23d9665dcd1d",
+        "src/Cogneris.DocumentAI/Model/PortalMagicLink.cs": "a616946dbbc9bdc9d2a9e0d7a864a1ec8655624d307f0e0a0036f55165cb9292",
+        "src/Cogneris.DocumentAI/Model/PortalMagicLinkOptIn.cs": "e466e10c5b9588d08d507fb771894ab341e7975b3fb0c2c7c3130b5aa887e002",
+        "src/Cogneris.DocumentAI/Model/PortalMagicLinkRequest.cs": "d5be04a044b42d3f6f42b8d550c3d52103e80f19917ca2bb2d28e057353f6839",
         "src/Cogneris.DocumentAI/Model/PortalSendChannel.cs": "e3100ed39f043e92c7cae7eb06366b289a9be123127feebd9a9195b69c445f04",
         "src/Cogneris.DocumentAI/Model/ProblemDetails.cs": "4466d30bba9dc253263255b2044613d86375cc041bce5ac647ced3c19c0666cd",
         "src/Cogneris.DocumentAI/Model/ProblemDetailsErrorsInner.cs": "0ce0445f4004a419dbf6acead6ac4501b5ae95c4ec778188f578e54b4641c917",
@@ -152,8 +153,9 @@
         "src/main/java/ai/cogneris/documentai/model/EnvelopeData.java": "5324f38c755110e44e88bf58ef00b2412fc5966d19236a4ea1de674c8fa1cea0",
         "src/main/java/ai/cogneris/documentai/model/PortalChannels.java": "ef0a5875b0c30779bf61f2356ce923678f220754f827927722dd5e2c1d5ff17e",
         "src/main/java/ai/cogneris/documentai/model/PortalForm.java": "dc7604e0af3bd84a89af2ab7155e12a925205b2fff51c460ada7e3d05c50960d",
-        "src/main/java/ai/cogneris/documentai/model/PortalMagicLink.java": "fcf681a4c080a31fd72ece6ee480e862bb8537bc1427da3655608089fc369bbc",
-        "src/main/java/ai/cogneris/documentai/model/PortalMagicLinkRequest.java": "7fa545f66282d93d968db5ba252368102394b8e0d764dd184b2974ec5b21c28f",
+        "src/main/java/ai/cogneris/documentai/model/PortalMagicLink.java": "34351bfb2ca6a58ec300ba72b9bfb6af63792f42ca36e013127c5997778b148e",
+        "src/main/java/ai/cogneris/documentai/model/PortalMagicLinkOptIn.java": "d42d4e5c6d97a548fb10597f9f66309600c5748e6345bb3665e01f311cc41d7d",
+        "src/main/java/ai/cogneris/documentai/model/PortalMagicLinkRequest.java": "16101ec88ae96731fb9e7ef6c6b8529453b0478ab7bcff0731d4ea7d2073e9e8",
         "src/main/java/ai/cogneris/documentai/model/PortalSendChannel.java": "cd9ee1205d50bf75183891f008950e3a77610522a90c5b91a6139757ad8c6fe0",
         "src/main/java/ai/cogneris/documentai/model/ProblemDetails.java": "abfacf85e4334416980b6013170ef38b3e12646a9832441f56be4a37292b5716",
         "src/main/java/ai/cogneris/documentai/model/ProblemDetailsErrorsInner.java": "38e709d635a505e2d85917439203dd6eda6c454f94bc4f0b5d69be5ed73c46d8",
@@ -175,7 +177,7 @@
       "version": "0.1.0",
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
-        "CHANGELOG.md": "48b96c1c2ccfaec82aaf0ba35caae600413c71fd3136ccadc9374fb91259f0be",
+        "CHANGELOG.md": "153211d7dbc3a0c299e8be3de8b7bb9a95c316146a450b5c618e9dc884ed228c",
         "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/documents/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
@@ -197,7 +199,7 @@
         "cogneris_document_ai_sdk/client.py": "a3f99d2eac81090b2dbb9b52d56645c2a2046c6c24bd643b7908ee089c3fe556",
         "cogneris_document_ai_sdk/cogneris.py": "93a772e2c9f0f2c04c6873336f7fe509c24f845ec2a1e8b95d38e8e322f20cb8",
         "cogneris_document_ai_sdk/errors.py": "80ef060662aa992360020f84e684fea0ecb1cedbe9ed5ffa5c6ece5134f5e6ad",
-        "cogneris_document_ai_sdk/models/__init__.py": "cac5a1171dbf7afc2b90a51839c7bc1c8b97f9b0674280172206ba76afcf387f",
+        "cogneris_document_ai_sdk/models/__init__.py": "8b6ad7c050b45e6dabf15c3345a54c8b0117c360d740c9b9878c23f5e6305622",
         "cogneris_document_ai_sdk/models/api_error_details_type_0.py": "9cda77d303e00e5cf8db0ebc453b1dab30fc2bc44b93c7dd26e501924124f76e",
         "cogneris_document_ai_sdk/models/api_error.py": "a131ac93b524c99261a7419f06a96c3ec27c64d84c1136b25b6f442c6aac6f4a",
         "cogneris_document_ai_sdk/models/classify_documents_body.py": "3ccfeaa7c2cff584a067ca5a7d0772b73d1f5e2f7a0eda42ff3fda83916b1c2d",
@@ -221,8 +223,10 @@
         "cogneris_document_ai_sdk/models/face_match_document_body.py": "fae904ff6fe306d1af0cd02e95bd2f63fa919540bb84465e475256cac7d0e626",
         "cogneris_document_ai_sdk/models/portal_channels.py": "fc406fe340d309a6078523eb7ef2adc3d121eed2b6b2673170465f4b3a0bf8c9",
         "cogneris_document_ai_sdk/models/portal_form.py": "8b221dbee5116e8b6201be9e36128d1e086e4630db3fd57c152b718178fa9928",
-        "cogneris_document_ai_sdk/models/portal_magic_link_request.py": "4980c103a03b19b27b0526fde1173e2c84f664b917bc263b3016a6a642c84f86",
-        "cogneris_document_ai_sdk/models/portal_magic_link.py": "ed42161ea24915fd1a711157b3f200b1ecce810a66ab6ce033b394139db4945e",
+        "cogneris_document_ai_sdk/models/portal_magic_link_opt_in_source.py": "ca452b4becdfba6697c5f10f1a8aee62c1a3298f5587af73b31a5c863b67cb3b",
+        "cogneris_document_ai_sdk/models/portal_magic_link_opt_in.py": "2d1175a97c7a38186abba9db30814fd2f34e5ae5db2110482ce50d2541c1cbb1",
+        "cogneris_document_ai_sdk/models/portal_magic_link_request.py": "ae46ff2acfca5d18844cd3dc24ad319b46ffd9ed8b4cdadb5ec193065461b1a1",
+        "cogneris_document_ai_sdk/models/portal_magic_link.py": "6219da9c3c300532af5a0d59856c2d30bda44393d5ade3319c3de805bb94a814",
         "cogneris_document_ai_sdk/models/portal_send_channel.py": "62012c0a0cd19b6f86774e7ab18098c22cace6e8a80f5697e823952bc4305eb3",
         "cogneris_document_ai_sdk/models/problem_details_errors_item.py": "efdf8ecb450aab70e631c037219ed966f885122c1ec682992ddc3f9fa8bb8901",
         "cogneris_document_ai_sdk/models/problem_details.py": "36113188e22e2e061b1a98e6fc24df7f384717d1332b7453e41a933b8ab35386",
@@ -261,9 +265,9 @@
         "src/core/serverSentEvents.gen.ts": "df993567abbe3e5b477d81517fb967cf63cf40b7866957d5dc6cc03238cb1426",
         "src/core/types.gen.ts": "0c33c5e096608fc1f859d89bc17ce428e306c7aa3c2c30acd8affa5a734370af",
         "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
-        "src/index.ts": "805d8c358c6353dc9a2e0faf42a627d7718ace378475eb427fdea0d1c403a45e",
+        "src/index.ts": "3e99079b6c27090c47a5cd8128abe8c90102f197e3a7fe4386fc9b6a697220d1",
         "src/sdk.gen.ts": "8a40647dd9a371a7bb23e1b11cbfc3fba6cafd1d9348c7afcc22e4ee6bac3398",
-        "src/types.gen.ts": "7a4325d6ce331bb83befc14252c37cfa3d975c13b7524e9cbb250879c0e0a6b8",
+        "src/types.gen.ts": "77208b1a27e2bcd1c61f049d522e90913c7beb2181abcd527a3c7834c21ebabf",
         "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
       }
     }

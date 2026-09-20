@@ -37,13 +37,15 @@ namespace Cogneris.DocumentAI.Model
         /// <param name="url">The link the recipient opens. Present only on the first create — the token is a one-time secret that is never stored in readable form, so an idempotent replay omits this field. </param>
         /// <param name="sent">Whether Cogneris dispatched the link. False when &#x60;sendChannel&#x60; was omitted or the send was suppressed.</param>
         /// <param name="sendChannel">The channel actually used, when one was.</param>
+        /// <param name="sendSuppressionReason">Why delivery was suppressed when sent is false. Null or absent when delivery succeeded or no send was requested. This is an open string; handle unknown values. whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded; whatsapp_blocked means the recipient asked to stop and consent cannot override it; provider_error is transient and may be retried. The link exists even if sending was suppressed; use the returned url when present. </param>
         [JsonConstructor]
-        public PortalMagicLink(Option<long?> id = default, Option<string?> url = default, Option<bool?> sent = default, Option<PortalSendChannel?> sendChannel = default)
+        public PortalMagicLink(Option<long?> id = default, Option<string?> url = default, Option<bool?> sent = default, Option<PortalSendChannel?> sendChannel = default, Option<string?> sendSuppressionReason = default)
         {
             IdOption = id;
             UrlOption = url;
             SentOption = sent;
             SendChannelOption = sendChannel;
+            SendSuppressionReasonOption = sendSuppressionReason;
             OnCreated();
         }
 
@@ -106,6 +108,20 @@ namespace Cogneris.DocumentAI.Model
         public bool? Sent { get { return this.SentOption.Value; } set { this.SentOption = new(value); } }
 
         /// <summary>
+        /// Used to track the state of SendSuppressionReason
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<string?> SendSuppressionReasonOption { get; private set; }
+
+        /// <summary>
+        /// Why delivery was suppressed when sent is false. Null or absent when delivery succeeded or no send was requested. This is an open string; handle unknown values. whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded; whatsapp_blocked means the recipient asked to stop and consent cannot override it; provider_error is transient and may be retried. The link exists even if sending was suppressed; use the returned url when present.
+        /// </summary>
+        /// <value>Why delivery was suppressed when sent is false. Null or absent when delivery succeeded or no send was requested. This is an open string; handle unknown values. whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded; whatsapp_blocked means the recipient asked to stop and consent cannot override it; provider_error is transient and may be retried. The link exists even if sending was suppressed; use the returned url when present. </value>
+        [JsonPropertyName("sendSuppressionReason")]
+        public string? SendSuppressionReason { get { return this.SendSuppressionReasonOption.Value; } set { this.SendSuppressionReasonOption = new(value); } }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -117,6 +133,7 @@ namespace Cogneris.DocumentAI.Model
             sb.Append("  Url: ").Append(Url).Append("\n");
             sb.Append("  Sent: ").Append(Sent).Append("\n");
             sb.Append("  SendChannel: ").Append(SendChannel).Append("\n");
+            sb.Append("  SendSuppressionReason: ").Append(SendSuppressionReason).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,6 +185,7 @@ namespace Cogneris.DocumentAI.Model
             Option<string?> url = default;
             Option<bool?> sent = default;
             Option<PortalSendChannel?> sendChannel = default;
+            Option<string?> sendSuppressionReason = default;
 
             while (utf8JsonReader.Read())
             {
@@ -196,6 +214,9 @@ namespace Cogneris.DocumentAI.Model
                         case "sendChannel":
                             sendChannel = new Option<PortalSendChannel?>(JsonSerializer.Deserialize<PortalSendChannel?>(ref utf8JsonReader, jsonSerializerOptions));
                             break;
+                        case "sendSuppressionReason":
+                            sendSuppressionReason = new Option<string?>(utf8JsonReader.GetString());
+                            break;
                         default:
                             break;
                     }
@@ -208,7 +229,7 @@ namespace Cogneris.DocumentAI.Model
             if (sent.IsSet && sent.Value == null)
                 throw new ArgumentNullException(nameof(sent), "Property is not nullable for class PortalMagicLink.");
 
-            return new PortalMagicLink(id, url, sent, sendChannel);
+            return new PortalMagicLink(id, url, sent, sendChannel, sendSuppressionReason);
         }
 
         /// <summary>
@@ -255,6 +276,11 @@ namespace Cogneris.DocumentAI.Model
                 }
                 else
                     writer.WriteNull("sendChannel");
+            if (portalMagicLink.SendSuppressionReasonOption.IsSet)
+                if (portalMagicLink.SendSuppressionReasonOption.Value != null)
+                    writer.WriteString("sendSuppressionReason", portalMagicLink.SendSuppressionReason);
+                else
+                    writer.WriteNull("sendSuppressionReason");
         }
     }
 }

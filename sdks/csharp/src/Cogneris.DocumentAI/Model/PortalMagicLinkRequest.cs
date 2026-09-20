@@ -42,8 +42,9 @@ namespace Cogneris.DocumentAI.Model
         /// <param name="dueDays">Days until the link expires. A value of zero or less is treated as 30. (default to 30)</param>
         /// <param name="maxAccesses">How many times the link may be opened. Null means unlimited; 1 makes it single-use.</param>
         /// <param name="notes">Internal note kept against the link, never shown to the recipient.</param>
+        /// <param name="optIn">WhatsApp consent for this recipient, recorded alongside creation. Supply it when consent is not already on file. Omit it when consent is already held. Only WhatsApp records this consent; email and SMS use their own consent rules. When supplied, source and non-blank evidenceText are required for every channel. </param>
         [JsonConstructor]
-        public PortalMagicLinkRequest(long formId, string name, Option<PortalSendChannel?> sendChannel = default, Option<string?> email = default, Option<string?> phone = default, Option<string?> taxId = default, Option<int?> dueDays = default, Option<int?> maxAccesses = default, Option<string?> notes = default)
+        public PortalMagicLinkRequest(long formId, string name, Option<PortalSendChannel?> sendChannel = default, Option<string?> email = default, Option<string?> phone = default, Option<string?> taxId = default, Option<int?> dueDays = default, Option<int?> maxAccesses = default, Option<string?> notes = default, Option<PortalMagicLinkOptIn?> optIn = default)
         {
             FormId = formId;
             Name = name;
@@ -54,6 +55,7 @@ namespace Cogneris.DocumentAI.Model
             DueDaysOption = dueDays;
             MaxAccessesOption = maxAccesses;
             NotesOption = notes;
+            OptInOption = optIn;
             OnCreated();
         }
 
@@ -172,6 +174,20 @@ namespace Cogneris.DocumentAI.Model
         public string? Notes { get { return this.NotesOption.Value; } set { this.NotesOption = new(value); } }
 
         /// <summary>
+        /// Used to track the state of OptIn
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<PortalMagicLinkOptIn?> OptInOption { get; private set; }
+
+        /// <summary>
+        /// WhatsApp consent for this recipient, recorded alongside creation. Supply it when consent is not already on file. Omit it when consent is already held. Only WhatsApp records this consent; email and SMS use their own consent rules. When supplied, source and non-blank evidenceText are required for every channel.
+        /// </summary>
+        /// <value>WhatsApp consent for this recipient, recorded alongside creation. Supply it when consent is not already on file. Omit it when consent is already held. Only WhatsApp records this consent; email and SMS use their own consent rules. When supplied, source and non-blank evidenceText are required for every channel. </value>
+        [JsonPropertyName("optIn")]
+        public PortalMagicLinkOptIn? OptIn { get { return this.OptInOption.Value; } set { this.OptInOption = new(value); } }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -188,6 +204,7 @@ namespace Cogneris.DocumentAI.Model
             sb.Append("  DueDays: ").Append(DueDays).Append("\n");
             sb.Append("  MaxAccesses: ").Append(MaxAccesses).Append("\n");
             sb.Append("  Notes: ").Append(Notes).Append("\n");
+            sb.Append("  OptIn: ").Append(OptIn).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -256,6 +273,7 @@ namespace Cogneris.DocumentAI.Model
             Option<int?> dueDays = default;
             Option<int?> maxAccesses = default;
             Option<string?> notes = default;
+            Option<PortalMagicLinkOptIn?> optIn = default;
 
             while (utf8JsonReader.Read())
             {
@@ -299,6 +317,9 @@ namespace Cogneris.DocumentAI.Model
                         case "notes":
                             notes = new Option<string?>(utf8JsonReader.GetString());
                             break;
+                        case "optIn":
+                            optIn = new Option<PortalMagicLinkOptIn?>(JsonSerializer.Deserialize<PortalMagicLinkOptIn>(ref utf8JsonReader, jsonSerializerOptions));
+                            break;
                         default:
                             break;
                     }
@@ -320,7 +341,7 @@ namespace Cogneris.DocumentAI.Model
             if (dueDays.IsSet && dueDays.Value == null)
                 throw new ArgumentNullException(nameof(dueDays), "Property is not nullable for class PortalMagicLinkRequest.");
 
-            return new PortalMagicLinkRequest(formId.Value!.Value!, name.Value!, sendChannel, email, phone, taxId, dueDays, maxAccesses, notes);
+            return new PortalMagicLinkRequest(formId.Value!.Value!, name.Value!, sendChannel, email, phone, taxId, dueDays, maxAccesses, notes, optIn);
         }
 
         /// <summary>
@@ -394,6 +415,15 @@ namespace Cogneris.DocumentAI.Model
                     writer.WriteString("notes", portalMagicLinkRequest.Notes);
                 else
                     writer.WriteNull("notes");
+
+            if (portalMagicLinkRequest.OptInOption.IsSet)
+                if (portalMagicLinkRequest.OptInOption.Value != null)
+                {
+                    writer.WritePropertyName("optIn");
+                    JsonSerializer.Serialize(writer, portalMagicLinkRequest.OptIn, jsonSerializerOptions);
+                }
+                else
+                    writer.WriteNull("optIn");
         }
     }
 }

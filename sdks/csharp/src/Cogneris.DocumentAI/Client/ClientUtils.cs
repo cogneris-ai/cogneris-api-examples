@@ -120,6 +120,8 @@ namespace Cogneris.DocumentAI.Client
                 return DocumentJobSubmitOperationValueConverter.ToJsonValue(documentJobSubmitOperation);
             if (obj is DocumentJobSubmitStatus documentJobSubmitStatus)
                 return DocumentJobSubmitStatusValueConverter.ToJsonValue(documentJobSubmitStatus);
+            if (obj is PortalMagicLinkOptIn.SourceEnum portalMagicLinkOptInSourceEnum)
+                return PortalMagicLinkOptIn.SourceEnumToJsonValue(portalMagicLinkOptInSourceEnum);
             if (obj is PortalSendChannel portalSendChannel)
                 return PortalSendChannelValueConverter.ToJsonValue(portalSendChannel);
             if (obj is ICollection collection)

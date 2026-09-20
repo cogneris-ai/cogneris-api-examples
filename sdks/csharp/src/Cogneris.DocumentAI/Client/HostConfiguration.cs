@@ -65,6 +65,7 @@ namespace Cogneris.DocumentAI.Client
             _jsonOptions.Converters.Add(new PortalChannelsJsonConverter());
             _jsonOptions.Converters.Add(new PortalFormJsonConverter());
             _jsonOptions.Converters.Add(new PortalMagicLinkJsonConverter());
+            _jsonOptions.Converters.Add(new PortalMagicLinkOptInJsonConverter());
             _jsonOptions.Converters.Add(new PortalMagicLinkRequestJsonConverter());
             _jsonOptions.Converters.Add(new PortalSendChannelJsonConverter());
             _jsonOptions.Converters.Add(new PortalSendChannelNullableJsonConverter());

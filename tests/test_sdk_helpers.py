@@ -85,6 +85,9 @@ class PythonInstalledSdkSmokeTests(unittest.TestCase):
     def test_poll_intervals_handle_non_finite_values_safely(self):
         self.run_installed("test_poll_intervals_handle_non_finite_values_safely")
 
+    def test_portal_consent_and_suppression_round_trip(self):
+        self.run_installed("test_portal_consent_and_suppression_round_trip")
+
     def test_public_flows_and_bounded_polling(self):
         self.run_installed("test_public_flows_and_bounded_polling")
 
