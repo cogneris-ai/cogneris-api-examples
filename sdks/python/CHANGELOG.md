@@ -2,6 +2,8 @@
 
 ## 0.1.0
 
+- Add optional typed WhatsApp consent (`PortalMagicLinkRequest.opt_in`) and preserve `PortalMagicLink.send_suppression_reason`, including unknown future reasons. Existing requests can still omit consent (XTRAK-1651).
+
 - Initial generated client for the public Cogneris Document AI OpenAPI contract.
 - Consume the `{data, meta, hasErrors}` response envelope on the async job endpoints: `submit_job`, `get_job`, `wait_for_job` and `cancel_job` unwrap `DocumentJobSubmissionEnvelope`, `DocumentJobEnvelope` and `DocumentJobCancellationEnvelope`; `cancel_job` returns `DocumentJobCancellation` (HTTP 202 with `jobId` and `cancellationRequested`) instead of `DocumentJob`; `SubmitDocumentJobResponse202` is removed (#14).
 - Align the job contract with the producer: `submit_job` takes a `DocumentJobSubmitOperation` (adds `Facematch`) and an `artifact://` input reference, `ServiceResponseMeta` carries structured `ApiError` entries and `credits_consumed`, and cancelling a job that cannot be cancelled returns a typed `ServiceErrorEnvelope` on HTTP 409 (#15).

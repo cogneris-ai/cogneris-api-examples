@@ -682,6 +682,36 @@ components:
         notes:
           type: [string, 'null']
           description: Internal note kept against the link, never shown to the recipient.
+        optIn:
+          description: |
+            WhatsApp consent for this recipient, recorded alongside creation. Supply it
+            when consent is not already on file. Omit it when consent is already held.
+            Only WhatsApp records this consent; email and SMS use their own consent rules.
+            When supplied, source and non-blank evidenceText are required for every channel.
+          oneOf:
+            - $ref: '#/components/schemas/PortalMagicLinkOptIn'
+            - type: 'null'
+
+    PortalMagicLinkOptIn:
+      type: object
+      description: A declaration that the recipient agreed to be messaged on WhatsApp.
+      required: [source, evidenceText]
+      properties:
+        source:
+          type: string
+          enum: [web_form, contract, in_person, import, api]
+          description: How the recipient's consent was collected.
+        evidenceText:
+          type: string
+          minLength: 1
+          description: Required, non-blank pointer to the proof of consent, such as a contract number, form id or ticket.
+        evidenceUrl:
+          type: [string, 'null']
+          description: Optional link to the evidence.
+        collectedWhen:
+          type: [string, 'null']
+          format: date-time
+          description: When the recipient consented. Defaults to now; supply the original date for older consent. Dates more than one day in the future are rejected.
 
     PortalMagicLink:
       type: object
@@ -704,6 +734,15 @@ components:
           oneOf:
             - $ref: '#/components/schemas/PortalSendChannel'
             - type: 'null'
+        sendSuppressionReason:
+          type: [string, 'null']
+          description: |
+            Why delivery was suppressed when sent is false. Null or absent when delivery
+            succeeded or no send was requested. This is an open string; handle unknown values.
+            whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded;
+            whatsapp_blocked means the recipient asked to stop and consent cannot override it;
+            provider_error is transient and may be retried. The link exists even if sending
+            was suppressed; use the returned url when present.
 
     ProblemDetails:
       type: object

@@ -24,6 +24,8 @@ from .face_match_document_body import FaceMatchDocumentBody
 from .portal_channels import PortalChannels
 from .portal_form import PortalForm
 from .portal_magic_link import PortalMagicLink
+from .portal_magic_link_opt_in import PortalMagicLinkOptIn
+from .portal_magic_link_opt_in_source import PortalMagicLinkOptInSource
 from .portal_magic_link_request import PortalMagicLinkRequest
 from .portal_send_channel import PortalSendChannel
 from .problem_details import ProblemDetails
@@ -60,6 +62,8 @@ __all__ = (
     "PortalChannels",
     "PortalForm",
     "PortalMagicLink",
+    "PortalMagicLinkOptIn",
+    "PortalMagicLinkOptInSource",
     "PortalMagicLinkRequest",
     "PortalSendChannel",
     "ProblemDetails",

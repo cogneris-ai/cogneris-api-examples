@@ -316,6 +316,32 @@ class InstalledPythonSdkTests(unittest.TestCase):
                 )
                 self.assertEqual(job.status.value, "Succeeded")
 
+    def test_portal_consent_and_suppression_round_trip(self):
+        from cogneris_document_ai_sdk.models import PortalMagicLink, PortalMagicLinkRequest
+
+        # Public DTO + controller mapping in api-be (cb6629d), no service envelope.
+        payload = {"formId": 42, "name": "Test Recipient", "sendChannel": "whatsapp",
+                   "phone": "+15555550100", "optIn": {
+                       "source": "web_form", "evidenceText": "consent-form-42",
+                       "evidenceUrl": "https://example.test/consents/42",
+                       "collectedWhen": "2026-09-17T12:00:00Z"}}
+        request = PortalMagicLinkRequest.from_dict(payload)
+        self.assertTrue(hasattr(request, "opt_in"), "consent must be a typed SDK field")
+        self.assertEqual(request.opt_in.evidence_text, "consent-form-42")
+        serialized = request.to_dict()["optIn"]
+        self.assertEqual(serialized["source"], "web_form")
+        self.assertEqual(serialized["evidenceUrl"], "https://example.test/consents/42")
+        self.assertEqual(serialized["collectedWhen"], "2026-09-17T12:00:00+00:00")
+        self.assertNotIn("optIn", PortalMagicLinkRequest(form_id=42, name="Test").to_dict())
+        self.assertIsNone(PortalMagicLinkRequest.from_dict({**payload, "optIn": None}).to_dict()["optIn"])
+        for reason in ("whatsapp_no_optin", "whatsapp_optin_revoked", "whatsapp_blocked",
+                       "provider_error", "future_reason", None):
+            response = PortalMagicLink.from_dict({"id": 90210, "url": None, "sent": False,
+                "sendChannel": "whatsapp", "sendSuppressionReason": reason})
+            self.assertEqual(response.send_suppression_reason, reason)
+            self.assertEqual(response.to_dict()["sendSuppressionReason"], reason)
+        self.assertNotIn("sendSuppressionReason", PortalMagicLink.from_dict({"id": 90210}).to_dict())
+
     def test_public_flows_and_bounded_polling(self):
         client = self.client(region="eu")
         extracted = client.extract(b"ordinary-document", file_name="sample.pdf")

@@ -19,6 +19,7 @@ import java.util.StringJoiner;
 import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
+import ai.cogneris.documentai.model.PortalMagicLinkOptIn;
 import ai.cogneris.documentai.model.PortalSendChannel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,7 +47,8 @@ import ai.cogneris.documentai.ApiClient;
   PortalMagicLinkRequest.JSON_PROPERTY_TAX_ID,
   PortalMagicLinkRequest.JSON_PROPERTY_DUE_DAYS,
   PortalMagicLinkRequest.JSON_PROPERTY_MAX_ACCESSES,
-  PortalMagicLinkRequest.JSON_PROPERTY_NOTES
+  PortalMagicLinkRequest.JSON_PROPERTY_NOTES,
+  PortalMagicLinkRequest.JSON_PROPERTY_OPT_IN
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class PortalMagicLinkRequest {
@@ -79,6 +81,9 @@ public class PortalMagicLinkRequest {
 
   public static final String JSON_PROPERTY_NOTES = "notes";
   private JsonNullable<String> notes = JsonNullable.<String>undefined();
+
+  public static final String JSON_PROPERTY_OPT_IN = "optIn";
+  private JsonNullable<PortalMagicLinkOptIn> optIn = JsonNullable.<PortalMagicLinkOptIn>undefined();
 
   public PortalMagicLinkRequest() {
   }
@@ -347,6 +352,38 @@ public class PortalMagicLinkRequest {
   }
 
 
+  public PortalMagicLinkRequest optIn(@javax.annotation.Nullable PortalMagicLinkOptIn optIn) {
+    this.optIn = JsonNullable.<PortalMagicLinkOptIn>of(optIn);
+    return this;
+  }
+
+  /**
+   * WhatsApp consent for this recipient, recorded alongside creation. Supply it when consent is not already on file. Omit it when consent is already held. Only WhatsApp records this consent; email and SMS use their own consent rules. When supplied, source and non-blank evidenceText are required for every channel.
+   * @return optIn
+   */
+  @javax.annotation.Nullable
+  @JsonIgnore
+  public PortalMagicLinkOptIn getOptIn() {
+        return optIn.orElse(null);
+  }
+
+  @JsonProperty(value = JSON_PROPERTY_OPT_IN, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public JsonNullable<PortalMagicLinkOptIn> getOptIn_JsonNullable() {
+    return optIn;
+  }
+
+  @JsonProperty(JSON_PROPERTY_OPT_IN)
+  public void setOptIn_JsonNullable(JsonNullable<PortalMagicLinkOptIn> optIn) {
+    this.optIn = optIn;
+  }
+
+  public void setOptIn(@javax.annotation.Nullable PortalMagicLinkOptIn optIn) {
+    this.optIn = JsonNullable.<PortalMagicLinkOptIn>of(optIn);
+  }
+
+
   /**
    * Return true if this PortalMagicLinkRequest object is equal to o.
    */
@@ -367,7 +404,8 @@ public class PortalMagicLinkRequest {
         equalsNullable(this.taxId, portalMagicLinkRequest.taxId) &&
         Objects.equals(this.dueDays, portalMagicLinkRequest.dueDays) &&
         equalsNullable(this.maxAccesses, portalMagicLinkRequest.maxAccesses) &&
-        equalsNullable(this.notes, portalMagicLinkRequest.notes);
+        equalsNullable(this.notes, portalMagicLinkRequest.notes) &&
+        equalsNullable(this.optIn, portalMagicLinkRequest.optIn);
   }
 
   private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
@@ -376,7 +414,7 @@ public class PortalMagicLinkRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(formId, name, hashCodeNullable(sendChannel), hashCodeNullable(email), hashCodeNullable(phone), hashCodeNullable(taxId), dueDays, hashCodeNullable(maxAccesses), hashCodeNullable(notes));
+    return Objects.hash(formId, name, hashCodeNullable(sendChannel), hashCodeNullable(email), hashCodeNullable(phone), hashCodeNullable(taxId), dueDays, hashCodeNullable(maxAccesses), hashCodeNullable(notes), hashCodeNullable(optIn));
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -399,6 +437,7 @@ public class PortalMagicLinkRequest {
     sb.append("    dueDays: ").append(toIndentedString(dueDays)).append("\n");
     sb.append("    maxAccesses: ").append(toIndentedString(maxAccesses)).append("\n");
     sb.append("    notes: ").append(toIndentedString(notes)).append("\n");
+    sb.append("    optIn: ").append(toIndentedString(optIn)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -486,6 +525,11 @@ public class PortalMagicLinkRequest {
     // add `notes` to the URL query string
     if (getNotes() != null) {
       joiner.add(String.format(java.util.Locale.ROOT, "%snotes%s=%s", prefix, suffix, ApiClient.urlEncode(ApiClient.valueToString(getNotes()))));
+    }
+
+    // add `optIn` to the URL query string
+    if (getOptIn() != null) {
+      joiner.add(getOptIn().toUrlQueryString(prefix + "optIn" + suffix));
     }
 
     return joiner.toString();

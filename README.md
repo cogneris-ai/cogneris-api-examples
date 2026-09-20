@@ -6,6 +6,9 @@ Postman. All of them are built from
 [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
 OpenAPI contract version `2026-08-07`.
 
+For WhatsApp consent and delivery outcomes on the generated Portal API, see
+[Portal magic links](docs/portal-magic-links.md).
+
 ## License
 
 The SDKs, CLI, examples, documentation, and distributed artifacts in this

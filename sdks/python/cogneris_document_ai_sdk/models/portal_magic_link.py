@@ -21,12 +21,20 @@ class PortalMagicLink:
         sent (Union[Unset, bool]): Whether Cogneris dispatched the link. False when `sendChannel` was omitted or the
             send was suppressed.
         send_channel (Union[None, PortalSendChannel, Unset]): The channel actually used, when one was.
+        send_suppression_reason (Union[None, Unset, str]): Why delivery was suppressed when sent is false. Null or
+            absent when delivery
+            succeeded or no send was requested. This is an open string; handle unknown values.
+            whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded;
+            whatsapp_blocked means the recipient asked to stop and consent cannot override it;
+            provider_error is transient and may be retried. The link exists even if sending
+            was suppressed; use the returned url when present.
     """
 
     id: Union[Unset, int] = UNSET
     url: Union[None, Unset, str] = UNSET
     sent: Union[Unset, bool] = UNSET
     send_channel: Union[None, PortalSendChannel, Unset] = UNSET
+    send_suppression_reason: Union[None, Unset, str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -48,6 +56,12 @@ class PortalMagicLink:
         else:
             send_channel = self.send_channel
 
+        send_suppression_reason: Union[None, Unset, str]
+        if isinstance(self.send_suppression_reason, Unset):
+            send_suppression_reason = UNSET
+        else:
+            send_suppression_reason = self.send_suppression_reason
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
@@ -59,6 +73,8 @@ class PortalMagicLink:
             field_dict["sent"] = sent
         if send_channel is not UNSET:
             field_dict["sendChannel"] = send_channel
+        if send_suppression_reason is not UNSET:
+            field_dict["sendSuppressionReason"] = send_suppression_reason
 
         return field_dict
 
@@ -95,11 +111,21 @@ class PortalMagicLink:
 
         send_channel = _parse_send_channel(d.pop("sendChannel", UNSET))
 
+        def _parse_send_suppression_reason(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        send_suppression_reason = _parse_send_suppression_reason(d.pop("sendSuppressionReason", UNSET))
+
         portal_magic_link = cls(
             id=id,
             url=url,
             sent=sent,
             send_channel=send_channel,
+            send_suppression_reason=send_suppression_reason,
         )
 
         portal_magic_link.additional_properties = d

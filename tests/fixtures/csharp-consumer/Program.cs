@@ -23,7 +23,7 @@ static class Smoke
             "SDK assembly must load from the isolated NuGet cache");
         Console.WriteLine("Package assembly: " + dll);
         foreach (var test in new Func<Task>[] {
-            Workflow, RetryHints, BoundedAndTerminal, Cancellation, SafeErrors, ResponseDecoding, LoopbackSeam, TransportFailure })
+            PortalConsent, Workflow, RetryHints, BoundedAndTerminal, Cancellation, SafeErrors, ResponseDecoding, LoopbackSeam, TransportFailure })
         {
             await test();
             Console.WriteLine("PASS " + test.Method.Name);
@@ -50,6 +50,44 @@ static class Smoke
         expiresAt = "2026-09-18T12:00:00Z" });
     static string Submission(int hint = 0) => Envelope(new {
         jobId = JobId, status = "Queued", statusUrl = $"/api/v1/document-jobs/{JobId}", retryAfterSeconds = hint });
+
+    static Task PortalConsent()
+    {
+        // Exercise the same converters registered by the generated API client.
+        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+        JsonSerializerOptions? options = null;
+        new Cogneris.DocumentAI.Client.HostConfiguration(services).ConfigureJsonOptions(value => options = value);
+        const string payload = """
+            {"formId":42,"name":"Test Recipient","sendChannel":"whatsapp","phone":"+15555550100",
+             "optIn":{"source":"web_form","evidenceText":"consent-form-42",
+                      "evidenceUrl":"https://example.test/consents/42","collectedWhen":"2026-09-17T12:00:00Z"}}
+            """;
+        var request = JsonSerializer.Deserialize<PortalMagicLinkRequest>(payload, options)!;
+        Check(request.OptIn?.EvidenceText == "consent-form-42", "typed consent must survive deserialization");
+        using var wire = JsonDocument.Parse(JsonSerializer.Serialize(request, options));
+        var consent = wire.RootElement.GetProperty("optIn");
+        Check(consent.GetProperty("source").GetString() == "web_form", "consent source wire value");
+        Check(consent.GetProperty("evidenceUrl").GetString() == "https://example.test/consents/42", "evidence URL wire value");
+        Check(consent.GetProperty("collectedWhen").GetDateTime().ToUniversalTime() ==
+            new DateTime(2026, 9, 17, 12, 0, 0, DateTimeKind.Utc), "original consent collection date");
+        using var omitted = JsonDocument.Parse(JsonSerializer.Serialize(new PortalMagicLinkRequest(42, "Test"), options));
+        Check(!omitted.RootElement.TryGetProperty("optIn", out _), "existing callers may omit consent");
+        request.OptIn = null;
+        using var explicitNull = JsonDocument.Parse(JsonSerializer.Serialize(request, options));
+        Check(explicitNull.RootElement.GetProperty("optIn").ValueKind == JsonValueKind.Null, "explicit null consent");
+        foreach (var reason in new string?[] { "whatsapp_no_optin", "whatsapp_optin_revoked", "whatsapp_blocked",
+            "provider_error", "future_reason", null })
+        {
+            var response = JsonSerializer.Deserialize<PortalMagicLink>(JsonSerializer.Serialize(new {
+                id = 90210, url = (string?)null, sent = false, sendChannel = "whatsapp", sendSuppressionReason = reason }), options)!;
+            Check(response.SendSuppressionReason == reason, "all suppression reasons including unknown/null must survive");
+            using var encoded = JsonDocument.Parse(JsonSerializer.Serialize(response, options));
+            Check(encoded.RootElement.GetProperty("sendSuppressionReason").GetString() == reason, "reason round trip");
+        }
+        var replay = JsonSerializer.Deserialize<PortalMagicLink>("{\"id\":90210,\"sent\":false}", options)!;
+        Check(replay.SendSuppressionReason == null, "idempotent replay may omit reason and URL");
+        return Task.CompletedTask;
+    }
 
     static async Task Workflow()
     {

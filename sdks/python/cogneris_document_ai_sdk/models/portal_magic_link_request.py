@@ -1,11 +1,15 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.portal_send_channel import PortalSendChannel
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.portal_magic_link_opt_in import PortalMagicLinkOptIn
+
 
 T = TypeVar("T", bound="PortalMagicLinkRequest")
 
@@ -27,6 +31,11 @@ class PortalMagicLinkRequest:
         max_accesses (Union[None, Unset, int]): How many times the link may be opened. Null means unlimited; 1 makes it
             single-use.
         notes (Union[None, Unset, str]): Internal note kept against the link, never shown to the recipient.
+        opt_in (Union['PortalMagicLinkOptIn', None, Unset]): WhatsApp consent for this recipient, recorded alongside
+            creation. Supply it
+            when consent is not already on file. Omit it when consent is already held.
+            Only WhatsApp records this consent; email and SMS use their own consent rules.
+            When supplied, source and non-blank evidenceText are required for every channel.
     """
 
     form_id: int
@@ -38,9 +47,12 @@ class PortalMagicLinkRequest:
     due_days: Union[Unset, int] = 30
     max_accesses: Union[None, Unset, int] = UNSET
     notes: Union[None, Unset, str] = UNSET
+    opt_in: Union["PortalMagicLinkOptIn", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.portal_magic_link_opt_in import PortalMagicLinkOptIn
+
         form_id = self.form_id
 
         name = self.name
@@ -85,6 +97,14 @@ class PortalMagicLinkRequest:
         else:
             notes = self.notes
 
+        opt_in: Union[None, Unset, dict[str, Any]]
+        if isinstance(self.opt_in, Unset):
+            opt_in = UNSET
+        elif isinstance(self.opt_in, PortalMagicLinkOptIn):
+            opt_in = self.opt_in.to_dict()
+        else:
+            opt_in = self.opt_in
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -107,11 +127,15 @@ class PortalMagicLinkRequest:
             field_dict["maxAccesses"] = max_accesses
         if notes is not UNSET:
             field_dict["notes"] = notes
+        if opt_in is not UNSET:
+            field_dict["optIn"] = opt_in
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.portal_magic_link_opt_in import PortalMagicLinkOptIn
+
         d = dict(src_dict)
         form_id = d.pop("formId")
 
@@ -181,6 +205,23 @@ class PortalMagicLinkRequest:
 
         notes = _parse_notes(d.pop("notes", UNSET))
 
+        def _parse_opt_in(data: object) -> Union["PortalMagicLinkOptIn", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                opt_in_type_0 = PortalMagicLinkOptIn.from_dict(data)
+
+                return opt_in_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["PortalMagicLinkOptIn", None, Unset], data)
+
+        opt_in = _parse_opt_in(d.pop("optIn", UNSET))
+
         portal_magic_link_request = cls(
             form_id=form_id,
             name=name,
@@ -191,6 +232,7 @@ class PortalMagicLinkRequest:
             due_days=due_days,
             max_accesses=max_accesses,
             notes=notes,
+            opt_in=opt_in,
         )
 
         portal_magic_link_request.additional_properties = d

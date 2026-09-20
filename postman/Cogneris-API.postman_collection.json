@@ -3471,7 +3471,7 @@
                         "method": "POST",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                          "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3528,7 +3528,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3545,7 +3545,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"id\": \"<long>\",\n  \"url\": \"<string,null>\",\n  \"sent\": \"<boolean>\",\n  \"sendChannel\": \"email\"\n}",
+                          "body": "{\n  \"id\": \"<long>\",\n  \"url\": \"<string,null>\",\n  \"sent\": \"<boolean>\",\n  \"sendChannel\": \"whatsapp\",\n  \"sendSuppressionReason\": \"<string,null>\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -3591,7 +3591,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3648,7 +3648,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3705,7 +3705,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3766,7 +3766,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3829,7 +3829,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3886,7 +3886,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -3947,7 +3947,7 @@
                             "method": "POST",
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"whatsapp\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\"\n}",
+                              "raw": "{\n  \"formId\": \"<long>\",\n  \"name\": \"<string>\",\n  \"sendChannel\": \"email\",\n  \"email\": \"<string,null>\",\n  \"phone\": \"<string,null>\",\n  \"taxId\": \"<string,null>\",\n  \"dueDays\": 30,\n  \"maxAccesses\": \"<integer,null>\",\n  \"notes\": \"<string,null>\",\n  \"optIn\": {\n    \"source\": \"web_form\",\n    \"evidenceText\": \"<string>\",\n    \"evidenceUrl\": \"<string,null>\",\n    \"collectedWhen\": \"<string,null-date-time>\"\n  }\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
