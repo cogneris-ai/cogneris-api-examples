@@ -14,8 +14,10 @@ info:
     ## Authentication
 
     Every endpoint takes an API key in the `Authorization` header as
-    `Bearer <key>`. Keys begin with `xtkt_live_`; the prefix is checked before the
-    key is looked up, so a malformed key fails with `401` immediately. Keys are
+    `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_`
+    (sandbox); either prefix is accepted before the key is looked up for validation.
+    The key selects the application environment. A recognized prefix alone does
+    not authenticate a request: the key must also be valid and active. Keys are
     tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard
     under **Settings → API keys**.
 
@@ -431,7 +433,8 @@ components:
       type: http
       scheme: bearer
       description: |
-        An API key prefixed `xtkt_live_`, sent as `Authorization: Bearer <key>`.
+        An API key prefixed `xtkt_live_` (production) or `xtkt_test_` (sandbox),
+        sent as `Authorization: Bearer <key>`.
 
   requestBodies:
     SingleFile:
@@ -455,7 +458,9 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/Envelope' }
     Unauthorized:
-      description: Missing key, or one that does not begin with `xtkt_live_`.
+      description: |
+        Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+        (sandbox) prefixes are accepted, but the key must also be valid and active.
     PayloadTooLarge:
       description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
     UnsupportedMediaType:

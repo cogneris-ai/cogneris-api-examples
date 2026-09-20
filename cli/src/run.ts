@@ -147,13 +147,14 @@ function parseCommand(argumentsList: string[]): Command {
 function requireApiKey(value: string | undefined): string {
   if (
     typeof value !== 'string' ||
-    !value.startsWith('xtkt_live_') ||
-    value.length <= 'xtkt_live_'.length ||
+    !['xtkt_live_', 'xtkt_test_'].some(
+      (prefix) => value.startsWith(prefix) && value.length > prefix.length,
+    ) ||
     value.length > 4_096 ||
     !/^[\x21-\x7e]+$/.test(value)
   ) {
     throw new UsageError(
-      'COGNERIS_API_KEY must be a public API key with the required prefix and a non-empty visible-ASCII suffix.',
+      'COGNERIS_API_KEY must be a production or sandbox API key with a supported prefix and a non-empty visible-ASCII suffix.',
     );
   }
   return value;

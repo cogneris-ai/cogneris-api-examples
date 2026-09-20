@@ -40,8 +40,9 @@ a full JDK 17 to compile the Java SDK or an application.
 Use a tenant-scoped API key and select exactly `us` and `eu` as the region. The
 SDK examples and CLI read credentials only from `COGNERIS_API_KEY`; they never
 accept the key as an argument. `COGNERIS_REGION` defaults to `us`.
-The CLI requires the public `xtkt_live_` prefix and a non-empty suffix with
-visible ASCII characters, without whitespace or control characters.
+The CLI accepts `xtkt_live_` (production) and `xtkt_test_` (sandbox). Both require
+a non-empty suffix with visible ASCII characters, without whitespace or control
+characters. The key selects the application environment; the region is separate.
 
 ```bash
 export COGNERIS_API_KEY='xtkt_live_...'

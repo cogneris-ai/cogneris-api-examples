@@ -246,7 +246,9 @@ export type ExtractDocumentData = {
 
 export type ExtractDocumentErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -288,7 +290,9 @@ export type ClassifyDocumentsData = {
 
 export type ClassifyDocumentsErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -325,7 +329,9 @@ export type ZeroShotDocumentData = {
 
 export type ZeroShotDocumentErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -362,7 +368,9 @@ export type CropDocumentData = {
 
 export type CropDocumentErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -399,7 +407,9 @@ export type SplitDocumentData = {
 
 export type SplitDocumentErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -445,7 +455,9 @@ export type FaceMatchDocumentData = {
 
 export type FaceMatchDocumentErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -484,7 +496,9 @@ export type ListDocumentJobsData = {
 
 export type ListDocumentJobsErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -517,7 +531,9 @@ export type SubmitDocumentJobData = {
 
 export type SubmitDocumentJobErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -546,7 +562,9 @@ export type GetDocumentJobData = {
 
 export type GetDocumentJobErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -579,7 +597,9 @@ export type CancelDocumentJobData = {
 
 export type CancelDocumentJobErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -612,7 +632,9 @@ export type ListPortalFormsData = {
 
 export type ListPortalFormsErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -652,7 +674,9 @@ export type ListPortalChannelsData = {
 
 export type ListPortalChannelsErrors = {
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**
@@ -705,7 +729,9 @@ export type CreatePortalMagicLinkErrors = {
      */
     400: unknown;
     /**
-     * Missing key, or one that does not begin with `xtkt_live_`.
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
      */
     401: unknown;
     /**

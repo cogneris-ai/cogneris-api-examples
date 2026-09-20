@@ -133,7 +133,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -484,7 +484,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -801,7 +801,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -1114,7 +1114,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -1427,7 +1427,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -1755,7 +1755,7 @@
                   "_postman_previewlanguage": "json"
                 },
                 {
-                  "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                  "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -2128,7 +2128,7 @@
                       "_postman_previewlanguage": "json"
                     },
                     {
-                      "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                      "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                       "originalRequest": {
                         "url": {
                           "path": [
@@ -2320,7 +2320,7 @@
                       "_postman_previewlanguage": "json"
                     },
                     {
-                      "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                      "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                       "originalRequest": {
                         "url": {
                           "path": [
@@ -2514,7 +2514,7 @@
                           "_postman_previewlanguage": "json"
                         },
                         {
-                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                           "originalRequest": {
                             "url": {
                               "path": [
@@ -2760,7 +2760,7 @@
                               "_postman_previewlanguage": "json"
                             },
                             {
-                              "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                              "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                               "originalRequest": {
                                 "url": {
                                   "path": [
@@ -3008,7 +3008,7 @@
                           "_postman_previewlanguage": "json"
                         },
                         {
-                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                           "originalRequest": {
                             "url": {
                               "path": [
@@ -3257,7 +3257,7 @@
                           "_postman_previewlanguage": "json"
                         },
                         {
-                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                           "originalRequest": {
                             "url": {
                               "path": [
@@ -3607,7 +3607,7 @@
                           "_postman_previewlanguage": "text"
                         },
                         {
-                          "name": "Missing key, or one that does not begin with `xtkt_live_`.",
+                          "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
                           "originalRequest": {
                             "url": {
                               "path": [
@@ -4009,7 +4009,7 @@
     "name": "Cogneris Document AI API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {
-      "content": "The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —\ninto structured JSON.\n\nThis document describes the endpoints that are actually deployed. It is written\nfrom the running service (`cogneris-api-be`) rather than from a design, so what\nis listed here is what you can call.\n\n## Authentication\n\nEvery endpoint takes an API key in the `Authorization` header as\n`Bearer <key>`. Keys begin with `xtkt_live_`; the prefix is checked before the\nkey is looked up, so a malformed key fails with `401` immediately. Keys are\ntenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard\nunder **Settings → API keys**.\n\n## Uploads\n\nThe synchronous document endpoints take `multipart/form-data`. There is no\nfetch-by-URL variant — the file travels in the request body.\n\n- Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,\n  `.bmp`, `.doc`, `.docx`\n- Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB\n\n## Templates\n\nExtraction and classification are driven by the document types and templates\nconfigured for your tenant. The platform selects the template from the document\nitself, so there is no template or schema parameter on the request.\n\n## Scopes\n\nKeys carry scopes. The Portal endpoints check them and answer `403` when the\nrequired one is absent; the document endpoints accept any valid key for the\ntenant without consulting the list. `*` is a real scope meaning full access, and\nit is what a key receives when it is created without an explicit scope list.\n\n## Rate limits\n\nOne shared policy covers every surface in this document, Portal included:\n**50 requests per API key per fixed 1-minute window**. It is a fixed window\nrather than a token bucket, so the allowance resets on the minute instead of\nrefilling gradually. Requests over the limit receive `429`.\n\n## Response envelope\n\nSuccessful responses from the **document and job** endpoints share one wrapper:\n`data` for the payload, `meta` for the status and any messages, and `hasErrors`\nfor a fast failure check.\n\nThe **Portal** endpoints do not use that wrapper. They return the payload\ndirectly, and their errors are RFC 9457 problem documents sent as\n`application/problem+json`, with a stable `code`, a `correlationId` that is also\nreturned in the `x-correlation-id` header, and a `retryable` flag. Branch on\n`code`; treat `type` as an opaque identifier.\n",
+      "content": "The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —\ninto structured JSON.\n\nThis document describes the endpoints that are actually deployed. It is written\nfrom the running service (`cogneris-api-be`) rather than from a design, so what\nis listed here is what you can call.\n\n## Authentication\n\nEvery endpoint takes an API key in the `Authorization` header as\n`Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_`\n(sandbox); either prefix is accepted before the key is looked up for validation.\nThe key selects the application environment. A recognized prefix alone does\nnot authenticate a request: the key must also be valid and active. Keys are\ntenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard\nunder **Settings → API keys**.\n\n## Uploads\n\nThe synchronous document endpoints take `multipart/form-data`. There is no\nfetch-by-URL variant — the file travels in the request body.\n\n- Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,\n  `.bmp`, `.doc`, `.docx`\n- Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB\n\n## Templates\n\nExtraction and classification are driven by the document types and templates\nconfigured for your tenant. The platform selects the template from the document\nitself, so there is no template or schema parameter on the request.\n\n## Scopes\n\nKeys carry scopes. The Portal endpoints check them and answer `403` when the\nrequired one is absent; the document endpoints accept any valid key for the\ntenant without consulting the list. `*` is a real scope meaning full access, and\nit is what a key receives when it is created without an explicit scope list.\n\n## Rate limits\n\nOne shared policy covers every surface in this document, Portal included:\n**50 requests per API key per fixed 1-minute window**. It is a fixed window\nrather than a token bucket, so the allowance resets on the minute instead of\nrefilling gradually. Requests over the limit receive `429`.\n\n## Response envelope\n\nSuccessful responses from the **document and job** endpoints share one wrapper:\n`data` for the payload, `meta` for the status and any messages, and `hasErrors`\nfor a fast failure check.\n\nThe **Portal** endpoints do not use that wrapper. They return the payload\ndirectly, and their errors are RFC 9457 problem documents sent as\n`application/problem+json`, with a stable `code`, a `correlationId` that is also\nreturned in the `x-correlation-id` header, and a `retryable` flag. Branch on\n`code`; treat `type` as an opaque identifier.\n",
       "type": "text/plain"
     }
   }
