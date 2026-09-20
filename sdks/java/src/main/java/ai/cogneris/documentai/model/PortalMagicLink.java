@@ -41,7 +41,8 @@ import ai.cogneris.documentai.ApiClient;
   PortalMagicLink.JSON_PROPERTY_ID,
   PortalMagicLink.JSON_PROPERTY_URL,
   PortalMagicLink.JSON_PROPERTY_SENT,
-  PortalMagicLink.JSON_PROPERTY_SEND_CHANNEL
+  PortalMagicLink.JSON_PROPERTY_SEND_CHANNEL,
+  PortalMagicLink.JSON_PROPERTY_SEND_SUPPRESSION_REASON
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class PortalMagicLink {
@@ -58,6 +59,9 @@ public class PortalMagicLink {
 
   public static final String JSON_PROPERTY_SEND_CHANNEL = "sendChannel";
   private JsonNullable<PortalSendChannel> sendChannel = JsonNullable.<PortalSendChannel>undefined();
+
+  public static final String JSON_PROPERTY_SEND_SUPPRESSION_REASON = "sendSuppressionReason";
+  private JsonNullable<String> sendSuppressionReason = JsonNullable.<String>undefined();
 
   public PortalMagicLink() {
   }
@@ -174,6 +178,38 @@ public class PortalMagicLink {
   }
 
 
+  public PortalMagicLink sendSuppressionReason(@javax.annotation.Nullable String sendSuppressionReason) {
+    this.sendSuppressionReason = JsonNullable.<String>of(sendSuppressionReason);
+    return this;
+  }
+
+  /**
+   * Why delivery was suppressed when sent is false. Null or absent when delivery succeeded or no send was requested. This is an open string; handle unknown values. whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded; whatsapp_blocked means the recipient asked to stop and consent cannot override it; provider_error is transient and may be retried. The link exists even if sending was suppressed; use the returned url when present.
+   * @return sendSuppressionReason
+   */
+  @javax.annotation.Nullable
+  @JsonIgnore
+  public String getSendSuppressionReason() {
+        return sendSuppressionReason.orElse(null);
+  }
+
+  @JsonProperty(value = JSON_PROPERTY_SEND_SUPPRESSION_REASON, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public JsonNullable<String> getSendSuppressionReason_JsonNullable() {
+    return sendSuppressionReason;
+  }
+
+  @JsonProperty(JSON_PROPERTY_SEND_SUPPRESSION_REASON)
+  public void setSendSuppressionReason_JsonNullable(JsonNullable<String> sendSuppressionReason) {
+    this.sendSuppressionReason = sendSuppressionReason;
+  }
+
+  public void setSendSuppressionReason(@javax.annotation.Nullable String sendSuppressionReason) {
+    this.sendSuppressionReason = JsonNullable.<String>of(sendSuppressionReason);
+  }
+
+
   /**
    * Return true if this PortalMagicLink object is equal to o.
    */
@@ -189,7 +225,8 @@ public class PortalMagicLink {
     return Objects.equals(this.id, portalMagicLink.id) &&
         equalsNullable(this.url, portalMagicLink.url) &&
         Objects.equals(this.sent, portalMagicLink.sent) &&
-        equalsNullable(this.sendChannel, portalMagicLink.sendChannel);
+        equalsNullable(this.sendChannel, portalMagicLink.sendChannel) &&
+        equalsNullable(this.sendSuppressionReason, portalMagicLink.sendSuppressionReason);
   }
 
   private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
@@ -198,7 +235,7 @@ public class PortalMagicLink {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, hashCodeNullable(url), sent, hashCodeNullable(sendChannel));
+    return Objects.hash(id, hashCodeNullable(url), sent, hashCodeNullable(sendChannel), hashCodeNullable(sendSuppressionReason));
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -216,6 +253,7 @@ public class PortalMagicLink {
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    sent: ").append(toIndentedString(sent)).append("\n");
     sb.append("    sendChannel: ").append(toIndentedString(sendChannel)).append("\n");
+    sb.append("    sendSuppressionReason: ").append(toIndentedString(sendSuppressionReason)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -278,6 +316,11 @@ public class PortalMagicLink {
     // add `sendChannel` to the URL query string
     if (getSendChannel() != null) {
       joiner.add(String.format(java.util.Locale.ROOT, "%ssendChannel%s=%s", prefix, suffix, ApiClient.urlEncode(ApiClient.valueToString(getSendChannel()))));
+    }
+
+    // add `sendSuppressionReason` to the URL query string
+    if (getSendSuppressionReason() != null) {
+      joiner.add(String.format(java.util.Locale.ROOT, "%ssendSuppressionReason%s=%s", prefix, suffix, ApiClient.urlEncode(ApiClient.valueToString(getSendSuppressionReason()))));
     }
 
     return joiner.toString();

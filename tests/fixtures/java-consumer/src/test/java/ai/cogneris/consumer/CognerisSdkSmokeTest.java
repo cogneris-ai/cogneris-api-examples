@@ -39,6 +39,33 @@ class CognerisSdkSmokeTest {
     static final UUID JOB = UUID.fromString("2cabd780-7886-499c-a452-f4d609bd9b1e");
     @TempDir Path files;
 
+    @Test void portalConsentAndSuppressionRoundTrip() throws Exception {
+        var mapper = new JSON().getMapper();
+        var request = mapper.readValue("""
+            {"formId":42,"name":"Test Recipient","sendChannel":"whatsapp","phone":"+15555550100",
+             "optIn":{"source":"web_form","evidenceText":"consent-form-42",
+                      "evidenceUrl":"https://example.test/consents/42","collectedWhen":"2026-09-17T12:00:00Z"}}
+            """, PortalMagicLinkRequest.class);
+        assertEquals("consent-form-42", request.getOptIn().getEvidenceText());
+        var consent = mapper.readTree(mapper.writeValueAsString(request)).get("optIn");
+        assertEquals("web_form", consent.get("source").asText());
+        assertEquals("https://example.test/consents/42", consent.get("evidenceUrl").asText());
+        assertEquals(java.time.Instant.parse("2026-09-17T12:00:00Z"),
+            java.time.OffsetDateTime.parse(consent.get("collectedWhen").asText()).toInstant());
+        assertFalse(mapper.readTree(mapper.writeValueAsString(new PortalMagicLinkRequest().formId(42L).name("Test"))).has("optIn"));
+        request.setOptIn(null);
+        assertTrue(mapper.readTree(mapper.writeValueAsString(request)).get("optIn").isNull());
+        for (var reason : new String[] { "whatsapp_no_optin", "whatsapp_optin_revoked", "whatsapp_blocked",
+                "provider_error", "future_reason", null }) {
+            var wire = mapper.createObjectNode().put("id", 90210).put("url", (String)null)
+                .put("sent", false).put("sendChannel", "whatsapp").put("sendSuppressionReason", reason);
+            var response = mapper.treeToValue(wire, PortalMagicLink.class);
+            assertEquals(reason, response.getSendSuppressionReason());
+            assertEquals(wire.get("sendSuppressionReason"), mapper.readTree(mapper.writeValueAsString(response)).get("sendSuppressionReason"));
+        }
+        assertNull(mapper.readValue("{\"id\":90210,\"sent\":false}", PortalMagicLink.class).getSendSuppressionReason());
+    }
+
     static CognerisClient client(Loopback server) {
         return new CognerisClient(new CognerisClient.Options(KEY, CognerisClient.Region.US, server.uri));
     }

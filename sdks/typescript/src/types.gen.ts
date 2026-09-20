@@ -163,6 +163,36 @@ export type PortalMagicLinkRequest = {
      * Internal note kept against the link, never shown to the recipient.
      */
     notes?: string | null;
+    /**
+     * WhatsApp consent for this recipient, recorded alongside creation. Supply it
+     * when consent is not already on file. Omit it when consent is already held.
+     * Only WhatsApp records this consent; email and SMS use their own consent rules.
+     * When supplied, source and non-blank evidenceText are required for every channel.
+     *
+     */
+    optIn?: PortalMagicLinkOptIn | null;
+};
+
+/**
+ * A declaration that the recipient agreed to be messaged on WhatsApp.
+ */
+export type PortalMagicLinkOptIn = {
+    /**
+     * How the recipient's consent was collected.
+     */
+    source: 'web_form' | 'contract' | 'in_person' | 'import' | 'api';
+    /**
+     * Required, non-blank pointer to the proof of consent, such as a contract number, form id or ticket.
+     */
+    evidenceText: string;
+    /**
+     * Optional link to the evidence.
+     */
+    evidenceUrl?: string | null;
+    /**
+     * When the recipient consented. Defaults to now; supply the original date for older consent. Dates more than one day in the future are rejected.
+     */
+    collectedWhen?: string | null;
 };
 
 export type PortalMagicLink = {
@@ -185,6 +215,16 @@ export type PortalMagicLink = {
      * The channel actually used, when one was.
      */
     sendChannel?: PortalSendChannel | null;
+    /**
+     * Why delivery was suppressed when sent is false. Null or absent when delivery
+     * succeeded or no send was requested. This is an open string; handle unknown values.
+     * whatsapp_no_optin and whatsapp_optin_revoked require consent to be recorded;
+     * whatsapp_blocked means the recipient asked to stop and consent cannot override it;
+     * provider_error is transient and may be retried. The link exists even if sending
+     * was suppressed; use the returned url when present.
+     *
+     */
+    sendSuppressionReason?: string | null;
 };
 
 /**

@@ -77,6 +77,12 @@ before(async () => {
       receivedAt: Date.now(),
     });
 
+    if (request.method === "POST" && request.url === "/api/v1/portal/magic-link") {
+      json(response, 201, { id: 90210, url: null, sent: false, sendChannel: "whatsapp",
+        sendSuppressionReason: "future_reason" });
+      return;
+    }
+
     if (request.method === "POST" && request.url === "/Document/extraction") {
       if (body.includes(reflectedDocument)) {
         json(response, 415, { code: reflectedApiKey, title: reflectedDocument, retryable: true });
@@ -144,6 +150,33 @@ before(async () => {
 after(async () => {
   if (server) await new Promise((resolve) => server.close(resolve));
   await rm(temporaryDirectory, { recursive: true, force: true });
+});
+
+test("installed portal types and transport retain consent and open suppression reasons", async () => {
+  const consumer = path.join(temporaryDirectory, "portal-consumer.ts");
+  await writeFile(consumer, `
+    import { createPortalMagicLink, type PortalMagicLinkRequest, type PortalMagicLink } from "@cogneris-ai/document-ai-sdk";
+    const request: PortalMagicLinkRequest = { formId: 42, name: "Test Recipient", sendChannel: "whatsapp",
+      optIn: { source: "web_form", evidenceText: "consent-form-42", evidenceUrl: "https://example.test/consents/42",
+        collectedWhen: "2026-09-17T12:00:00Z" } };
+    const oldRequest: PortalMagicLinkRequest = { formId: 42, name: "Test" };
+    const nullRequest: PortalMagicLinkRequest = { ...oldRequest, optIn: null };
+    const response: PortalMagicLink = { sent: false, sendSuppressionReason: "future_reason" };
+    const emptyResponse: PortalMagicLink = { sent: true, sendSuppressionReason: null };
+    createPortalMagicLink({ body: request });
+  `);
+  execFileSync(path.join(root, "node_modules", ".bin", "tsc"),
+    ["--noEmit", "--strict", "--skipLibCheck", "--target", "ES2022", "--module", "NodeNext", "--moduleResolution", "NodeNext", consumer],
+    { cwd: temporaryDirectory, stdio: "pipe" });
+  requests = [];
+  const result = await sdk.createPortalMagicLink({ baseUrl, body: {
+    formId: 42, name: "Test Recipient", sendChannel: "whatsapp", phone: "+15555550100",
+    optIn: { source: "web_form", evidenceText: "consent-form-42", evidenceUrl: "https://example.test/consents/42",
+      collectedWhen: "2026-09-17T12:00:00Z" },
+  } });
+  assert.equal(result.data.sendSuppressionReason, "future_reason");
+  assert.deepEqual(JSON.parse(requests[0].body).optIn, { source: "web_form", evidenceText: "consent-form-42",
+    evidenceUrl: "https://example.test/consents/42", collectedWhen: "2026-09-17T12:00:00Z" });
 });
 
 test("installed package exports the maintained helper surface", () => {
