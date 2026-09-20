@@ -324,9 +324,11 @@ test("credential validation rejects missing and unsafe values without echoing th
 test("credentials require the public prefix and suffix before client creation or transport", async (context) => {
   let constructions = 0;
   let requests = 0;
-  const server = createServer((_request, response) => {
+  const authorizations = [];
+  const server = createServer((request, response) => {
     requests += 1;
-    json(response, 200, { jobId: "unexpected", status: "Succeeded" });
+    authorizations.push(request.headers.authorization);
+    json(response, 200, serviceEnvelope(200, { jobId: "valid-job", status: "Succeeded" }));
   });
   const baseUrl = await listen(server);
   context.after(() => new Promise((resolve) => server.close(resolve)));
@@ -335,9 +337,12 @@ test("credentials require the public prefix and suffix before client creation or
     constructions += 1;
     return new sdk.CognerisClient({ ...options, _baseUrlForTesting: baseUrl });
   };
-  for (const value of ["garbage", "xtkt_test_SENTINEL", "xtkt_live_", "XTKT_live_SENTINEL",
-    "xtkt_live_" + "x".repeat(4096), "xtkt_live_BAD VALUE", "xtkt_live_BAD\nVALUE",
-    "xtkt_live_BAD\tVALUE", "xtkt_live_BAD\u007fVALUE", "xtkt_live_clé"]) {
+  const prefixes = ["xtkt_live_", "xtkt_test_"];
+  for (const value of ["garbage", "xtkt_other_SENTINEL", ...prefixes.flatMap((prefix) => [
+    prefix, prefix.toUpperCase() + "SENTINEL", prefix + "x".repeat(4087),
+    prefix + "BAD VALUE", prefix + "BAD\nVALUE", prefix + "BAD\tVALUE",
+    prefix + "BAD\u007fVALUE", prefix + "clé",
+  ])]) {
     const result = await invoke(["jobs", "get", "unused-job"], {
       env: { COGNERIS_API_KEY: value }, clientFactory,
     });
@@ -350,14 +355,20 @@ test("credentials require the public prefix and suffix before client creation or
   assert.equal(requests, 0);
 
   // No stronger suffix alphabet is specified by the public contract.
-  for (const value of ["xtkt_live_x", "xtkt_live_TEST:!~+/@=._-sentinel", "xtkt_live_" + "x".repeat(4086)]) {
+  const validKeys = prefixes.flatMap((prefix) => [
+    prefix + "x", prefix + "TEST:!~+/@=._-sentinel", prefix + "x".repeat(4086),
+  ]);
+  for (const value of validKeys) {
     const result = await invoke(["jobs", "get", "valid-job"], {
       env: { COGNERIS_API_KEY: value }, clientFactory,
     });
     assert.equal(result.code, 0, result.stderr);
+    assert.equal(result.stderr, "");
+    assert.deepEqual(JSON.parse(result.stdout), { jobId: "valid-job", status: "Succeeded" });
   }
-  assert.equal(constructions, 3);
-  assert.equal(requests, 3);
+  assert.equal(constructions, validKeys.length);
+  assert.equal(requests, validKeys.length);
+  assert.deepEqual(authorizations, validKeys.map((value) => `Bearer ${value}`));
 });
 
 test("usage failures stay on stderr and do not expose credential arguments or internal commands", async () => {
