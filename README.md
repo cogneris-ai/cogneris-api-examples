@@ -59,10 +59,15 @@ only controlled status summaries and identifiers.
 
 ## Install local release artifacts
 
-`@cogneris-ai/document-ai-sdk`, `cogneris-document-ai-sdk`, and
-`@cogneris-ai/document-ai-cli` are not published to npm or PyPI. The Java
+`@cogneris-ai/document-ai-sdk` and `@cogneris-ai/document-ai-cli` are not published
+to npm. The Java
 package is not published to Maven Central. For those packages, use the local
 release artifacts below until a registry release is separately verified.
+
+The Python SDK [cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
+is available on PyPI. Its public wheel matched the verified CI artifact and
+passed all seven installed SDK checks on 2026-09-21. The local wheel instructions
+below remain an alternative for inspecting release artifacts.
 
 The C# SDK [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
 is available on NuGet.org. Its public package was installed and passed all nine
