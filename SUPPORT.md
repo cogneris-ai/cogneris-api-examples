@@ -13,11 +13,12 @@ command or minimal reproduction, safe error class/status, and region. Remove
 API keys, document contents, extracted values, raw responses, tenant data, and
 input/output references before posting.
 
-For C# or Java, state whether the exact local
-`Cogneris.DocumentAI.0.1.0.nupkg` or the paired
-`cogneris-document-ai-sdk-0.1.0.jar` and `.pom` was used. Package-name-only
-registry installation is outside the supported path until NuGet or Maven
-Central availability has separately verified release evidence.
+For C#, state whether you installed the verified public
+[Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
+release from NuGet.org or the local `Cogneris.DocumentAI.0.1.0.nupkg`.
+For Java, supply the versions of both the local
+`cogneris-document-ai-sdk-0.1.0.jar` and `.pom`. Maven Central installation
+remains outside the supported path until publication is separately verified.
 
 The repository does not provide support for tenant configuration, schema or
 template design, service entitlement, Portal administration, private/internal

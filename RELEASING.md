@@ -3,8 +3,10 @@
 The package identities are `@cogneris-ai/document-ai-sdk`,
 `@cogneris-ai/document-ai-cli`, `cogneris-document-ai-sdk`,
 `Cogneris.DocumentAI`, and `ai.cogneris:cogneris-document-ai-sdk`. npm and PyPI
-availability requires a separately verified registry release. The C# and Java
-packages are not published to NuGet or Maven Central; no workflow publishes to NuGet or Maven Central.
+availability requires a separately verified registry release.
+[Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
+was published to NuGet.org and verified by public installation on 2026-09-21.
+The Java package is not published to Maven Central; no workflow publishes to NuGet or Maven Central.
 Public distribution of version `0.1.0` under Apache License 2.0 was authorized
 by COGNERIS,INC. on 2026-09-17. The release artifacts must carry the repository
 `LICENSE` and `NOTICE` files and matching SPDX metadata.

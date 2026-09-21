@@ -60,11 +60,15 @@ only controlled status summaries and identifiers.
 ## Install local release artifacts
 
 `@cogneris-ai/document-ai-sdk`, `cogneris-document-ai-sdk`, and
-`@cogneris-ai/document-ai-cli` are not published to npm or PyPI. The C# and
-Java packages are not published to NuGet or Maven Central, and no repository
-workflow publishes them there. Until each registry release is separately
-verified, install only locally built or owner-provided local release artifacts.
-Do not run a registry install by package name alone.
+`@cogneris-ai/document-ai-cli` are not published to npm or PyPI. The Java
+package is not published to Maven Central. For those packages, use the local
+release artifacts below until a registry release is separately verified.
+
+The C# SDK [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
+is available on NuGet.org. Its public package was installed and passed all nine
+.NET 8 consumer checks on 2026-09-21. The local NuGet instructions below remain
+an alternative for inspecting owner-provided artifacts. No repository workflow
+publishes to NuGet or Maven Central.
 
 Choose explicit checkout, release-artifact, and consumer directories. Use
 absolute paths so later commands cannot accidentally resolve against a
@@ -163,7 +167,8 @@ client.close()
 ## .NET 8: local NuGet package
 
 `Cogneris.DocumentAI.0.1.0.nupkg` is an owner-provided local artifact targeting
-`net8.0`; it is not evidence of NuGet availability. Create a separate .NET 8
+`net8.0`. For the verified public release, see the NuGet.org link above. To
+use a local artifact instead, create a separate .NET 8
 consumer, copy the runnable example, add the package with the explicit local
 source, and restore public transitive dependencies from NuGet.org:
 
