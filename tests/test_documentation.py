@@ -133,7 +133,7 @@ class DocumentationContractTests(unittest.TestCase):
             "Java 17",
             "cogneris-document-ai-sdk-0.1.0.jar",
             "cogneris-document-ai-sdk-0.1.0.pom",
-            "not published to NuGet or Maven Central",
+            "not published to Maven Central",
         ):
             self.assertIn(term, readme, f"README is missing C#/Java term: {term}")
 

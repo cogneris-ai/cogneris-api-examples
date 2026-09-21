@@ -2,9 +2,14 @@
 
 The package identities are `@cogneris-ai/document-ai-sdk`,
 `@cogneris-ai/document-ai-cli`, `cogneris-document-ai-sdk`,
-`Cogneris.DocumentAI`, and `ai.cogneris:cogneris-document-ai-sdk`. npm and PyPI
-availability requires a separately verified registry release. The C# and Java
-packages are not published to NuGet or Maven Central; no workflow publishes to NuGet or Maven Central.
+`Cogneris.DocumentAI`, and `ai.cogneris:cogneris-document-ai-sdk`. npm
+availability requires a separately verified registry release.
+[cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
+was published to PyPI through trusted publishing on 2026-09-21; its public wheel
+matched the CI artifact and passed all seven installed SDK checks.
+[Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
+was published to NuGet.org and verified by public installation on 2026-09-21.
+The Java package is not published to Maven Central; no workflow publishes to NuGet or Maven Central.
 Public distribution of version `0.1.0` under Apache License 2.0 was authorized
 by COGNERIS,INC. on 2026-09-17. The release artifacts must carry the repository
 `LICENSE` and `NOTICE` files and matching SPDX metadata.
@@ -88,10 +93,12 @@ An owner must complete these steps outside this workflow:
    `sdk-release`. Set `SDK_PYPI_TRUSTED_PUBLISHING_READY` to `true` only after the
    registry configuration is complete.
 
-The `registry` input selects `all` (default), `npm`, or `pypi`. After the owner
-bootstraps npm version `0.1.0`, select `registry: pypi` to publish that version to
-PyPI without attempting to overwrite the npm packages. Use a single-registry
-selection for an owner-reviewed partial-release recovery as well. Every selection
+The `registry` input selects `all` (default), `npm`, or `pypi`. Select only a
+registry where the exact release version is not yet published and its prerequisites
+are complete. PyPI `0.1.0` is already published: do not dispatch `registry: pypi`
+or `all` for that version. Initial npm publication still requires owner bootstrap;
+do not use the workflow to bootstrap or overwrite that version. Use a single-registry
+selection for an owner-reviewed partial-release recovery. Every selection
 still builds and verifies all package families and runs the full Python matrix;
 unselected publication jobs are skipped before requesting environment approval.
 
