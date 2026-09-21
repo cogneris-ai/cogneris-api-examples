@@ -88,6 +88,13 @@ An owner must complete these steps outside this workflow:
    `sdk-release`. Set `SDK_PYPI_TRUSTED_PUBLISHING_READY` to `true` only after the
    registry configuration is complete.
 
+The `registry` input selects `all` (default), `npm`, or `pypi`. After the owner
+bootstraps npm version `0.1.0`, select `registry: pypi` to publish that version to
+PyPI without attempting to overwrite the npm packages. Use a single-registry
+selection for an owner-reviewed partial-release recovery as well. Every selection
+still builds and verifies all package families and runs the full Python matrix;
+unselected publication jobs are skipped before requesting environment approval.
+
 Real jobs require `dry_run: false`, the `main` ref, successful build and all Python
 compatibility jobs, and the protected environment. They alone receive
 `id-token: write`. No long-lived tokens, secret inputs, or fallback credentials
