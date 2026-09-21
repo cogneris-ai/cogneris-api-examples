@@ -53,8 +53,26 @@ def require(condition, message):
 
 
 def run(arguments, cwd=ROOT, env=None):
-    return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
-                          check=True, text=True, capture_output=True).stdout.strip()
+    try:
+        return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
+                              check=True, text=True, capture_output=True).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        # Dependency output and command arguments can contain credentials. Only
+        # emit fixed categories, never excerpts from the captured tool output.
+        output = ((error.stdout or "") + "\n" + (error.stderr or "")).lower()
+        patterns = {
+            "native-thread-limit": ("unable to create native thread", "resource temporarily unavailable"),
+            "gradle-daemon-disappeared": ("gradle build daemon disappeared",),
+            "memory-limit": ("outofmemoryerror", "java heap space", "cannot allocate memory"),
+            "dependency-resolution": ("could not resolve", "could not get resource", "could not get '"),
+            "test-failure": ("there were failing tests",),
+            "compilation-failure": ("compilation failed",),
+            "disk-limit": ("no space left on device",),
+        }
+        categories = [name for name, markers in patterns.items()
+                      if any(marker in output for marker in markers)]
+        category = ", ".join(categories) or "unknown"
+        raise ValueError(f"external tool failed (exit {error.returncode}; {category})") from None
 
 
 def digest(file):

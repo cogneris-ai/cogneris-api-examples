@@ -28,6 +28,38 @@ def release_module():
     return module
 
 
+class ToolFailureTests(unittest.TestCase):
+    def test_failed_tools_report_categories_without_output_or_environment_data(self):
+        release = release_module()
+        cases = {
+            "unable to create native thread": "native-thread-limit",
+            "Gradle build daemon disappeared unexpectedly": "gradle-daemon-disappeared",
+            "Could not resolve all files for configuration": "dependency-resolution",
+            "There were failing tests": "test-failure",
+            "java.lang.OutOfMemoryError: Java heap space": "memory-limit",
+            "Compilation failed": "compilation-failure",
+            "No space left on device": "disk-limit",
+            "unrecognized failure": "unknown",
+        }
+        sentinel = "PRIVATE_DIAGNOSTIC_TEST_VALUE"
+        for message, category in cases.items():
+            with self.subTest(category=category):
+                environment = dict(os.environ, DIAGNOSTIC_TEST_SECRET=sentinel,
+                                   DIAGNOSTIC_TEST_FAILURE=message)
+                with self.assertRaises((ValueError, subprocess.CalledProcessError)) as caught:
+                    release.run([
+                        sys.executable, "-c",
+                        "import os,sys; print(os.environ['DIAGNOSTIC_TEST_SECRET']); "
+                        "print(os.environ['DIAGNOSTIC_TEST_FAILURE'], file=sys.stderr); sys.exit(17)",
+                    ], env=environment)
+                diagnostic = str(caught.exception)
+                self.assertIn("exit 17", diagnostic)
+                self.assertIn(category, diagnostic)
+                self.assertNotIn(sentinel, diagnostic)
+                self.assertNotIn(message, diagnostic)
+                self.assertNotIn("import os", diagnostic)
+
+
 class ArchiveResourceTests(unittest.TestCase):
     """Real compressed fixtures use small chunks, never huge in-memory payloads."""
 
