@@ -14,7 +14,14 @@ was published to PyPI through trusted publishing on 2026-09-21; its public wheel
 matched the CI artifact and passed all seven installed SDK checks.
 [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
 was published to NuGet.org and verified by public installation on 2026-09-21.
-The Java package is not published to Maven Central; no workflow publishes to NuGet or Maven Central.
+[ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
+was published through the Central Portal on 2026-09-21. The public binary, POM,
+sources, and Javadoc matched the approved artifacts; all four PGP signatures
+were verified, and nineteen Java 17 consumer tests passed after a clean public
+installation. No repository workflow publishes to NuGet or Maven Central.
+Maven Central versions are immutable: do not upload `0.1.0` again. Future Java
+releases require a new version, signed artifacts, and a separately verified
+Central Portal publication.
 Public distribution of version `0.1.0` under Apache License 2.0 was authorized
 by COGNERIS,INC. on 2026-09-17. The release artifacts must carry the repository
 `LICENSE` and `NOTICE` files and matching SPDX metadata.

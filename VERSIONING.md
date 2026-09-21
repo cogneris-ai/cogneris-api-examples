@@ -3,8 +3,10 @@
 The TypeScript SDK (`@cogneris-ai/document-ai-sdk`), Python SDK
 (`cogneris-document-ai-sdk`), C# SDK (`Cogneris.DocumentAI`), Java SDK
 (`ai.cogneris:cogneris-document-ai-sdk`), and TypeScript CLI
-(`@cogneris-ai/document-ai-cli`) use Semantic Versioning. The Java `0.1.0`
-artifact remains unpublished on Maven Central.
+(`@cogneris-ai/document-ai-cli`) use Semantic Versioning.
+The Java [ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
+is published on Maven Central, with public artifact integrity, PGP signatures,
+and Java 17 installation verified on 2026-09-21.
 The npm [SDK 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.1.0)
 and [CLI 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.1.0)
 are published, with public tarball integrity and installation verified on 2026-09-21.
