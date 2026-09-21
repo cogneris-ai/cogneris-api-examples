@@ -52,9 +52,35 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def run(arguments, cwd=ROOT, env=None):
-    return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
-                          check=True, text=True, capture_output=True).stdout.strip()
+def run(arguments, cwd=ROOT, env=None, *, diagnostic_context="external"):
+    require(diagnostic_context in {"external", "java-build", "java-consumer"},
+            "unsupported diagnostic context")
+    try:
+        return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
+                              check=True, text=True, capture_output=True).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        # Dependency output and command arguments can contain credentials. Only
+        # emit fixed categories, never excerpts from the captured tool output.
+        output = ((error.stdout or "") + "\n" + (error.stderr or "")).lower()
+        patterns = {
+            "native-thread-limit": ("unable to create native thread", "resource temporarily unavailable"),
+            "gradle-daemon-disappeared": ("gradle build daemon disappeared",),
+            "memory-limit": ("outofmemoryerror", "java heap space", "cannot allocate memory"),
+            "dependency-resolution": ("could not resolve", "could not get resource", "could not get '"),
+            "test-failure": ("there were failing tests",),
+            "compilation-failure": ("compilation failed",),
+            "disk-limit": ("no space left on device",),
+            "network-timeout": ("timed out", "sockettimeoutexception"),
+            "http-download-failure": ("server returned http response code", "http error",),
+            "gradle-wrapper-download": ("org.gradle.wrapper.download.",),
+            "distribution-integrity": ("verification of gradle distribution failed",),
+        }
+        categories = [name for name, markers in patterns.items()
+                      if any(marker in output for marker in markers)]
+        statuses = re.findall(r"(?:http response code:|http error) ([45][0-9]{2})\b", output)
+        categories.extend(f"http-{status}" for status in sorted(set(statuses)))
+        category = ", ".join(categories) or "unknown"
+        raise ValueError(f"{diagnostic_context} tool failed (exit {error.returncode}; {category})") from None
 
 
 def digest(file):
@@ -586,7 +612,7 @@ def build(arguments):
         package_environment["GRADLE_USER_HOME"] = str(temporary / "gradle-home")
         run(java_command(
             checkout, "clean", "test", "jar", "generatePomFileForMavenPublication"
-        ), checkout, package_environment)
+        ), checkout, package_environment, diagnostic_context="java-build")
         java_build = checkout / "sdks/java/build"
         shutil.copyfile(
             java_build / f"libs/cogneris-document-ai-sdk-{arguments.version}.jar",
@@ -692,6 +718,7 @@ def clean_install(arguments):
                 java_command(ROOT, "test", project_directory=java_consumer),
                 consumer,
                 java_environment,
+                diagnostic_context="java-consumer",
             )
             require(f"Resolved Maven artifact: {java_jar}" in java_output,
                     "Java consumer did not resolve the staged Maven artifact")
