@@ -72,10 +72,13 @@ def run(arguments, cwd=ROOT, env=None, *, diagnostic_context="external"):
             "disk-limit": ("no space left on device",),
             "network-timeout": ("timed out", "sockettimeoutexception"),
             "http-download-failure": ("server returned http response code", "http error",),
+            "gradle-wrapper-download": ("org.gradle.wrapper.download.",),
             "distribution-integrity": ("verification of gradle distribution failed",),
         }
         categories = [name for name, markers in patterns.items()
                       if any(marker in output for marker in markers)]
+        statuses = re.findall(r"(?:http response code:|http error) ([45][0-9]{2})\b", output)
+        categories.extend(f"http-{status}" for status in sorted(set(statuses)))
         category = ", ".join(categories) or "unknown"
         raise ValueError(f"{diagnostic_context} tool failed (exit {error.returncode}; {category})") from None
 
