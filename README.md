@@ -69,8 +69,19 @@ consumer project with Node.js >=20.0.0:
 npm install @cogneris-ai/document-ai-sdk@0.1.0 @cogneris-ai/document-ai-cli@0.1.0
 ```
 
-The Java package is not published to Maven Central. Use the local Maven artifact
-below until a registry release is separately verified.
+The Java SDK [ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
+is available on Maven Central. Its public binary, POM, sources, and Javadoc
+matched the approved artifacts, and all four PGP signatures were verified.
+All nineteen Java 17 consumer tests passed against a clean public installation
+on 2026-09-21. Add this dependency to your Maven project:
+
+```xml
+<dependency>
+  <groupId>ai.cogneris</groupId>
+  <artifactId>cogneris-document-ai-sdk</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
 
 The Python SDK [cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
 is available on PyPI. Its public wheel matched the verified CI artifact and
@@ -233,8 +244,8 @@ cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.2.0.pom" "$COGNERIS_MAVEN_COORD
 ```
 
 Create `$COGNERIS_CONSUMER/java/pom.xml` with the dependency bound to that
-explicit repository. Maven Central remains available only for the artifact's
-public transitive dependencies and build plugins; the Cogneris package itself
+explicit local repository. In this local-artifact example, Maven Central supplies
+public transitive dependencies and build plugins, while the Cogneris package
 resolves from `COGNERIS_MAVEN_REPOSITORY`:
 
 ```xml
@@ -283,7 +294,8 @@ java -cp "target/classes:$COGNERIS_JAVA_CLASSPATH" Quickstart extract /path/to/d
 
 The command is a package-only first-result path: the consumer has no reference
 to `sdks/java` and Maven resolves the Cogneris coordinate from the explicit
-local repository. The package remains unavailable from Maven Central. The
+local repository. To use the verified public release instead, use the Maven
+Central dependency shown under Package availability. The
 example maps `COGNERIS_REGION=us|eu` to `CognerisClient.Region.US` or
 `CognerisClient.Region.EU` and demonstrates `extract`, `submitJob`, `getJob`,
 `waitForJob`, and `cancelJob`. The facade sends bearer authentication and
