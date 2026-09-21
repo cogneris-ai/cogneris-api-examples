@@ -57,12 +57,20 @@ The region maps to `https://api-us.cogneris.ai` or
 fields, input/output references, or raw response bodies. The examples print
 only controlled status summaries and identifiers.
 
-## Install local release artifacts
+## Package availability
 
-`@cogneris-ai/document-ai-sdk` and `@cogneris-ai/document-ai-cli` are not published
-to npm. The Java
-package is not published to Maven Central. For those packages, use the local
-release artifacts below until a registry release is separately verified.
+The TypeScript SDK [@cogneris-ai/document-ai-sdk 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.1.0)
+and CLI [@cogneris-ai/document-ai-cli 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.1.0)
+are available on npm. Both public tarballs matched the approved release artifacts;
+five SDK and twelve CLI consumer tests passed on 2026-09-21. Install them in your
+consumer project with Node.js >=20.0.0:
+
+```bash
+npm install @cogneris-ai/document-ai-sdk@0.1.0 @cogneris-ai/document-ai-cli@0.1.0
+```
+
+The Java package is not published to Maven Central. Use the local Maven artifact
+below until a registry release is separately verified.
 
 The Python SDK [cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
 is available on PyPI. Its public wheel matched the verified CI artifact and
@@ -75,6 +83,9 @@ is available on NuGet.org. Its public package was installed and passed all nine
 an alternative for inspecting owner-provided artifacts. No repository workflow
 publishes to NuGet or Maven Central.
 
+## Install local release artifacts
+
+Local installation remains available for inspecting release artifacts.
 Choose explicit checkout, release-artifact, and consumer directories. Use
 absolute paths so later commands cannot accidentally resolve against a
 different working directory:
