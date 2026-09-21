@@ -39,6 +39,9 @@ class ToolFailureTests(unittest.TestCase):
             "java.lang.OutOfMemoryError: Java heap space": "memory-limit",
             "Compilation failed": "compilation-failure",
             "No space left on device": "disk-limit",
+            "java.net.SocketTimeoutException: Read timed out": "network-timeout",
+            "Server returned HTTP response code: 403 for URL: https://example.invalid/private": "http-download-failure",
+            "Verification of Gradle distribution failed": "distribution-integrity",
             "unrecognized failure": "unknown",
         }
         sentinel = "PRIVATE_DIAGNOSTIC_TEST_VALUE"
@@ -53,8 +56,8 @@ class ToolFailureTests(unittest.TestCase):
                         "print(os.environ['DIAGNOSTIC_TEST_FAILURE'], file=sys.stderr); sys.exit(17)",
                     ], env=environment)
                 diagnostic = str(caught.exception)
-                self.assertIn("exit 17", diagnostic)
                 self.assertIn(category, diagnostic)
+                self.assertIn("exit 17", diagnostic)
                 self.assertNotIn(sentinel, diagnostic)
                 self.assertNotIn(message, diagnostic)
                 self.assertNotIn("import os", diagnostic)

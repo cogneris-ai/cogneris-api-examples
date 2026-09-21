@@ -52,7 +52,9 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def run(arguments, cwd=ROOT, env=None):
+def run(arguments, cwd=ROOT, env=None, *, diagnostic_context="external"):
+    require(diagnostic_context in {"external", "java-build", "java-consumer"},
+            "unsupported diagnostic context")
     try:
         return subprocess.run([str(arg) for arg in arguments], cwd=cwd, env=env,
                               check=True, text=True, capture_output=True).stdout.strip()
@@ -68,11 +70,14 @@ def run(arguments, cwd=ROOT, env=None):
             "test-failure": ("there were failing tests",),
             "compilation-failure": ("compilation failed",),
             "disk-limit": ("no space left on device",),
+            "network-timeout": ("timed out", "sockettimeoutexception"),
+            "http-download-failure": ("server returned http response code", "http error",),
+            "distribution-integrity": ("verification of gradle distribution failed",),
         }
         categories = [name for name, markers in patterns.items()
                       if any(marker in output for marker in markers)]
         category = ", ".join(categories) or "unknown"
-        raise ValueError(f"external tool failed (exit {error.returncode}; {category})") from None
+        raise ValueError(f"{diagnostic_context} tool failed (exit {error.returncode}; {category})") from None
 
 
 def digest(file):
@@ -604,7 +609,7 @@ def build(arguments):
         package_environment["GRADLE_USER_HOME"] = str(temporary / "gradle-home")
         run(java_command(
             checkout, "clean", "test", "jar", "generatePomFileForMavenPublication"
-        ), checkout, package_environment)
+        ), checkout, package_environment, diagnostic_context="java-build")
         java_build = checkout / "sdks/java/build"
         shutil.copyfile(
             java_build / f"libs/cogneris-document-ai-sdk-{arguments.version}.jar",
@@ -710,6 +715,7 @@ def clean_install(arguments):
                 java_command(ROOT, "test", project_directory=java_consumer),
                 consumer,
                 java_environment,
+                diagnostic_context="java-consumer",
             )
             require(f"Resolved Maven artifact: {java_jar}" in java_output,
                     "Java consumer did not resolve the staged Maven artifact")
