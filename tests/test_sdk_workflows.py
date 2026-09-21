@@ -172,7 +172,8 @@ def expected_jobs(release):
                     }),
                 ])
             jobs["publish-" + registry] = {
-                "if": "${{ inputs.dry_run == false && github.ref == 'refs/heads/main' }}",
+                "if": "${{ inputs.dry_run == false && github.ref == 'refs/heads/main' && "
+                      "(inputs.registry == 'all' || inputs.registry == '" + registry + "') }}",
                 "needs": ["build", "python-compatibility"], "environment": "sdk-release",
                 "runs-on": "ubuntu-latest", "permissions": {"contents": "read", "id-token": "write"},
                 "env": env, "steps": steps,
@@ -191,7 +192,9 @@ def contract(document, source, release):
         for value in inputs.values():
             value.pop("description", None)
         assert inputs == {"version": {"required": True, "type": "string"},
-                          "dry_run": {"required": True, "type": "boolean", "default": True}}
+                          "dry_run": {"required": True, "type": "boolean", "default": True},
+                          "registry": {"required": True, "type": "choice", "default": "all",
+                                       "options": ["all", "npm", "pypi"]}}
         assert document["concurrency"] == {"group": "sdk-release", "cancel-in-progress": False}
     else:
         assert document["on"] == {"pull_request": None, "push": {"branches": ["main"]}}
