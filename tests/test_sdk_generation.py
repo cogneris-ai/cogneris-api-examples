@@ -261,7 +261,7 @@ class SdkGenerationTests(unittest.TestCase):
 
         pyproject = (SDKS / "python" / "pyproject.toml").read_text()
         self.assertRegex(pyproject, r'(?m)^name = "cogneris-document-ai-sdk"$')
-        self.assertRegex(pyproject, r'(?m)^version = "0\.1\.0"$')
+        self.assertRegex(pyproject, r'(?m)^version = "0\.2\.0"$')
         self.assertRegex(pyproject, r'(?m)^requires-python = ">=3\.9,<4\.0"$')
         self.assertTrue(
             (SDKS / "python" / "cogneris_document_ai_sdk" / "__init__.py").is_file()
