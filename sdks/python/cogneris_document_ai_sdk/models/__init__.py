@@ -2,6 +2,8 @@
 
 from .api_error import ApiError
 from .api_error_details_type_0 import ApiErrorDetailsType0
+from .artifact import Artifact
+from .artifact_upload_envelope import ArtifactUploadEnvelope
 from .classify_documents_body import ClassifyDocumentsBody
 from .crop_document_body import CropDocumentBody
 from .document_job import DocumentJob
@@ -20,6 +22,7 @@ from .envelope import Envelope
 from .envelope_data import EnvelopeData
 from .envelope_data_metadata import EnvelopeDataMetadata
 from .extract_document_body import ExtractDocumentBody
+from .extracted_field import ExtractedField
 from .face_match_document_body import FaceMatchDocumentBody
 from .portal_channels import PortalChannels
 from .portal_form import PortalForm
@@ -35,11 +38,14 @@ from .service_error_envelope_data_type_0 import ServiceErrorEnvelopeDataType0
 from .service_response_meta import ServiceResponseMeta
 from .split_document_body import SplitDocumentBody
 from .submit_document_job_body import SubmitDocumentJobBody
+from .upload_artifact_body import UploadArtifactBody
 from .zero_shot_document_body import ZeroShotDocumentBody
 
 __all__ = (
     "ApiError",
     "ApiErrorDetailsType0",
+    "Artifact",
+    "ArtifactUploadEnvelope",
     "ClassifyDocumentsBody",
     "CropDocumentBody",
     "DocumentJob",
@@ -58,6 +64,7 @@ __all__ = (
     "EnvelopeData",
     "EnvelopeDataMetadata",
     "ExtractDocumentBody",
+    "ExtractedField",
     "FaceMatchDocumentBody",
     "PortalChannels",
     "PortalForm",
@@ -73,5 +80,6 @@ __all__ = (
     "ServiceResponseMeta",
     "SplitDocumentBody",
     "SubmitDocumentJobBody",
+    "UploadArtifactBody",
     "ZeroShotDocumentBody",
 )

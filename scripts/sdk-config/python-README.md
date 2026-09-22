@@ -4,7 +4,7 @@ Generated client package for the public Cogneris Document AI API contract at
 `openapi/cogneris-openapi.yaml`.
 
 The distribution name is `cogneris-document-ai-sdk`, the import package is
-`cogneris_document_ai_sdk`, and this source release is version `0.1.0`.
+`cogneris_document_ai_sdk`, and this source release is version `0.2.0`.
 
 ## Build
 

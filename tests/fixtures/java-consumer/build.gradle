@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'ai.cogneris:cogneris-document-ai-sdk:0.1.0'
+    testImplementation 'ai.cogneris:cogneris-document-ai-sdk:0.2.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -29,7 +29,7 @@ test {
     testLogging { events 'passed', 'failed'; showStandardStreams = true; exceptionFormat = 'full' }
     doFirst {
         def artifact = configurations.testRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.find {
-            it.moduleVersion.id.toString() == 'ai.cogneris:cogneris-document-ai-sdk:0.1.0'
+            it.moduleVersion.id.toString() == 'ai.cogneris:cogneris-document-ai-sdk:0.2.0'
         }
         assert artifact != null
         println "Resolved Maven artifact: ${artifact.file.canonicalPath}"

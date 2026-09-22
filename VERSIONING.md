@@ -3,8 +3,9 @@
 The TypeScript SDK (`@cogneris-ai/document-ai-sdk`), Python SDK
 (`cogneris-document-ai-sdk`), C# SDK (`Cogneris.DocumentAI`), Java SDK
 (`ai.cogneris:cogneris-document-ai-sdk`), and TypeScript CLI
-(`@cogneris-ai/document-ai-cli`) use Semantic Versioning. The Java `0.1.0`
-artifact remains unpublished on Maven Central.
+(`@cogneris-ai/document-ai-cli`) use Semantic Versioning. The committed source
+is `0.2.0` for all five families, and `0.2.0` is unpublished on every registry.
+No Java artifact is published on Maven Central.
 The npm [SDK 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.1.0)
 and [CLI 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.1.0)
 are published, with public tarball integrity and installation verified on 2026-09-21.
@@ -16,7 +17,7 @@ A package version or local artifact alone does not prove registry availability.
 
 Every generated SDK release is tied to a dated public OpenAPI contract. The
 current artifacts are generated from Cogneris Document AI OpenAPI version
-`2026-08-07`; [`sdks/manifest.json`](sdks/manifest.json) records the exact
+`2026-09-22` (the published `0.1.0` releases were generated from `2026-08-07`); [`sdks/manifest.json`](sdks/manifest.json) records the exact
 contract SHA-256 and generated file hashes. `npm run check:sdks` verifies that
 committed output still matches that input and the pinned generators.
 
@@ -33,6 +34,37 @@ While the packages remain below `1.0.0`, release notes must still call out any
 compatibility impact explicitly. A newer OpenAPI date is not by itself proof of
 backward compatibility; compare the contract and regenerate/check all four SDKs.
 
+## Release notes
+
+### 0.2.0
+
+Generated from OpenAPI contract `2026-09-22`, replacing `2026-08-07`. A minor
+release under the policy above: it supports a new compatible contract.
+
+Compatibility impact: **additive, no breaking change.** Compared symbol by
+symbol against the `0.1.0` output of all four SDKs, no operation, model, field,
+or type was removed, renamed, or retyped. Code written against `0.1.0` needs no
+change.
+
+- New Artifacts API in every SDK: `uploadArtifact` (`POST /api/v1/artifacts`)
+  stores a job's input and returns the `artifact://` reference that job
+  submission takes; `downloadArtifact` (`GET /api/v1/artifacts/content`) reads
+  back an upload or a finished job's `outputReference`. New models `Artifact`
+  and `ArtifactUploadEnvelope`.
+- New `ExtractedField` model (and `BoundingBox` in TypeScript) documenting the
+  entries of `data.metadata`: `value`, `confidence` from `0` to `100`, and, when
+  the value was located on the page, `page`, `bbox`, and `bbox_confidence`.
+  `data.metadata` keeps its open type, so these entries arrive exactly as they
+  did in `0.1.0`.
+- Generated documentation describes the per-field coordinate convention, the
+  `artifact://` reference lifecycle, and `outputReference`.
+- The CLI changes only its exact SDK dependency, to `0.2.0`; its commands,
+  options, and output are unchanged.
+- `CognerisClient` helpers are unchanged. Artifact upload is reachable through
+  the generated Artifacts API, not a helper.
+
+The Python SDK's `CHANGELOG.md` carries the same notes with Python names.
+
 ## Deprecation notice
 
 Before a supported helper, command, or generated public operation is removed,
@@ -42,5 +74,5 @@ it. No fixed deprecation window is promised until the service owner approves
 and publishes one. Urgent security or legal changes may require a shorter
 window and must be identified explicitly in the release notes.
 
-Contract features absent from OpenAPI version `2026-08-07` are not deprecated;
+Contract features absent from OpenAPI version `2026-09-22` are not deprecated;
 they are unsupported and must not be inferred from an internal service.

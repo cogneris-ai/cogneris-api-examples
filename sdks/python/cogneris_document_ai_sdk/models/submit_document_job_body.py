@@ -14,8 +14,10 @@ class SubmitDocumentJobBody:
     """
     Attributes:
         operation (DocumentJobSubmitOperation):
-        input_reference (str): Artifact reference to the already-uploaded input. Example:
-            artifact://documents/input.pdf.
+        input_reference (str): The `reference` returned by `POST /api/v1/artifacts`. That upload
+            is the only way to obtain one, and it can back more than one job
+            until it expires.
+             Example: artifact://uploads/9f2c1b7a4d8e4f06b1a25c3e7d9f0a11/invoice.pdf.
     """
 
     operation: DocumentJobSubmitOperation

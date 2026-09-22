@@ -76,7 +76,7 @@ def sync_detailed(
     """Discover fields without a template
 
      Reports the fields the model can find in a document you have no template
-    for, each with a confidence score.
+    for, each with a confidence score from `0` to `100`.
 
     Args:
         body (ZeroShotDocumentBody):
@@ -108,7 +108,7 @@ def sync(
     """Discover fields without a template
 
      Reports the fields the model can find in a document you have no template
-    for, each with a confidence score.
+    for, each with a confidence score from `0` to `100`.
 
     Args:
         body (ZeroShotDocumentBody):
@@ -135,7 +135,7 @@ async def asyncio_detailed(
     """Discover fields without a template
 
      Reports the fields the model can find in a document you have no template
-    for, each with a confidence score.
+    for, each with a confidence score from `0` to `100`.
 
     Args:
         body (ZeroShotDocumentBody):
@@ -165,7 +165,7 @@ async def asyncio(
     """Discover fields without a template
 
      Reports the fields the model can find in a document you have no template
-    for, each with a confidence score.
+    for, each with a confidence score from `0` to `100`.
 
     Args:
         body (ZeroShotDocumentBody):

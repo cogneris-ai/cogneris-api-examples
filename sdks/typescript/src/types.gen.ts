@@ -8,7 +8,35 @@ export type Envelope = {
     data?: {
         id?: string;
         /**
-         * Operation-specific payload.
+         * Operation-specific payload, shaped by the template or operation that ran.
+         * The keys are your template's, so the object itself is left open here.
+         *
+         * Extraction and zero-shot fill it with one entry per extracted field, and
+         * each entry is an `ExtractedField`: the value, how certain the model is of
+         * it, and — when the value was visually located on the page — where it was
+         * read from. A table-shaped field carries an `items` array instead, whose
+         * rows hold `ExtractedField` cells under the same keys.
+         *
+         * Source coordinates follow one convention, the same on every engine:
+         *
+         * - `page` is 1-indexed, and never past the document's last page.
+         * - `bbox` is `[x0, y0, x1, y1]` as fractions of the page size with the
+         * origin at the top-left, so `x0,y0` is the top-left corner and `x1,y1`
+         * the bottom-right. Values are clamped into `0`–`1` and the corners are
+         * ordered, so `x0 <= x1` and `y0 <= y1` always hold.
+         * - `page`, `bbox` and `bbox_confidence` are omitted **together** for any
+         * value the model could not locate on the page — a computed total, for
+         * instance. Their absence is not an error, and a field object carrying
+         * none of the three is ordinary.
+         *
+         * Every confidence this API returns is a number from `0` to `100`,
+         * `bbox_confidence` included. There is no second scale to convert from.
+         *
+         * A document job's stored `result.json` holds the same field entries,
+         * sanitized the same way, so the asynchronous answer agrees with the
+         * synchronous one for the same document. It wraps them differently — see
+         * `outputReference`.
+         *
          */
         metadata?: {
             [key: string]: unknown;
@@ -18,6 +46,55 @@ export type Envelope = {
     meta?: ServiceResponseMeta;
     hasErrors?: boolean;
 };
+
+/**
+ * One extracted field: the value, how certain the model is of it, and where on the
+ * document it was read from. These are the objects that fill `data.metadata`, and
+ * the cells inside a table-shaped field's `items` rows.
+ *
+ * The three location keys are present or absent together — see `data.metadata` for
+ * the coordinate convention they follow.
+ *
+ */
+export type ExtractedField = {
+    /**
+     * The extracted value, or `null` when the field was not found.
+     */
+    value?: string | null;
+    /**
+     * Certainty in the value, from `0` to `100`. This is the one confidence scale
+     * the API uses; `bbox_confidence` is on the same one.
+     *
+     */
+    confidence?: number;
+    /**
+     * 1-indexed page the value was read from. Absent when the value could not be
+     * located on the page.
+     *
+     */
+    page?: number;
+    bbox?: BoundingBox;
+    /**
+     * Certainty in the location, from `0` to `100` — the same scale as `confidence`,
+     * not a `0`–`1` fraction. Absent whenever `bbox` is.
+     *
+     */
+    bbox_confidence?: number;
+};
+
+/**
+ * Where a value sits on its page, as `[x0, y0, x1, y1]` fractions of the page size
+ * with the origin at the top-left: `x0,y0` is the top-left corner and `x1,y1` the
+ * bottom-right. Fractions rather than pixels, so the box survives any rendering
+ * scale — multiply by the width and height you draw the page at.
+ *
+ */
+export type BoundingBox = [
+    number,
+    number,
+    number,
+    number
+];
 
 export type DocumentJobOperation = 'Extraction' | 'Classification' | 'ZeroShot' | 'Crop' | 'Split' | 'Redaction' | 'Facematch';
 
@@ -42,6 +119,45 @@ export type ApiError = {
     details?: {
         [key: string]: string;
     } | null;
+};
+
+export type Artifact = {
+    /**
+     * Pass this as a job's `inputReference`. Reusable until it expires — treat
+     * it as opaque rather than parsing it.
+     *
+     */
+    reference: string;
+    /**
+     * The stored name. Characters outside `A-Z a-z 0-9 . _ -` are replaced and
+     * long names are truncated, so this can differ from what you sent. The
+     * extension is always preserved.
+     *
+     */
+    fileName: string;
+    /**
+     * The type the bytes were stored under. A non-image document is normalized
+     * to `application/pdf` before storage, so this can differ from what you
+     * uploaded.
+     *
+     */
+    contentType: string;
+    /**
+     * Size of the stored document, which is not the size you sent when it was normalized.
+     */
+    sizeBytes: number;
+    /**
+     * When the reference stops resolving — 7 days from upload. Reads after this
+     * answer `410`.
+     *
+     */
+    expiresAt: string;
+};
+
+export type ArtifactUploadEnvelope = {
+    data: Artifact;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
 };
 
 export type ServiceErrorEnvelope = {
@@ -99,6 +215,24 @@ export type DocumentJob = {
     jobId?: string;
     operation?: DocumentJobOperation;
     status?: DocumentJobStatus;
+    /**
+     * Where the finished result is stored, as an `artifact://` reference. Read it
+     * with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
+     * null for `Redaction`, which has its own download route.
+     *
+     * For `Extraction` and `ZeroShot` its field entries are the same
+     * `ExtractedField` objects a synchronous call returns for that document — same
+     * source-coordinate convention, same `0`-`100` confidence scale.
+     *
+     * The stored `result.json` is not the response envelope and does not repeat its
+     * casing: it holds the extraction result directly, with `Metadata` where the
+     * synchronous body has `data.metadata`. The field names inside are your
+     * template's either way.
+     *
+     * Jobs that completed before 2026-09-22 carry a bucket-qualified path rather
+     * than an `artifact://` reference; the download accepts both.
+     *
+     */
     outputReference?: string | null;
     stage?: string | null;
     processedPages?: number | null;
@@ -308,7 +442,9 @@ export type ExtractDocumentErrors = {
 export type ExtractDocumentResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
@@ -352,7 +488,9 @@ export type ClassifyDocumentsErrors = {
 export type ClassifyDocumentsResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
@@ -391,7 +529,9 @@ export type ZeroShotDocumentErrors = {
 export type ZeroShotDocumentResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
@@ -430,7 +570,9 @@ export type CropDocumentErrors = {
 export type CropDocumentResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
@@ -469,7 +611,9 @@ export type SplitDocumentErrors = {
 export type SplitDocumentResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
@@ -517,13 +661,130 @@ export type FaceMatchDocumentErrors = {
 export type FaceMatchDocumentResponses = {
     /**
      * The service envelope. `data.metadata` is shaped by the template or operation
-     * that ran, so its fields vary by document type.
+     * that ran, so its fields vary by document type. What does not vary is the shape of
+     * each field inside it — see `ExtractedField` for the value, confidence and source
+     * coordinates every extracted field carries.
      *
      */
     200: Envelope;
 };
 
 export type FaceMatchDocumentResponse = FaceMatchDocumentResponses[keyof FaceMatchDocumentResponses];
+
+export type UploadArtifactData = {
+    body: {
+        /**
+         * The document a job will consume. Same accepted extensions and the
+         * same 10 MB limit as the synchronous endpoints.
+         *
+         */
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/artifacts';
+};
+
+export type UploadArtifactErrors = {
+    /**
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
+     */
+    401: unknown;
+    /**
+     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     */
+    413: unknown;
+    /**
+     * Extension outside the supported list.
+     */
+    415: unknown;
+    /**
+     * The document was rejected by the security policy, or could not be
+     * converted safely. The `code` says which.
+     *
+     */
+    422: ServiceErrorEnvelope;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: unknown;
+    /**
+     * Document admission is temporarily unavailable. Marked retryable — back
+     * off and upload again.
+     *
+     */
+    503: ServiceErrorEnvelope;
+};
+
+export type UploadArtifactError = UploadArtifactErrors[keyof UploadArtifactErrors];
+
+export type UploadArtifactResponses = {
+    /**
+     * Stored.
+     */
+    201: ArtifactUploadEnvelope;
+};
+
+export type UploadArtifactResponse = UploadArtifactResponses[keyof UploadArtifactResponses];
+
+export type DownloadArtifactData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * An `artifact://` reference, or the bucket-qualified form an older job
+         * returned. Pass back exactly what you were given.
+         *
+         */
+        reference: string;
+    };
+    url: '/api/v1/artifacts/content';
+};
+
+export type DownloadArtifactErrors = {
+    /**
+     * The reference is missing, unreadable, or not one this tenant can read.
+     * A reference belonging to another tenant answers here, not `403` — the
+     * response does not reveal whether it exists.
+     *
+     */
+    400: ServiceErrorEnvelope;
+    /**
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
+     */
+    401: unknown;
+    /**
+     * No artifact with that reference in this tenant.
+     */
+    404: unknown;
+    /**
+     * The reference was valid and has expired. Distinct from `404` on purpose:
+     * retrying will never succeed, so upload again.
+     *
+     */
+    410: ServiceErrorEnvelope;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: unknown;
+};
+
+export type DownloadArtifactError = DownloadArtifactErrors[keyof DownloadArtifactErrors];
+
+export type DownloadArtifactResponses = {
+    /**
+     * A job result document.
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type DownloadArtifactResponse = DownloadArtifactResponses[keyof DownloadArtifactResponses];
 
 export type ListDocumentJobsData = {
     body?: never;
@@ -560,7 +821,10 @@ export type SubmitDocumentJobData = {
     body: {
         operation: DocumentJobSubmitOperation;
         /**
-         * Artifact reference to the already-uploaded input.
+         * The `reference` returned by `POST /api/v1/artifacts`. That upload
+         * is the only way to obtain one, and it can back more than one job
+         * until it expires.
+         *
          */
         inputReference: string;
     };

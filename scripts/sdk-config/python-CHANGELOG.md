@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+Generated from OpenAPI contract `2026-09-22` (was `2026-08-07`). Compatibility: additive only. No operation, model, field, or type from 0.1.0 was removed, renamed, or retyped, so code written against 0.1.0 compiles and behaves the same.
+
+- Add the `artifacts` API: `upload_artifact` (`POST /api/v1/artifacts`) stores a job's input document and returns an `ArtifactUploadEnvelope` whose `Artifact.reference` is the `artifact://` value `submit_job` takes; `download_artifact` (`GET /api/v1/artifacts/content`) reads back the bytes of an upload or of a finished job's `output_reference`. New models: `Artifact`, `ArtifactUploadEnvelope`, `UploadArtifactBody` (XTRAK-1742).
+- Add the `ExtractedField` model, which documents what each entry of `EnvelopeData.metadata` holds: `value`, `confidence` (0–100), and, when the value was located on the page, `page`, `bbox`, and `bbox_confidence` (0–100). `EnvelopeData.metadata` keeps its open `EnvelopeDataMetadata` type, whose entries still arrive in `additional_properties` exactly as before; `ExtractedField` and the docstrings describe them rather than retyping them (XTRAK-1744).
+- Docstrings now describe the per-field source-coordinate convention, the `artifact://` reference lifecycle, and `DocumentJob.output_reference` (XTRAK-1744, XTRAK-1742).
+
 ## 0.1.0
 
 - Add optional typed WhatsApp consent (`PortalMagicLinkRequest.opt_in`) and preserve `PortalMagicLink.send_suppression_reason`, including unknown future reasons. Existing requests can still omit consent (XTRAK-1651).

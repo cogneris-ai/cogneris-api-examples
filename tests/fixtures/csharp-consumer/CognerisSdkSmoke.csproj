@@ -8,6 +8,6 @@
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Cogneris.DocumentAI" Version="0.1.0" />
+    <PackageReference Include="Cogneris.DocumentAI" Version="0.2.0" />
   </ItemGroup>
 </Project>
