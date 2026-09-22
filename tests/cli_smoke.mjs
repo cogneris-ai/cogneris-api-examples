@@ -159,9 +159,9 @@ after(async () => {
 test("CLI package has the public identity, binary, and exact SDK dependency", async () => {
   const packageJson = JSON.parse(await readFile(path.join(root, "cli", "package.json"), "utf8"));
   assert.equal(packageJson.name, "@cogneris-ai/document-ai-cli");
-  assert.equal(packageJson.version, "0.1.0");
+  assert.equal(packageJson.version, "0.2.0");
   assert.deepEqual(packageJson.bin, { cogneris: "dist/bin.js" });
-  assert.equal(packageJson.dependencies["@cogneris-ai/document-ai-sdk"], "0.1.0");
+  assert.equal(packageJson.dependencies["@cogneris-ai/document-ai-sdk"], "0.2.0");
   assert.deepEqual(packageJson.repository, {
     type: "git",
     url: "git+https://github.com/cogneris-ai/cogneris-api-examples.git",

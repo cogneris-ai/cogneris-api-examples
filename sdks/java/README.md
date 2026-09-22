@@ -1,6 +1,6 @@
 # Cogneris Document AI SDK for Java
 
-Coordinates: `ai.cogneris:cogneris-document-ai-sdk:0.1.0`. Requires Java 17.
+Coordinates: `ai.cogneris:cogneris-document-ai-sdk:0.2.0`. Requires Java 17.
 
 The typed client is generated from the repository's public OpenAPI contract.
 Regenerate all SDKs from the repository root with `npm run generate:sdks`;

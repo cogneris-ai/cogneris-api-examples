@@ -1,5 +1,5 @@
 {
   "project_name_override": "cogneris-document-ai-sdk",
   "package_name_override": "cogneris_document_ai_sdk",
-  "package_version_override": "0.1.0"
+  "package_version_override": "0.2.0"
 }

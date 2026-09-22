@@ -169,10 +169,10 @@ class CSharpSdkSmokeTests(unittest.TestCase):
             ], cwd=root, env=environment, text=True, capture_output=True)
             self.assertEqual(restored.returncode, 0, restored.stdout + restored.stderr)
             assets = json.loads((project / "obj/project.assets.json").read_text())
-            library = assets["libraries"]["Cogneris.DocumentAI/0.1.0"]
+            library = assets["libraries"]["Cogneris.DocumentAI/0.2.0"]
             self.assertEqual(library["type"], "package")
-            artifact = packages / "Cogneris.DocumentAI.0.1.0.nupkg"
-            installed = cache / library["path"] / "cogneris.documentai.0.1.0.nupkg"
+            artifact = packages / "Cogneris.DocumentAI.0.2.0.nupkg"
+            installed = cache / library["path"] / "cogneris.documentai.0.2.0.nupkg"
             self.assertEqual(hashlib.sha256(artifact.read_bytes()).hexdigest(),
                              hashlib.sha256(installed.read_bytes()).hexdigest())
             result = subprocess.run([
@@ -204,11 +204,11 @@ class JavaSdkSmokeTests(unittest.TestCase):
             built = subprocess.run(command + [str(sdk), "jar", "generatePomFileForMavenPublication"],
                                    cwd=root, env=environment, text=True, capture_output=True, timeout=240)
             self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
-            coordinates = repository / "ai/cogneris/cogneris-document-ai-sdk/0.1.0"
+            coordinates = repository / "ai/cogneris/cogneris-document-ai-sdk/0.2.0"
             coordinates.mkdir(parents=True)
-            jar = coordinates / "cogneris-document-ai-sdk-0.1.0.jar"
-            pom = coordinates / "cogneris-document-ai-sdk-0.1.0.pom"
-            shutil.copy2(sdk / "build/libs/cogneris-document-ai-sdk-0.1.0.jar", jar)
+            jar = coordinates / "cogneris-document-ai-sdk-0.2.0.jar"
+            pom = coordinates / "cogneris-document-ai-sdk-0.2.0.pom"
+            shutil.copy2(sdk / "build/libs/cogneris-document-ai-sdk-0.2.0.jar", jar)
             shutil.copy2(sdk / "build/publications/maven/pom-default.xml", pom)
             ns = {"m": "http://maven.apache.org/POM/4.0.0"}
             scopes = {dependency.findtext("m:artifactId", namespaces=ns):

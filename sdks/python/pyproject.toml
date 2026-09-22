@@ -1,6 +1,6 @@
 [project]
 name = "cogneris-document-ai-sdk"
-version = "0.1.0"
+version = "0.2.0"
 description = "A client library for accessing Cogneris Document AI API"
 authors = []
 requires-python = ">=3.9,<4.0"

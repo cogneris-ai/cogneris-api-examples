@@ -75,7 +75,7 @@ class ArchiveResourceTests(unittest.TestCase):
                     return b" " * size
 
             with tarfile.open(file, "w:gz", format=tarfile.USTAR_FORMAT) as archive:
-                encoded = b'{"name":"test-package","version":"0.1.0"}'
+                encoded = b'{"name":"test-package","version":"0.2.0"}'
                 header = tarfile.TarInfo("package/package.json")
                 header.size = len(encoded)
                 archive.addfile(header, io.BytesIO(encoded))
@@ -85,7 +85,7 @@ class ArchiveResourceTests(unittest.TestCase):
                     archive.addfile(header, Spaces())
         else:
             with zipfile.ZipFile(file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-                archive.writestr("test-0.1.0.dist-info/METADATA", "Name: test-package\nVersion: 0.1.0\n")
+                archive.writestr("test-0.2.0.dist-info/METADATA", "Name: test-package\nVersion: 0.2.0\n")
                 for name, size in entries:
                     with archive.open(name, "w") as member:
                         for offset in range(0, size, 65536):
@@ -107,7 +107,7 @@ class ArchiveResourceTests(unittest.TestCase):
                         with file.open("wb") as stream:
                             stream.seek(16 * 1024 * 1024)
                             with zipfile.ZipFile(stream, "w") as archive:
-                                archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.1.0\n")
+                                archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.2.0\n")
                     with self.assertRaisesRegex(ValueError, "archive.*limit"):
                         release.package_metadata(file)
 
@@ -202,7 +202,7 @@ class ArchiveResourceTests(unittest.TestCase):
                 with self.subTest(compression=compression):
                     file = Path(directory) / f"compression-{compression}.whl"
                     with zipfile.ZipFile(file, "w", compression=compression) as archive:
-                        archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.1.0\n")
+                        archive.writestr("test.dist-info/METADATA", "Name: test\nVersion: 0.2.0\n")
                     with self.assertRaisesRegex(ValueError, "archive.*compression"):
                         release.package_metadata(file)
 
@@ -229,12 +229,12 @@ def fixture_bundle(directory, tar_member=None, zip_member=None, licensed=True):
     license_contents = (ROOT / "LICENSE").read_bytes()
     notice_contents = (ROOT / "NOTICE").read_bytes()
     for kind in ("sdk", "cli"):
-        metadata = {"name": f"@cogneris-ai/document-ai-{kind}", "version": "0.1.0"}
+        metadata = {"name": f"@cogneris-ai/document-ai-{kind}", "version": "0.2.0"}
         if licensed:
             metadata["license"] = "Apache-2.0"
         if kind == "cli":
-            metadata["dependencies"] = {"@cogneris-ai/document-ai-sdk": "0.1.0"}
-        with tarfile.open(directory / f"cogneris-ai-document-ai-{kind}-0.1.0.tgz", "w:gz") as archive:
+            metadata["dependencies"] = {"@cogneris-ai/document-ai-sdk": "0.2.0"}
+        with tarfile.open(directory / f"cogneris-ai-document-ai-{kind}-0.2.0.tgz", "w:gz") as archive:
             encoded = json.dumps(metadata).encode()
             member = tarfile.TarInfo("package/package.json")
             member.size = len(encoded)
@@ -246,30 +246,30 @@ def fixture_bundle(directory, tar_member=None, zip_member=None, licensed=True):
                     archive.addfile(member, io.BytesIO(contents))
             if kind == "sdk" and tar_member is not None:
                 archive.addfile(tar_member, io.BytesIO(b""))
-    with zipfile.ZipFile(directory / "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl", "w") as archive:
+    with zipfile.ZipFile(directory / "cogneris_document_ai_sdk-0.2.0-py3-none-any.whl", "w") as archive:
         license_metadata = "License-Expression: Apache-2.0\n" if licensed else ""
-        archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/METADATA",
-                         f"Name: cogneris-document-ai-sdk\nVersion: 0.1.0\n{license_metadata}")
+        archive.writestr("cogneris_document_ai_sdk-0.2.0.dist-info/METADATA",
+                         f"Name: cogneris-document-ai-sdk\nVersion: 0.2.0\n{license_metadata}")
         if licensed:
-            archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/licenses/LICENSE", license_contents)
-            archive.writestr("cogneris_document_ai_sdk-0.1.0.dist-info/licenses/NOTICE", notice_contents)
+            archive.writestr("cogneris_document_ai_sdk-0.2.0.dist-info/licenses/LICENSE", license_contents)
+            archive.writestr("cogneris_document_ai_sdk-0.2.0.dist-info/licenses/NOTICE", notice_contents)
         if zip_member is not None:
             archive.writestr(zip_member, b"")
     nuspec = b"""<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
-    <id>Cogneris.DocumentAI</id><version>0.1.0</version><authors>COGNERIS, INC.</authors>
+    <id>Cogneris.DocumentAI</id><version>0.2.0</version><authors>COGNERIS, INC.</authors>
     <license type="expression">Apache-2.0</license>
   </metadata>
 </package>
 """
-    with zipfile.ZipFile(directory / "Cogneris.DocumentAI.0.1.0.nupkg", "w") as archive:
+    with zipfile.ZipFile(directory / "Cogneris.DocumentAI.0.2.0.nupkg", "w") as archive:
         archive.writestr("Cogneris.DocumentAI.nuspec", nuspec)
         if licensed:
             archive.writestr("LICENSE", license_contents)
             archive.writestr("NOTICE", notice_contents)
     class_bytes = b"\xca\xfe\xba\xbe\x00\x00\x00\x3d"
-    with zipfile.ZipFile(directory / "cogneris-document-ai-sdk-0.1.0.jar", "w") as archive:
+    with zipfile.ZipFile(directory / "cogneris-document-ai-sdk-0.2.0.jar", "w") as archive:
         if licensed:
             archive.writestr("META-INF/LICENSE", license_contents)
             archive.writestr("META-INF/NOTICE", notice_contents)
@@ -279,18 +279,18 @@ def fixture_bundle(directory, tar_member=None, zip_member=None, licensed=True):
             "CognerisJobTerminalException", "CognerisMaxAttemptsException",
         ):
             archive.writestr(f"ai/cogneris/documentai/{facade}.class", class_bytes)
-    (directory / "cogneris-document-ai-sdk-0.1.0.pom").write_text("""\
+    (directory / "cogneris-document-ai-sdk-0.2.0.pom").write_text("""\
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>ai.cogneris</groupId><artifactId>cogneris-document-ai-sdk</artifactId><version>0.1.0</version>
+  <groupId>ai.cogneris</groupId><artifactId>cogneris-document-ai-sdk</artifactId><version>0.2.0</version>
   <licenses><license><name>Apache-2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url></license></licenses>
 </project>
 """)
-    manifest = {"version": "0.1.0", "source": "a" * 40,
+    manifest = {"version": "0.2.0", "source": "a" * 40,
                 "files": {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in directory.iterdir()}}
     encoded = json.dumps(manifest).encode()
     (directory / "manifest.json").write_bytes(encoded)
-    return ["--version", "0.1.0", "--artifacts", str(directory),
+    return ["--version", "0.2.0", "--artifacts", str(directory),
             "--manifest-sha256", hashlib.sha256(encoded).hexdigest(), "--source", "a" * 40]
 
 
@@ -302,11 +302,11 @@ class ReleaseArtifactTests(unittest.TestCase):
                               env=environment, text=True, capture_output=True)
 
     def test_version_gate_rejects_missing_malformed_and_mismatched_versions(self):
-        for version in ("", "v0.1.0", "01.1.0", "0.1", "0.1.0;false", "0.2.0"):
+        for version in ("", "v0.2.0", "02.2.0", "0.2", "0.2.0;false", "0.1.0"):
             with self.subTest(version=version):
                 result = self.invoke("check-version", "--version", version)
                 self.assertNotEqual(result.returncode, 0)
-        result = self.invoke("check-version", "--version", "0.1.0")
+        result = self.invoke("check-version", "--version", "0.2.0")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_integrity_gate_rejects_artifacts_without_the_approved_license(self):
@@ -322,18 +322,18 @@ class ReleaseArtifactTests(unittest.TestCase):
 <project xmlns="http://maven.apache.org/POM/4.0.0"><groupId>&leak;</groupId></project>"""
         with tempfile.TemporaryDirectory(prefix="cogneris-release-xml-") as directory:
             root = Path(directory)
-            pom = root / "cogneris-document-ai-sdk-0.1.0.pom"
+            pom = root / "cogneris-document-ai-sdk-0.2.0.pom"
             pom.write_bytes(entity_xml)
             with self.assertRaisesRegex(ValueError, "XML declaration"):
                 release.package_metadata(pom)
-            package = root / "Cogneris.DocumentAI.0.1.0.nupkg"
+            package = root / "Cogneris.DocumentAI.0.2.0.nupkg"
             with zipfile.ZipFile(package, "w") as archive:
                 archive.writestr("Cogneris.DocumentAI.nuspec", entity_xml)
             with self.assertRaisesRegex(ValueError, "XML declaration"):
                 release.package_metadata(package)
             wrong_pom_namespace = b"""\
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:e="https://example.invalid">
-  <e:groupId>ai.cogneris</e:groupId><e:artifactId>cogneris-document-ai-sdk</e:artifactId><e:version>0.1.0</e:version>
+  <e:groupId>ai.cogneris</e:groupId><e:artifactId>cogneris-document-ai-sdk</e:artifactId><e:version>0.2.0</e:version>
   <e:licenses><e:license><e:name>Apache-2.0</e:name><e:url>https://www.apache.org/licenses/LICENSE-2.0</e:url></e:license></e:licenses>
 </project>"""
             pom.write_bytes(wrong_pom_namespace)
@@ -341,7 +341,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                 release.package_metadata(pom)
             wrong_nuspec_namespace = b"""\
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd" xmlns:e="https://example.invalid">
-  <e:metadata><e:id>Cogneris.DocumentAI</e:id><e:version>0.1.0</e:version>
+  <e:metadata><e:id>Cogneris.DocumentAI</e:id><e:version>0.2.0</e:version>
     <e:authors>COGNERIS, INC.</e:authors><e:license type="expression">Apache-2.0</e:license></e:metadata>
 </package>"""
             with zipfile.ZipFile(package, "w") as archive:
@@ -354,13 +354,13 @@ class ReleaseArtifactTests(unittest.TestCase):
             pom_text = f"""<?xml version="1.0" encoding="UTF-16"?>
 <!DOCTYPE project [<!ENTITY payload "{expansion}">]>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
-  <groupId>&payload;</groupId><artifactId>cogneris-document-ai-sdk</artifactId><version>0.1.0</version>
+  <groupId>&payload;</groupId><artifactId>cogneris-document-ai-sdk</artifactId><version>0.2.0</version>
   <licenses><license><name>Apache-2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url></license></licenses>
 </project>"""
             nuspec_text = f"""<?xml version="1.0" encoding="UTF-16"?>
 <!DOCTYPE package [<!ENTITY payload "{expansion}">]>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-  <metadata><id>&payload;</id><version>0.1.0</version><authors>COGNERIS, INC.</authors>
+  <metadata><id>&payload;</id><version>0.2.0</version><authors>COGNERIS, INC.</authors>
     <license type="expression">Apache-2.0</license></metadata>
 </package>"""
             for encoding, byte_order_mark in (
@@ -388,11 +388,11 @@ class ReleaseArtifactTests(unittest.TestCase):
         release = release_module()
         with tempfile.TemporaryDirectory(prefix="cogneris-nuget-proof-") as directory:
             root = Path(directory)
-            staged = root / "Cogneris.DocumentAI.0.1.0.nupkg"
+            staged = root / "Cogneris.DocumentAI.0.2.0.nupkg"
             staged.write_bytes(b"approved built package")
             cache = root / "cache"
-            relative = "cogneris.documentai/0.1.0"
-            installed = cache / relative / "cogneris.documentai.0.1.0.nupkg"
+            relative = "cogneris.documentai/0.2.0"
+            installed = cache / relative / "cogneris.documentai.0.2.0.nupkg"
             installed.parent.mkdir(parents=True)
             installed.write_bytes(staged.read_bytes())
             assets = root / "project.assets.json"
@@ -400,19 +400,19 @@ class ReleaseArtifactTests(unittest.TestCase):
             def write_assets(kind):
                 assets.write_text(json.dumps({
                     "libraries": {
-                        "Cogneris.DocumentAI/0.1.0": {"type": kind, "path": relative},
+                        "Cogneris.DocumentAI/0.2.0": {"type": kind, "path": relative},
                     },
                 }))
 
             write_assets("package")
-            release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.1.0")
+            release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.2.0")
             write_assets("project")
             with self.assertRaisesRegex(ValueError, "package-only"):
-                release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.1.0")
+                release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.2.0")
             write_assets("package")
             installed.write_bytes(b"different package bytes")
             with self.assertRaisesRegex(ValueError, "digest"):
-                release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.1.0")
+                release.verify_nuget_install(assets, cache, staged, "Cogneris.DocumentAI", "0.2.0")
 
     def test_nuget_source_mapping_reserves_cogneris_for_the_staged_feed(self):
         release = release_module()
@@ -451,12 +451,12 @@ class ReleaseArtifactTests(unittest.TestCase):
             approved_notice = notice_file.read_bytes()
 
             output = Path(directory) / "artifacts"
-            result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+            result = self.invoke("build", "--version", "0.2.0", "--output", str(output))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
             for package in ("sdk", "cli"):
                 with self.subTest(package=package):
-                    archive = output / f"cogneris-ai-document-ai-{package}-0.1.0.tgz"
+                    archive = output / f"cogneris-ai-document-ai-{package}-0.2.0.tgz"
                     with tarfile.open(archive, "r:gz") as contents:
                         metadata = json.load(contents.extractfile("package/package.json"))
                         self.assertEqual(metadata["license"], "Apache-2.0")
@@ -465,7 +465,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                         self.assertEqual(contents.extractfile("package/LICENSE").read(), approved_license)
                         self.assertEqual(contents.extractfile("package/NOTICE").read(), approved_notice)
 
-            wheel = output / "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"
+            wheel = output / "cogneris_document_ai_sdk-0.2.0-py3-none-any.whl"
             with zipfile.ZipFile(wheel) as contents:
                 metadata_name = next(name for name in contents.namelist() if name.endswith(".dist-info/METADATA"))
                 metadata = email.parser.BytesParser().parsebytes(contents.read(metadata_name))
@@ -477,13 +477,13 @@ class ReleaseArtifactTests(unittest.TestCase):
                 }
                 self.assertEqual(licenses, {"LICENSE": approved_license, "NOTICE": approved_notice})
 
-            package = output / "Cogneris.DocumentAI.0.1.0.nupkg"
+            package = output / "Cogneris.DocumentAI.0.2.0.nupkg"
             with zipfile.ZipFile(package) as contents:
                 nuspecs = [name for name in contents.namelist() if name.endswith(".nuspec")]
                 self.assertEqual(nuspecs, ["Cogneris.DocumentAI.nuspec"])
                 nuspec = ET.fromstring(contents.read(nuspecs[0]))
                 self.assertEqual(nuspec.findtext(".//{*}id"), "Cogneris.DocumentAI")
-                self.assertEqual(nuspec.findtext(".//{*}version"), "0.1.0")
+                self.assertEqual(nuspec.findtext(".//{*}version"), "0.2.0")
                 self.assertEqual(nuspec.findtext(".//{*}authors"), "COGNERIS, INC.")
                 license_metadata = nuspec.find(".//{*}license")
                 self.assertIsNotNone(license_metadata)
@@ -492,7 +492,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                 self.assertEqual(contents.read("LICENSE"), approved_license)
                 self.assertEqual(contents.read("NOTICE"), approved_notice)
 
-            jar = output / "cogneris-document-ai-sdk-0.1.0.jar"
+            jar = output / "cogneris-document-ai-sdk-0.2.0.jar"
             with zipfile.ZipFile(jar) as contents:
                 self.assertEqual(contents.read("META-INF/LICENSE"), approved_license)
                 self.assertEqual(contents.read("META-INF/NOTICE"), approved_notice)
@@ -507,11 +507,11 @@ class ReleaseArtifactTests(unittest.TestCase):
                     self.assertEqual(bytecode[:4], b"\xca\xfe\xba\xbe")
                     self.assertEqual(int.from_bytes(bytecode[6:8], "big"), 61)
 
-            pom = ET.parse(output / "cogneris-document-ai-sdk-0.1.0.pom")
+            pom = ET.parse(output / "cogneris-document-ai-sdk-0.2.0.pom")
             ns = {"m": "http://maven.apache.org/POM/4.0.0"}
             self.assertEqual(pom.findtext("m:groupId", namespaces=ns), "ai.cogneris")
             self.assertEqual(pom.findtext("m:artifactId", namespaces=ns), "cogneris-document-ai-sdk")
-            self.assertEqual(pom.findtext("m:version", namespaces=ns), "0.1.0")
+            self.assertEqual(pom.findtext("m:version", namespaces=ns), "0.2.0")
             self.assertEqual(pom.findtext("m:licenses/m:license/m:name", namespaces=ns), "Apache-2.0")
             self.assertEqual(
                 pom.findtext("m:licenses/m:license/m:url", namespaces=ns),
@@ -522,19 +522,19 @@ class ReleaseArtifactTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="cogneris-release-test-") as directory:
             self.checkout = clean_checkout(Path(directory) / "checkout")
             output = Path(directory) / "artifacts"
-            result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+            result = self.invoke("build", "--version", "0.2.0", "--output", str(output))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             manifest_bytes = (output / "manifest.json").read_bytes()
             manifest = json.loads(manifest_bytes)
             digest = hashlib.sha256(manifest_bytes).hexdigest()
             self.assertEqual(set(manifest["files"]), {
-                "cogneris-ai-document-ai-sdk-0.1.0.tgz", "cogneris-ai-document-ai-cli-0.1.0.tgz",
-                "cogneris_document_ai_sdk-0.1.0-py3-none-any.whl",
-                "Cogneris.DocumentAI.0.1.0.nupkg",
-                "cogneris-document-ai-sdk-0.1.0.jar",
-                "cogneris-document-ai-sdk-0.1.0.pom",
+                "cogneris-ai-document-ai-sdk-0.2.0.tgz", "cogneris-ai-document-ai-cli-0.2.0.tgz",
+                "cogneris_document_ai_sdk-0.2.0-py3-none-any.whl",
+                "Cogneris.DocumentAI.0.2.0.nupkg",
+                "cogneris-document-ai-sdk-0.2.0.jar",
+                "cogneris-document-ai-sdk-0.2.0.pom",
             })
-            arguments = ["--version", "0.1.0", "--artifacts", str(output),
+            arguments = ["--version", "0.2.0", "--artifacts", str(output),
                          "--manifest-sha256", digest, "--source", manifest["source"]]
             result = self.invoke("verify", *arguments)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -544,7 +544,7 @@ class ReleaseArtifactTests(unittest.TestCase):
             # Never overwrite an existing artifact directory, including user files.
             marker = output / "pre-existing.txt"
             marker.write_text("must survive")
-            result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+            result = self.invoke("build", "--version", "0.2.0", "--output", str(output))
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(marker.read_text(), "must survive")
             result = self.invoke("verify", *arguments)
@@ -561,7 +561,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                     self.assertIn("digest", result.stderr.lower())
                     tampered.write_bytes(original)
 
-            artifact = output / "cogneris-ai-document-ai-sdk-0.1.0.tgz"
+            artifact = output / "cogneris-ai-document-ai-sdk-0.2.0.tgz"
             original = artifact.read_bytes()
             # A self-consistent checksum is insufficient if package metadata lies.
             with tarfile.open(artifact, "w:gz") as archive:
@@ -633,7 +633,7 @@ class ReleaseArtifactTests(unittest.TestCase):
         member.extra = struct.pack("<HH", 0x000d, 20) + b"\0" * 12 + b"../other"
         cases.append(("zip hardlink metadata", None, member))
         cases.append(("tar duplicate", tarfile.TarInfo("package/package.json"), None))
-        cases.append(("zip case collision", None, zipfile.ZipInfo("COGNERIS_DOCUMENT_AI_SDK-0.1.0.dist-info/metadata")))
+        cases.append(("zip case collision", None, zipfile.ZipInfo("COGNERIS_DOCUMENT_AI_SDK-0.2.0.dist-info/metadata")))
         with tempfile.TemporaryDirectory(prefix="cogneris-unsafe-archives-") as directory:
             for index, (label, tar_member, zip_member) in enumerate(cases):
                 with self.subTest(archive=label):
@@ -671,7 +671,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                         subprocess.run(["git", "update-index", "--assume-unchanged", name], cwd=self.checkout, check=True)
                     output = Path(directory) / f"artifacts-{index}"
                     try:
-                        result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+                        result = self.invoke("build", "--version", "0.2.0", "--output", str(output))
                         self.assertNotEqual(result.returncode, 0)
                         self.assertIn("dirty or untracked build inputs", result.stderr.lower())
                         self.assertFalse(output.exists(), "dirty source must fail before artifact creation")
@@ -702,7 +702,7 @@ class ReleaseArtifactTests(unittest.TestCase):
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_bytes(b"unrelated pre-existing bytes")
             output = Path(directory) / "artifacts"
-            result = self.invoke("build", "--version", "0.1.0", "--output", str(output))
+            result = self.invoke("build", "--version", "0.2.0", "--output", str(output))
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads((output / "manifest.json").read_text())["source"],
                              subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=self.checkout).decode().strip())

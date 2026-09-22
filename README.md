@@ -4,7 +4,7 @@ This repository is the canonical first-result path for the public Cogneris
 Document AI API: TypeScript, Python, C#/.NET, Java, the `cogneris` CLI, and
 Postman. All of them are built from
 [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
-OpenAPI contract version `2026-08-07`.
+OpenAPI contract version `2026-09-22`.
 
 For WhatsApp consent and delivery outcomes on the generated Portal API, see
 [Portal magic links](docs/portal-magic-links.md).
@@ -83,6 +83,12 @@ is available on NuGet.org. Its public package was installed and passed all nine
 an alternative for inspecting owner-provided artifacts. No repository workflow
 publishes to NuGet or Maven Central.
 
+The committed source is version `0.2.0`, generated from OpenAPI contract
+`2026-09-22`. The registry releases linked above are `0.1.0`, generated from
+`2026-08-07`; `0.2.0` is not yet published to any registry. The change is
+additive: see the release notes in [VERSIONING.md](VERSIONING.md). The local
+release artifacts below build `0.2.0`.
+
 ## Install local release artifacts
 
 Local installation remains available for inspecting release artifacts.
@@ -110,7 +116,7 @@ npm pack ./cli --pack-destination "$COGNERIS_RELEASE"
 ```
 
 Set up the separate consumer project. This block installs both npm tarballs in
-one operation so the CLI's exact `0.1.0` SDK dependency is satisfied locally,
+one operation so the CLI's exact `0.2.0` SDK dependency is satisfied locally,
 installs the wheel into a consumer-local virtual environment, and copies the
 runnable examples to paths that exist in the consumer:
 
@@ -124,9 +130,9 @@ cp "$COGNERIS_CHECKOUT/examples/typescript/quickstart.mjs" "$COGNERIS_CONSUMER/e
 cp "$COGNERIS_CHECKOUT/examples/python/quickstart.py" "$COGNERIS_CONSUMER/examples/python/"
 cd "$COGNERIS_CONSUMER"
 test -f package.json || npm init --yes
-npm install "$COGNERIS_RELEASE/cogneris-ai-document-ai-sdk-0.1.0.tgz" "$COGNERIS_RELEASE/cogneris-ai-document-ai-cli-0.1.0.tgz"
+npm install "$COGNERIS_RELEASE/cogneris-ai-document-ai-sdk-0.2.0.tgz" "$COGNERIS_RELEASE/cogneris-ai-document-ai-cli-0.2.0.tgz"
 uv venv --python "${PYTHON_BIN:-python3}" .venv
-uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"
+uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-0.2.0-py3-none-any.whl"
 ```
 <!-- consumer-setup:end -->
 
@@ -182,7 +188,7 @@ client.close()
 
 ## .NET 8: local NuGet package
 
-`Cogneris.DocumentAI.0.1.0.nupkg` is an owner-provided local artifact targeting
+`Cogneris.DocumentAI.0.2.0.nupkg` is an owner-provided local artifact targeting
 `net8.0`. For the verified public release, see the NuGet.org link above. To
 use a local artifact instead, create a separate .NET 8
 consumer, copy the runnable example, add the package with the explicit local
@@ -193,7 +199,7 @@ mkdir -p "$COGNERIS_CONSUMER/dotnet"
 cd "$COGNERIS_CONSUMER/dotnet"
 dotnet new console --framework net8.0
 cp "$COGNERIS_CHECKOUT/examples/dotnet/Quickstart.cs" Program.cs
-dotnet add package Cogneris.DocumentAI --version 0.1.0 --source "$COGNERIS_RELEASE" --no-restore
+dotnet add package Cogneris.DocumentAI --version 0.2.0 --source "$COGNERIS_RELEASE" --no-restore
 dotnet restore --source "$COGNERIS_RELEASE" --source https://api.nuget.org/v3/index.json
 dotnet run -- extract /path/to/document.pdf
 ```
@@ -209,17 +215,17 @@ sanitized `CognerisApiException`, `CognerisTransportException`,
 
 ## Java 17: local Maven artifact
 
-Stage the exact `cogneris-document-ai-sdk-0.1.0.jar` and
-`cogneris-document-ai-sdk-0.1.0.pom` as one local Maven artifact. A full JDK 17
+Stage the exact `cogneris-document-ai-sdk-0.2.0.jar` and
+`cogneris-document-ai-sdk-0.2.0.pom` as one local Maven artifact. A full JDK 17
 with `javac` and Apache Maven 3.9 or newer are required; `jdk4py` is not a full
 compiler JDK on this host.
 
 ```bash
 export COGNERIS_MAVEN_REPOSITORY="$COGNERIS_CONSUMER/java/maven-repository"
-export COGNERIS_MAVEN_COORDINATES="$COGNERIS_MAVEN_REPOSITORY/ai/cogneris/cogneris-document-ai-sdk/0.1.0"
+export COGNERIS_MAVEN_COORDINATES="$COGNERIS_MAVEN_REPOSITORY/ai/cogneris/cogneris-document-ai-sdk/0.2.0"
 mkdir -p "$COGNERIS_MAVEN_COORDINATES"
-cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.jar" "$COGNERIS_MAVEN_COORDINATES/"
-cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.1.0.pom" "$COGNERIS_MAVEN_COORDINATES/"
+cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.2.0.jar" "$COGNERIS_MAVEN_COORDINATES/"
+cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.2.0.pom" "$COGNERIS_MAVEN_COORDINATES/"
 ```
 
 Create `$COGNERIS_CONSUMER/java/pom.xml` with the dependency bound to that
@@ -249,7 +255,7 @@ resolves from `COGNERIS_MAVEN_REPOSITORY`:
     <dependency>
       <groupId>ai.cogneris</groupId>
       <artifactId>cogneris-document-ai-sdk</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
     </dependency>
   </dependencies>
 </project>
@@ -336,13 +342,19 @@ response, exception context, document, or credential.
   `.jpg`, `.jpeg`, `.tiff`, `.tif`, `.bmp`, `.doc`, and `.docx`.
 - The maximum is 10 MB per file except `/Document/split`, which accepts 500 MB.
 - There is no fetch-by-URL upload: synchronous documents travel in the request
-  body. Asynchronous submission takes a reference to an already-uploaded input.
+  body. Asynchronous submission takes the `artifact://` reference that
+  `POST /api/v1/artifacts` returns; the generated SDKs expose it as the
+  Artifacts API (`uploadArtifact`/`upload_artifact`), not as a `CognerisClient`
+  helper.
 - One fixed-window limit covers the contract: 50 requests per API key per
   1-minute window. Excess requests return HTTP 429.
 - Schema is selected by tenant configuration and the document itself. There is
   no public schema or template parameter on extraction requests.
-- Public evidence, cost, destination, and webhook-signature APIs are absent
-  from OpenAPI contract `2026-08-07`. Do not fabricate calls or infer private
+- Per-field evidence travels inside the extraction response: each entry of
+  `data.metadata` is an `ExtractedField` carrying `value`, `confidence`, and,
+  when the value was located on the page, `page`, `bbox`, and `bbox_confidence`.
+  Separate evidence, cost, destination, and webhook-signature APIs are absent
+  from OpenAPI contract `2026-09-22`. Do not fabricate calls or infer private
   service behavior for those capabilities.
 - `CognerisClient` is the maintained document/job helper. Portal,
   administrative, and internal APIs are not SDK helper features. Public Portal

@@ -21,7 +21,23 @@ class DocumentJob:
         job_id (Union[Unset, UUID]):
         operation (Union[Unset, DocumentJobOperation]):
         status (Union[Unset, DocumentJobStatus]):
-        output_reference (Union[None, Unset, str]):
+        output_reference (Union[None, Unset, str]): Where the finished result is stored, as an `artifact://` reference.
+            Read it
+            with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
+            null for `Redaction`, which has its own download route.
+
+            For `Extraction` and `ZeroShot` its field entries are the same
+            `ExtractedField` objects a synchronous call returns for that document — same
+            source-coordinate convention, same `0`-`100` confidence scale.
+
+            The stored `result.json` is not the response envelope and does not repeat its
+            casing: it holds the extraction result directly, with `Metadata` where the
+            synchronous body has `data.metadata`. The field names inside are your
+            template's either way.
+
+            Jobs that completed before 2026-09-22 carry a bucket-qualified path rather
+            than an `artifact://` reference; the download accepts both.
+             Example: artifact://document-jobs/7c9e6679-7425-40de-944b-e07fc1f90ae7/result.json.
         stage (Union[None, Unset, str]):
         processed_pages (Union[None, Unset, int]):
         total_pages (Union[None, Unset, int]):

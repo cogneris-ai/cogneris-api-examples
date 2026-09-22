@@ -15,9 +15,9 @@ input/output references before posting.
 
 For C#, state whether you installed the verified public
 [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
-release from NuGet.org or the local `Cogneris.DocumentAI.0.1.0.nupkg`.
+release from NuGet.org or a local `Cogneris.DocumentAI.0.2.0.nupkg` built from source.
 For Java, supply the versions of both the local
-`cogneris-document-ai-sdk-0.1.0.jar` and `.pom`. Maven Central installation
+`cogneris-document-ai-sdk-0.2.0.jar` and `.pom`. Maven Central installation
 remains outside the supported path until publication is separately verified.
 
 The repository does not provide support for tenant configuration, schema or

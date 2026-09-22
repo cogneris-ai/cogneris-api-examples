@@ -1,6 +1,6 @@
 # Cogneris Document AI SDK for C#
 
-Package: `Cogneris.DocumentAI`, version `0.1.0`. Requires .NET 8.
+Package: `Cogneris.DocumentAI`, version `0.2.0`. Requires .NET 8.
 
 The typed client is generated from the repository's public OpenAPI contract.
 Regenerate all SDKs from the repository root with `npm run generate:sdks`;

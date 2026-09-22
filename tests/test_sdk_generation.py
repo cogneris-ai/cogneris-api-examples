@@ -248,7 +248,7 @@ class SdkGenerationTests(unittest.TestCase):
     def test_package_identities_and_versions_are_publishable(self):
         typescript = json.loads((SDKS / "typescript" / "package.json").read_text())
         self.assertEqual(typescript["name"], "@cogneris-ai/document-ai-sdk")
-        self.assertEqual(typescript["version"], "0.1.0")
+        self.assertEqual(typescript["version"], "0.2.0")
         self.assertFalse(typescript.get("private", False))
         self.assertEqual(typescript["scripts"]["build"], "tsc -p tsconfig.json")
         self.assertEqual(
@@ -261,7 +261,7 @@ class SdkGenerationTests(unittest.TestCase):
 
         pyproject = (SDKS / "python" / "pyproject.toml").read_text()
         self.assertRegex(pyproject, r'(?m)^name = "cogneris-document-ai-sdk"$')
-        self.assertRegex(pyproject, r'(?m)^version = "0\.1\.0"$')
+        self.assertRegex(pyproject, r'(?m)^version = "0\.2\.0"$')
         self.assertRegex(pyproject, r'(?m)^requires-python = ">=3\.9,<4\.0"$')
         self.assertTrue(
             (SDKS / "python" / "cogneris_document_ai_sdk" / "__init__.py").is_file()
@@ -270,7 +270,7 @@ class SdkGenerationTests(unittest.TestCase):
     def test_csharp_and_java_metadata_and_legal_files_are_normalized(self):
         self.assertTrue((SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj").is_file(), "missing generated C# project")
         project = ET.parse(SDKS / "csharp/src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj")
-        for tag, value in (("PackageId", "Cogneris.DocumentAI"), ("Version", "0.1.0"),
+        for tag, value in (("PackageId", "Cogneris.DocumentAI"), ("Version", "0.2.0"),
                            ("TargetFramework", "net8.0"), ("PackageLicenseExpression", "Apache-2.0"),
                            ("Authors", "COGNERIS, INC."), ("Company", "COGNERIS, INC."),
                            ("Copyright", "Copyright 2026 COGNERIS, INC."),
@@ -282,7 +282,7 @@ class SdkGenerationTests(unittest.TestCase):
             self.assertEqual(item.attrib, {"Include": f"../../{legal}", "Pack": "true", "PackagePath": ""})
         pom = ET.parse(SDKS / "java/pom.xml")
         ns = {"m": "http://maven.apache.org/POM/4.0.0"}
-        for tag, value in (("groupId", "ai.cogneris"), ("artifactId", "cogneris-document-ai-sdk"), ("version", "0.1.0")):
+        for tag, value in (("groupId", "ai.cogneris"), ("artifactId", "cogneris-document-ai-sdk"), ("version", "0.2.0")):
             self.assertEqual(pom.findtext(f"m:{tag}", namespaces=ns), value)
         self.assertEqual(pom.findtext("m:url", namespaces=ns), "https://github.com/cogneris-ai/cogneris-api-examples")
         self.assertEqual(pom.findtext("m:developers/m:developer/m:name", namespaces=ns), "COGNERIS, INC.")
@@ -352,7 +352,7 @@ class SdkGenerationTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
             self.assertEqual(
                 [path.name for path in wheels.glob("*.whl")],
-                ["cogneris_document_ai_sdk-0.1.0-py3-none-any.whl"],
+                ["cogneris_document_ai_sdk-0.2.0-py3-none-any.whl"],
             )
 
     def test_check_is_exact_and_does_not_modify_committed_outputs(self):

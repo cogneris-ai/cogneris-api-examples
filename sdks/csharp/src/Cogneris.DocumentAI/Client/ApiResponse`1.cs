@@ -2,9 +2,9 @@
 /*
  * Cogneris Document AI API
  *
- * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so there is no template or schema parameter on the request.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.
+ * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  The asynchronous job endpoints do not take a file. Upload it first to `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the `artifact://` reference it returns.  ## Artifact references  A reference names one stored object. `POST /api/v1/artifacts` returns one, a job submit consumes one as `inputReference`, and a finished job returns one as `outputReference`. `GET /api/v1/artifacts/content` turns either back into bytes.  - References are scoped to the tenant that created them. One belonging to another   tenant is refused as an invalid reference — the answer does not distinguish a   reference that exists elsewhere from one that never existed. - An uploaded reference is **reusable**: one upload can back several jobs. - It expires **7 days** after upload, matching how long a job is retained. The   exact instant is returned as `expiresAt`. Reading it afterwards answers `410`,   which is not `404` — the reference was real, it aged out, and re-requesting it   will never succeed. Upload again. - A job's `outputReference` lives as long as the job does.  ### Two shapes, one of them historical  Everything this API produces today is `artifact://<key>`. Jobs that completed before 2026-09-22 carry a bucket-qualified path instead — `<bucket>/<tenant>/document-jobs/<jobId>/result.json`, sometimes with an `@<version>` suffix. `GET /api/v1/artifacts/content` accepts both, so a reference stored from an older job still resolves for the rest of its life. Treat a reference as opaque: pass back exactly what you were given.  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so there is no template or schema parameter on the request.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.
  *
- * The version of the OpenAPI document: 2026-08-07
+ * The version of the OpenAPI document: 2026-09-22
  * Generated by: https://github.com/openapitools/openapi-generator.git
  */
 
@@ -201,6 +201,26 @@ namespace Cogneris.DocumentAI.Client
     /// An interface for responses of type
     /// </summary>
     /// <typeparam name="TType"></typeparam>
+    public interface IBadRequest<TType> : IApiResponse
+    {
+        /// <summary>
+        /// Deserializes the response if the response is BadRequest
+        /// </summary>
+        /// <returns></returns>
+        TType BadRequest();
+
+        /// <summary>
+        /// Returns true if the response is BadRequest and the deserialized response is not null
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        bool TryBadRequest([NotNullWhen(true)]out TType? result);
+    }
+
+    /// <summary>
+    /// An interface for responses of type
+    /// </summary>
+    /// <typeparam name="TType"></typeparam>
     public interface IConflict<TType> : IApiResponse
     {
         /// <summary>
@@ -241,6 +261,26 @@ namespace Cogneris.DocumentAI.Client
     /// An interface for responses of type
     /// </summary>
     /// <typeparam name="TType"></typeparam>
+    public interface IServiceUnavailable<TType> : IApiResponse
+    {
+        /// <summary>
+        /// Deserializes the response if the response is ServiceUnavailable
+        /// </summary>
+        /// <returns></returns>
+        TType ServiceUnavailable();
+
+        /// <summary>
+        /// Returns true if the response is ServiceUnavailable and the deserialized response is not null
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        bool TryServiceUnavailable([NotNullWhen(true)]out TType? result);
+    }
+
+    /// <summary>
+    /// An interface for responses of type
+    /// </summary>
+    /// <typeparam name="TType"></typeparam>
     public interface IBadGateway<TType> : IApiResponse
     {
         /// <summary>
@@ -275,6 +315,46 @@ namespace Cogneris.DocumentAI.Client
         /// <param name="result"></param>
         /// <returns></returns>
         bool TryOk([NotNullWhen(true)]out TType? result);
+    }
+
+    /// <summary>
+    /// An interface for responses of type
+    /// </summary>
+    /// <typeparam name="TType"></typeparam>
+    public interface IGone<TType> : IApiResponse
+    {
+        /// <summary>
+        /// Deserializes the response if the response is Gone
+        /// </summary>
+        /// <returns></returns>
+        TType Gone();
+
+        /// <summary>
+        /// Returns true if the response is Gone and the deserialized response is not null
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        bool TryGone([NotNullWhen(true)]out TType? result);
+    }
+
+    /// <summary>
+    /// An interface for responses of type
+    /// </summary>
+    /// <typeparam name="TType"></typeparam>
+    public interface IUnprocessableContent<TType> : IApiResponse
+    {
+        /// <summary>
+        /// Deserializes the response if the response is UnprocessableContent
+        /// </summary>
+        /// <returns></returns>
+        TType UnprocessableContent();
+
+        /// <summary>
+        /// Returns true if the response is UnprocessableContent and the deserialized response is not null
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        bool TryUnprocessableContent([NotNullWhen(true)]out TType? result);
     }
 
     /// <summary>

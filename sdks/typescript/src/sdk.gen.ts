@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
+import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, DownloadArtifactData, DownloadArtifactErrors, DownloadArtifactResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, UploadArtifactData, UploadArtifactErrors, UploadArtifactResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -59,7 +59,7 @@ export const classifyDocuments = <ThrowOnError extends boolean = false>(options:
  * Discover fields without a template
  *
  * Reports the fields the model can find in a document you have no template
- * for, each with a confidence score.
+ * for, each with a confidence score from `0` to `100`.
  *
  */
 export const zeroShotDocument = <ThrowOnError extends boolean = false>(options: Options<ZeroShotDocumentData, ThrowOnError>): RequestResult<ZeroShotDocumentResponses, ZeroShotDocumentErrors, ThrowOnError> => (options.client ?? client).post<ZeroShotDocumentResponses, ZeroShotDocumentErrors, ThrowOnError>({
@@ -123,6 +123,51 @@ export const faceMatchDocument = <ThrowOnError extends boolean = false>(options:
         'Content-Type': null,
         ...options.headers
     }
+});
+
+/**
+ * Upload the input document of an asynchronous job
+ *
+ * Stores a document and returns the `artifact://` reference to submit it with.
+ * This is the only way to obtain one — the asynchronous job endpoints take a
+ * reference, never a file.
+ *
+ * The document is scanned and normalized before it is stored, exactly as the
+ * synchronous `/Document*` endpoints do. Images are stored as uploaded, so
+ * `Crop` and `Facematch` still see the original pixels; everything else is
+ * stored in its canonical form, which is what the job will read.
+ *
+ * The reference is reusable and expires after 7 days — see **Artifact
+ * references** above.
+ *
+ */
+export const uploadArtifact = <ThrowOnError extends boolean = false>(options: Options<UploadArtifactData, ThrowOnError>): RequestResult<UploadArtifactResponses, UploadArtifactErrors, ThrowOnError> => (options.client ?? client).post<UploadArtifactResponses, UploadArtifactErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
+
+/**
+ * Download the bytes behind a reference
+ *
+ * Returns the stored bytes of an upload, or of a finished job's
+ * `outputReference`. For a completed job this is the result document —
+ * `application/json` for the extraction, classification and zero-shot
+ * operations.
+ *
+ * The reference is a query parameter, not a path segment, because it is a URI
+ * in its own right. Percent-encode it.
+ *
+ */
+export const downloadArtifact = <ThrowOnError extends boolean = false>(options: Options<DownloadArtifactData, ThrowOnError>): RequestResult<DownloadArtifactResponses, DownloadArtifactErrors, ThrowOnError> => (options.client ?? client).get<DownloadArtifactResponses, DownloadArtifactErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/content',
+    ...options
 });
 
 /**

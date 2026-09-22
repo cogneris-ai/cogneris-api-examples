@@ -5,7 +5,7 @@
     <artifactId>cogneris-document-ai-sdk</artifactId>
     <packaging>jar</packaging>
     <name>cogneris-document-ai-sdk</name>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <url>https://github.com/cogneris-ai/cogneris-api-examples</url>
     <description>Cogneris Document AI API client for Java</description>
     <scm>
