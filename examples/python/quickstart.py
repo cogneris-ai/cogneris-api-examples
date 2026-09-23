@@ -11,6 +11,7 @@ from cogneris_document_ai_sdk import CognerisClient, CognerisError
 
 USAGE = """Usage:
   python quickstart.py extract <file>
+  python quickstart.py async-file <operation> <file>
   python quickstart.py async <operation> <input-reference>"""
 OPERATIONS = {"Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"}
 
@@ -43,6 +44,8 @@ def _command(arguments: Sequence[str]):
         and _required(arguments[2])
     ):
         return "async", arguments[1], arguments[2]
+    if len(arguments) == 3 and arguments[0] == "async-file" and arguments[1] in OPERATIONS and _required(arguments[2]):
+        return "async-file", arguments[1], arguments[2]
     raise UsageError("Choose a supported example command.")
 
 
@@ -87,11 +90,20 @@ def _run_example_for_testing(
             )
             return 0
 
-        submission = client.submit_job(first, second)
+        input_reference = second
+        if kind == "async-file":
+            try:
+                contents = Path(second).read_bytes()
+            except OSError:
+                raise UsageError("Unable to read the input file.") from None
+            input_reference = client.upload_artifact(contents, file_name=Path(second).name).reference
+        submission = client.submit_job(first, input_reference)
         job_id = getattr(submission, "job_id", None)
         if not job_id:
             raise CognerisError("Cogneris API response did not include a job ID.")
         job = client.wait_for_job(job_id)
+        if kind == "async-file" and isinstance(job.output_reference, str):
+            client.download_artifact(job.output_reference)
         _write_json(
             stdout,
             {

@@ -10,9 +10,12 @@ from uuid import UUID
 import httpx
 
 from .api.documents import extract_document
+from .api.artifacts import download_artifact, upload_artifact
 from .api.jobs import cancel_document_job, get_document_job, submit_document_job
 from .client import AuthenticatedClient
 from .models.document_job import DocumentJob
+from .models.artifact import Artifact
+from .models.artifact_upload_envelope import ArtifactUploadEnvelope
 from .models.document_job_cancellation import DocumentJobCancellation
 from .models.document_job_cancellation_envelope import DocumentJobCancellationEnvelope
 from .models.document_job_envelope import DocumentJobEnvelope
@@ -22,6 +25,7 @@ from .models.document_job_submission import DocumentJobSubmission
 from .models.document_job_submission_envelope import DocumentJobSubmissionEnvelope
 from .models.envelope import Envelope
 from .models.extract_document_body import ExtractDocumentBody
+from .models.upload_artifact_body import UploadArtifactBody
 from .models.submit_document_job_body import SubmitDocumentJobBody
 from .types import File, Response
 
@@ -204,6 +208,16 @@ class CognerisClient:
         if isinstance(submission.job_id, UUID) and hint is not None:
             self._initial_retry_hints[submission.job_id] = hint
         return submission
+
+    def upload_artifact(self, content: Union[bytes, BinaryIO], *, file_name: str) -> Artifact:
+        payload = content if hasattr(content, "read") else io.BytesIO(content)
+        response = _safe_generated_call(lambda: upload_artifact.sync_detailed(
+            client=self._client, body=UploadArtifactBody(file=File(payload=payload, file_name=file_name))))
+        return _require_envelope_data(response, ArtifactUploadEnvelope, Artifact)
+
+    def download_artifact(self, reference: str) -> object:
+        response = _safe_generated_call(lambda: download_artifact.sync_detailed(client=self._client, reference=reference))
+        return _require_data(response, object)
 
     def get_job(self, job_id: Union[str, UUID]) -> DocumentJob:
         response = self._get_job_detailed(job_id)
