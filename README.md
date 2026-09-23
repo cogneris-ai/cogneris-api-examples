@@ -136,7 +136,7 @@ uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai
 ```
 <!-- consumer-setup:end -->
 
-## TypeScript: upload or submit and poll
+## TypeScript: upload, submit, poll, and download
 
 The runnable example imports `CognerisClient` from the official installed
 `@cogneris-ai/document-ai-sdk` package. Synchronous extraction sends the file as
@@ -147,13 +147,13 @@ cd "$COGNERIS_CONSUMER"
 node ./examples/typescript/quickstart.mjs extract /path/to/document.pdf
 ```
 
-For an already-uploaded input reference, submit an asynchronous job and poll it
-to a terminal state. The reference must be valid for your tenant; the public
-contract does not upload it for you.
+For the complete asynchronous public path, upload a document, submit it, poll
+to a terminal state, and download the result. The example keeps artifact
+references and result bytes out of stdout and prints only the job summary.
 
 ```bash
 cd "$COGNERIS_CONSUMER"
-node ./examples/typescript/quickstart.mjs async Extraction artifact://tenant/input/reference
+node ./examples/typescript/quickstart.mjs async-file Extraction /path/to/document.pdf
 ```
 
 The maintained interface used by the example is:
@@ -161,11 +161,13 @@ The maintained interface used by the example is:
 ```js
 const client = new CognerisClient({ apiKey: process.env.COGNERIS_API_KEY, region: "us" });
 const envelope = await client.extract(file, { fileName: "document.pdf" });
-const submission = await client.submitJob("Extraction", "artifact://tenant/input/reference");
+const artifact = await client.uploadArtifact(file, { fileName: "document.pdf" });
+const submission = await client.submitJob("Extraction", artifact.reference);
 const job = await client.waitForJob(submission.jobId);
+await client.downloadArtifact(job.outputReference);
 ```
 
-## Python: upload or submit and poll
+## Python: upload, submit, poll, and download
 
 The Python example imports `CognerisClient` from the installed
 `cogneris-document-ai-sdk` wheel:
@@ -173,7 +175,7 @@ The Python example imports `CognerisClient` from the installed
 ```bash
 cd "$COGNERIS_CONSUMER"
 ./.venv/bin/python ./examples/python/quickstart.py extract /path/to/document.pdf
-./.venv/bin/python ./examples/python/quickstart.py async Extraction artifact://tenant/input/reference
+./.venv/bin/python ./examples/python/quickstart.py async-file Extraction /path/to/document.pdf
 ```
 
 The equivalent maintained interface is:
@@ -181,8 +183,10 @@ The equivalent maintained interface is:
 ```python
 client = CognerisClient(api_key=os.environ["COGNERIS_API_KEY"], region="us")
 envelope = client.extract(contents, file_name="document.pdf")
-submission = client.submit_job("Extraction", "artifact://tenant/input/reference")
+artifact = client.upload_artifact(contents, file_name="document.pdf")
+submission = client.submit_job("Extraction", artifact.reference)
 job = client.wait_for_job(submission.job_id)
+client.download_artifact(job.output_reference)
 client.close()
 ```
 

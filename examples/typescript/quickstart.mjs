@@ -6,6 +6,7 @@ import { CognerisClient, CognerisError } from "@cogneris-ai/document-ai-sdk";
 
 const USAGE = `Usage:
   node quickstart.mjs extract <file>
+  node quickstart.mjs async-file <operation> <file>
   node quickstart.mjs async <operation> <input-reference>`;
 const OPERATIONS = new Set(["Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"]);
 
@@ -38,6 +39,10 @@ function command(argumentsList) {
     required(argumentsList[2])
   ) {
     return { kind: "async", operation: argumentsList[1], inputReference: argumentsList[2] };
+  }
+  if (argumentsList[0] === "async-file" && argumentsList.length === 3 &&
+      OPERATIONS.has(argumentsList[1]) && required(argumentsList[2])) {
+    return { kind: "async-file", operation: argumentsList[1], filePath: argumentsList[2] };
   }
   throw new UsageError("Choose a supported example command.");
 }
@@ -81,11 +86,23 @@ export async function _runExampleForTesting({
       return 0;
     }
 
-    const submission = await client.submitJob(selected.operation, selected.inputReference);
+    let inputReference = selected.inputReference;
+    if (selected.kind === "async-file") {
+      let contents;
+      try { contents = await readFile(selected.filePath); } catch { throw new UsageError("Unable to read the input file."); }
+      const artifact = await client.uploadArtifact(new Blob([new Uint8Array(contents)]), {
+        fileName: path.basename(selected.filePath),
+      });
+      inputReference = artifact.reference;
+    }
+    const submission = await client.submitJob(selected.operation, inputReference);
     if (typeof submission.jobId !== "string" || submission.jobId.length === 0) {
       throw new CognerisError("Cogneris API response did not include a job ID.");
     }
     const job = await client.waitForJob(submission.jobId);
+    if (selected.kind === "async-file" && typeof job.outputReference === "string") {
+      await client.downloadArtifact(job.outputReference);
+    }
     writeJson(io.stdout, {
       operation: selected.operation,
       jobId: submission.jobId,

@@ -1,11 +1,14 @@
 import { createClient } from './client';
 import {
   cancelDocumentJob,
+  downloadArtifact,
   extractDocument,
   getDocumentJob,
   submitDocumentJob,
+  uploadArtifact,
 } from './sdk.gen';
 import type {
+  Artifact,
   DocumentJob,
   DocumentJobCancellation,
   DocumentJobSubmitOperation,
@@ -180,6 +183,16 @@ export class CognerisClient {
       client: this.generatedClient,
     });
     return requireData(result);
+  }
+
+  async uploadArtifact(file: Blob | File, options: ExtractOptions = {}): Promise<Artifact> {
+    const upload = options.fileName && !(file instanceof File)
+      ? new File([file], options.fileName, { type: file.type }) : file;
+    return requireEnvelopeData<Artifact>(await uploadArtifact({ body: { file: upload }, client: this.generatedClient }));
+  }
+
+  async downloadArtifact(reference: string): Promise<unknown> {
+    return requireData(await downloadArtifact({ query: { reference }, client: this.generatedClient }));
   }
 
   async submitJob(
