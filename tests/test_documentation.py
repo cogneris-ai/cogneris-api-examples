@@ -42,6 +42,14 @@ def assert_no_unbound_package_install_guidance(test_case, document):
         ):
             continue
         section = markdown_section_containing(document, match.start())
+        if section.startswith("## Package availability\n"):
+            test_case.assertIn(
+                "https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/",
+                section,
+                "Public Maven installation must identify the verified registry release",
+            )
+            test_case.assertIn("<version>0.1.0</version>", block)
+            continue
         test_case.assertIn(
             "<url>file://${env.COGNERIS_MAVEN_REPOSITORY}</url>",
             section,
@@ -100,7 +108,7 @@ class DocumentationContractTests(unittest.TestCase):
             "cost",
             "destination",
             "webhook-signature",
-            "not published",
+            "available on maven central",
             "local release artifacts",
         )
         for term in required_terms:
@@ -120,7 +128,8 @@ class DocumentationContractTests(unittest.TestCase):
         self.assertNotIn("does not yet", support)
         for term in ("semantic versioning", "2026-09-22", "deprecation", "openapi"):
             self.assertIn(term, versioning)
-        self.assertIn("unpublished", versioning)
+        for term in ("published on maven central", "public artifact integrity", "0.2.0", "unpublished"):
+            self.assertIn(term, versioning)
 
     def test_readme_documents_csharp_and_java_from_explicit_local_sources(self):
         readme = (ROOT / "README.md").read_text()
@@ -133,7 +142,7 @@ class DocumentationContractTests(unittest.TestCase):
             "Java 17",
             "cogneris-document-ai-sdk-0.2.0.jar",
             "cogneris-document-ai-sdk-0.2.0.pom",
-            "not published to Maven Central",
+            "is available on Maven Central",
         ):
             self.assertIn(term, readme, f"README is missing C#/Java term: {term}")
 
@@ -147,6 +156,13 @@ class DocumentationContractTests(unittest.TestCase):
     def test_local_source_guard_rejects_registry_and_unbound_install_guidance(self):
         readme = (ROOT / "README.md").read_text()
         mutations = {
+            "public Maven dependency uses an unverified version": readme.replace(
+                "<version>0.1.0</version>", "<version>0.2.0</version>", 1,
+            ),
+            "public Maven dependency lacks the verified registry link": readme.replace(
+                "https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/",
+                "https://example.invalid/unverified", 1,
+            ),
             "NuGet.org presented as the package source": readme.replace(
                 '--source "$COGNERIS_RELEASE"',
                 "--source https://api.nuget.org/v3/index.json",
@@ -206,7 +222,7 @@ dotnet add package Cogneris.DocumentAI --version 0.2.0
             "cogneris-document-ai-sdk-0.2.0.pom",
             "full JDK 17 with `javac`",
             "not a full compiler JDK",
-            "no workflow publishes to NuGet or Maven Central",
+            "No repository workflow publishes to NuGet or Maven Central",
         ):
             self.assertIn(term, releasing, f"Release policy is missing: {term}")
 
