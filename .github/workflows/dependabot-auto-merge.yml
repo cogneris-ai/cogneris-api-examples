@@ -1,0 +1,67 @@
+name: dependabot auto-merge
+
+# XTRAK-1648. Dependabot opens the npm PRs; until this workflow nobody owned
+# merging them, and the queue sat for up to 11 days while the lockfile drift the
+# PRs existed to close stayed on main. This arms GitHub's native auto-merge on
+# npm minor/patch PRs from Dependabot, so each one lands by itself once the
+# branch protection's required checks pass -- and never before. Nothing here
+# merges directly and nothing bypasses a check: if a required check goes red,
+# the PR simply stays open for a human.
+#
+# Deliberately out of scope:
+#   - semver-major: needs its own triage, so the PR stays open.
+#   - other ecosystems (docker, github-actions, pip, terraform, nuget): the
+#     decision recorded in XTRAK-1648 covers npm only.
+#   - the toolchain-convergence packages below. dependabot.yml already holds
+#     them, but this repository's own lane does not run the fleet gate that
+#     compares them against cogneris-workspace/config/toolchain-convergence-policy.json,
+#     so one slipping through a grouped PR would go GREEN here and turn the fleet
+#     red. Refusing them here is the backstop to that hold, not a replacement.
+#
+# A merge performed with GITHUB_TOKEN does not trigger Actions `push` runs on
+# main. Publishing and the DEV deploy are Cloud Build triggers on push to main,
+# which fire regardless of who merged; only the post-merge Actions re-runs of
+# checks that already passed on the PR are skipped.
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Arm auto-merge for npm minor/patch
+        if: >-
+          steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' &&
+          steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          DEPENDENCIES: ${{ steps.metadata.outputs.dependency-names }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          frozen="typescript jsdom @types/node vitest @vitest/coverage-v8 vue-tsc"
+          IFS=', ' read -r -a deps <<< "$DEPENDENCIES"
+          for dep in "${deps[@]}"; do
+            for held in $frozen; do
+              if [ "$dep" = "$held" ]; then
+                echo "::notice::$dep is held by the toolchain-convergence policy; leaving $PR_URL for a human."
+                exit 0
+              fi
+            done
+          done
+          if [ -z "$UPDATE_TYPE" ]; then
+            echo "::notice::fetch-metadata reported no update type; leaving $PR_URL for a human."
+            exit 0
+          fi
+          gh pr merge --auto --squash "$PR_URL"
