@@ -305,7 +305,7 @@
         "src/index.ts": "0762ef2b5effd00d05d138aa11702eb98b3a34cbff0db57274cabb151771b6bb",
         "src/sdk.gen.ts": "a91731a39d2bff854d45885d27adfb2ee17b8b35f332c4e1f36dbb25bacee427",
         "src/types.gen.ts": "2eb222ad94abf063a4ebe64e0b4313cdbf0a7b6bbe16cc53cded33099e1fd563",
-        "tsconfig.json": "dae022242bf86611ef4dbb0b508eaab2f894b12943e9c1360a6a2ec08963090d"
+        "tsconfig.json": "b205457704859986569141833ad81d29d6dfc4be6d0962bf9f1eceb9555092f7"
       }
     }
   }
