@@ -48,6 +48,12 @@ class DocumentJob:
         completed_at (Union[None, Unset, datetime.datetime]):
         cancellation_requested_at (Union[None, Unset, datetime.datetime]):
         expires_at (Union[Unset, datetime.datetime]):
+        credits_consumed (Union[None, Unset, float]): What the job consumed, in credits. Absent — never `0` — while the
+            cost is
+            unknown: a job still queued or running, an operation that is not metered,
+            or one billing could not price. `0` is a real value meaning the job was
+            free. It is a property of the job, so polling a finished job twice reports
+            the same figure; it is not a charge per read.
     """
 
     job_id: Union[Unset, UUID] = UNSET
@@ -64,6 +70,7 @@ class DocumentJob:
     completed_at: Union[None, Unset, datetime.datetime] = UNSET
     cancellation_requested_at: Union[None, Unset, datetime.datetime] = UNSET
     expires_at: Union[Unset, datetime.datetime] = UNSET
+    credits_consumed: Union[None, Unset, float] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -141,6 +148,12 @@ class DocumentJob:
         if not isinstance(self.expires_at, Unset):
             expires_at = self.expires_at.isoformat()
 
+        credits_consumed: Union[None, Unset, float]
+        if isinstance(self.credits_consumed, Unset):
+            credits_consumed = UNSET
+        else:
+            credits_consumed = self.credits_consumed
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
@@ -172,6 +185,8 @@ class DocumentJob:
             field_dict["cancellationRequestedAt"] = cancellation_requested_at
         if expires_at is not UNSET:
             field_dict["expiresAt"] = expires_at
+        if credits_consumed is not UNSET:
+            field_dict["creditsConsumed"] = credits_consumed
 
         return field_dict
 
@@ -306,6 +321,15 @@ class DocumentJob:
         else:
             expires_at = isoparse(_expires_at)
 
+        def _parse_credits_consumed(data: object) -> Union[None, Unset, float]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, float], data)
+
+        credits_consumed = _parse_credits_consumed(d.pop("creditsConsumed", UNSET))
+
         document_job = cls(
             job_id=job_id,
             operation=operation,
@@ -321,6 +345,7 @@ class DocumentJob:
             completed_at=completed_at,
             cancellation_requested_at=cancellation_requested_at,
             expires_at=expires_at,
+            credits_consumed=credits_consumed,
         )
 
         document_job.additional_properties = d

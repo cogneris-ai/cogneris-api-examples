@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -21,14 +21,20 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Optional[Union[PortalChannels, ProblemDetails]]:
     if response.status_code == 200:
         response_200 = PortalChannels.from_dict(response.json())
 
         return response_200
 
+    if response.status_code == 400:
+        response_400 = ProblemDetails.from_dict(response.json())
+
+        return response_400
+
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ProblemDetails.from_dict(response.json())
+
         return response_401
 
     if response.status_code == 403:
@@ -36,9 +42,25 @@ def _parse_response(
 
         return response_403
 
+    if response.status_code == 404:
+        response_404 = ProblemDetails.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 409:
+        response_409 = ProblemDetails.from_dict(response.json())
+
+        return response_409
+
     if response.status_code == 429:
-        response_429 = cast(Any, None)
+        response_429 = ProblemDetails.from_dict(response.json())
+
         return response_429
+
+    if response.status_code == 500:
+        response_500 = ProblemDetails.from_dict(response.json())
+
+        return response_500
 
     if response.status_code == 502:
         response_502 = ProblemDetails.from_dict(response.json())
@@ -53,7 +75,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Response[Union[PortalChannels, ProblemDetails]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,7 +87,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Response[Union[PortalChannels, ProblemDetails]]:
     """List the send channels this environment can use
 
      The channels available for delivering a magic link. This is a property of the
@@ -80,7 +102,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, PortalChannels, ProblemDetails]]
+        Response[Union[PortalChannels, ProblemDetails]]
     """
 
     kwargs = _get_kwargs()
@@ -95,7 +117,7 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Optional[Union[PortalChannels, ProblemDetails]]:
     """List the send channels this environment can use
 
      The channels available for delivering a magic link. This is a property of the
@@ -110,7 +132,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, PortalChannels, ProblemDetails]
+        Union[PortalChannels, ProblemDetails]
     """
 
     return sync_detailed(
@@ -121,7 +143,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Response[Union[PortalChannels, ProblemDetails]]:
     """List the send channels this environment can use
 
      The channels available for delivering a magic link. This is a property of the
@@ -136,7 +158,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, PortalChannels, ProblemDetails]]
+        Response[Union[PortalChannels, ProblemDetails]]
     """
 
     kwargs = _get_kwargs()
@@ -149,7 +171,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, PortalChannels, ProblemDetails]]:
+) -> Optional[Union[PortalChannels, ProblemDetails]]:
     """List the send channels this environment can use
 
      The channels available for delivering a magic link. This is a property of the
@@ -164,7 +186,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, PortalChannels, ProblemDetails]
+        Union[PortalChannels, ProblemDetails]
     """
 
     return (

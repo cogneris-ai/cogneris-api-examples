@@ -123,6 +123,27 @@ def _require_envelope_data(response: Response[object], envelope_type: type, data
     raise _api_error(response)
 
 
+class _UndecodableErrorStatus(Exception):
+    """An error status whose body is not JSON, raised before the generated parser sees it."""
+
+    def __init__(self, status: int) -> None:
+        super().__init__()
+        self.status = status
+
+
+def _reject_undecodable_error(response: httpx.Response) -> None:
+    # The contract declares a JSON body on every error status, so the generated parser
+    # decodes one unconditionally. A proxy or load balancer can still answer with HTML or
+    # nothing at all; keep the status instead of reporting a contract mismatch.
+    if response.status_code < 400:
+        return
+    response.read()
+    try:
+        json.loads(response.content)
+    except (TypeError, ValueError, UnicodeDecodeError):
+        raise _UndecodableErrorStatus(response.status_code) from None
+
+
 def _integer_retry_hint(value: object) -> Optional[int]:
     if isinstance(value, bool):
         return None
@@ -147,6 +168,11 @@ def _safe_generated_call(operation: Callable[[], T]) -> T:
     safe_error: Optional[CognerisError] = None
     try:
         return operation()
+    except _UndecodableErrorStatus as undecodable:
+        safe_error = CognerisApiError(
+            f"Cogneris API request failed with HTTP {undecodable.status}.",
+            status=undecodable.status,
+        )
     except httpx.HTTPError:
         safe_error = CognerisTransportError("Cogneris API transport failed.")
     except Exception:
@@ -169,7 +195,11 @@ class CognerisClient:
         region_base_url = cogneris_base_url(region)
         self.region = region
         base_url = _loopback_base_url(_base_url_for_testing) if _base_url_for_testing is not None else region_base_url
-        self._client = AuthenticatedClient(base_url=base_url, token=api_key)
+        self._client = AuthenticatedClient(
+            base_url=base_url,
+            token=api_key,
+            httpx_args={"event_hooks": {"response": [_reject_undecodable_error]}},
+        )
         self._initial_retry_hints: dict[UUID, int] = {}
 
     def extract(

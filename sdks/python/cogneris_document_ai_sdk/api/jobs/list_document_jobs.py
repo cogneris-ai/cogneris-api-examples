@@ -1,11 +1,12 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.document_job_list_envelope import DocumentJobListEnvelope
+from ...models.problem_details import ProblemDetails
 from ...types import UNSET, Response, Unset
 
 
@@ -30,19 +31,46 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, DocumentJobListEnvelope]]:
+) -> Optional[Union[DocumentJobListEnvelope, ProblemDetails]]:
     if response.status_code == 200:
         response_200 = DocumentJobListEnvelope.from_dict(response.json())
 
         return response_200
 
+    if response.status_code == 400:
+        response_400 = ProblemDetails.from_dict(response.json())
+
+        return response_400
+
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ProblemDetails.from_dict(response.json())
+
         return response_401
 
+    if response.status_code == 403:
+        response_403 = ProblemDetails.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        response_404 = ProblemDetails.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 409:
+        response_409 = ProblemDetails.from_dict(response.json())
+
+        return response_409
+
     if response.status_code == 429:
-        response_429 = cast(Any, None)
+        response_429 = ProblemDetails.from_dict(response.json())
+
         return response_429
+
+    if response.status_code == 500:
+        response_500 = ProblemDetails.from_dict(response.json())
+
+        return response_500
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -52,7 +80,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, DocumentJobListEnvelope]]:
+) -> Response[Union[DocumentJobListEnvelope, ProblemDetails]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,7 +93,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 100,
-) -> Response[Union[Any, DocumentJobListEnvelope]]:
+) -> Response[Union[DocumentJobListEnvelope, ProblemDetails]]:
     """List document jobs
 
     Args:
@@ -76,7 +104,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, DocumentJobListEnvelope]]
+        Response[Union[DocumentJobListEnvelope, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -94,7 +122,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 100,
-) -> Optional[Union[Any, DocumentJobListEnvelope]]:
+) -> Optional[Union[DocumentJobListEnvelope, ProblemDetails]]:
     """List document jobs
 
     Args:
@@ -105,7 +133,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, DocumentJobListEnvelope]
+        Union[DocumentJobListEnvelope, ProblemDetails]
     """
 
     return sync_detailed(
@@ -118,7 +146,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 100,
-) -> Response[Union[Any, DocumentJobListEnvelope]]:
+) -> Response[Union[DocumentJobListEnvelope, ProblemDetails]]:
     """List document jobs
 
     Args:
@@ -129,7 +157,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, DocumentJobListEnvelope]]
+        Response[Union[DocumentJobListEnvelope, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -145,7 +173,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 100,
-) -> Optional[Union[Any, DocumentJobListEnvelope]]:
+) -> Optional[Union[DocumentJobListEnvelope, ProblemDetails]]:
     """List document jobs
 
     Args:
@@ -156,7 +184,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, DocumentJobListEnvelope]
+        Union[DocumentJobListEnvelope, ProblemDetails]
     """
 
     return (

@@ -7,6 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.envelope import Envelope
 from ...models.face_match_document_body import FaceMatchDocumentBody
+from ...models.problem_details import ProblemDetails
 from ...types import Response
 
 
@@ -29,15 +30,36 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, Envelope]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails]]:
     if response.status_code == 200:
         response_200 = Envelope.from_dict(response.json())
 
         return response_200
 
+    if response.status_code == 400:
+        response_400 = ProblemDetails.from_dict(response.json())
+
+        return response_400
+
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ProblemDetails.from_dict(response.json())
+
         return response_401
+
+    if response.status_code == 403:
+        response_403 = ProblemDetails.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        response_404 = ProblemDetails.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 409:
+        response_409 = ProblemDetails.from_dict(response.json())
+
+        return response_409
 
     if response.status_code == 413:
         response_413 = cast(Any, None)
@@ -48,8 +70,14 @@ def _parse_response(
         return response_415
 
     if response.status_code == 429:
-        response_429 = cast(Any, None)
+        response_429 = ProblemDetails.from_dict(response.json())
+
         return response_429
+
+    if response.status_code == 500:
+        response_500 = ProblemDetails.from_dict(response.json())
+
+        return response_500
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -59,7 +87,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, Envelope]]:
+) -> Response[Union[Any, Envelope, ProblemDetails]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,7 +100,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Response[Union[Any, Envelope]]:
+) -> Response[Union[Any, Envelope, ProblemDetails]]:
     """Match a selfie against identity documents
 
     Args:
@@ -83,7 +111,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Envelope]]
+        Response[Union[Any, Envelope, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -101,7 +129,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Optional[Union[Any, Envelope]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails]]:
     """Match a selfie against identity documents
 
     Args:
@@ -112,7 +140,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, Envelope]
+        Union[Any, Envelope, ProblemDetails]
     """
 
     return sync_detailed(
@@ -125,7 +153,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Response[Union[Any, Envelope]]:
+) -> Response[Union[Any, Envelope, ProblemDetails]]:
     """Match a selfie against identity documents
 
     Args:
@@ -136,7 +164,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Envelope]]
+        Response[Union[Any, Envelope, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -152,7 +180,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Optional[Union[Any, Envelope]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails]]:
     """Match a selfie against identity documents
 
     Args:
@@ -163,7 +191,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, Envelope]
+        Union[Any, Envelope, ProblemDetails]
     """
 
     return (

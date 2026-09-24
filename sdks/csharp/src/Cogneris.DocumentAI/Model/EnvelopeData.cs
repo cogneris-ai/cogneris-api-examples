@@ -2,9 +2,9 @@
 /*
  * Cogneris Document AI API
  *
- * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  The asynchronous job endpoints do not take a file. Upload it first to `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the `artifact://` reference it returns.  ## Artifact references  A reference names one stored object. `POST /api/v1/artifacts` returns one, a job submit consumes one as `inputReference`, and a finished job returns one as `outputReference`. `GET /api/v1/artifacts/content` turns either back into bytes.  - References are scoped to the tenant that created them. One belonging to another   tenant is refused as an invalid reference — the answer does not distinguish a   reference that exists elsewhere from one that never existed. - An uploaded reference is **reusable**: one upload can back several jobs. - It expires **7 days** after upload, matching how long a job is retained. The   exact instant is returned as `expiresAt`. Reading it afterwards answers `410`,   which is not `404` — the reference was real, it aged out, and re-requesting it   will never succeed. Upload again. - A job's `outputReference` lives as long as the job does.  ### Two shapes, one of them historical  Everything this API produces today is `artifact://<key>`. Jobs that completed before 2026-09-22 carry a bucket-qualified path instead — `<bucket>/<tenant>/document-jobs/<jobId>/result.json`, sometimes with an `@<version>` suffix. `GET /api/v1/artifacts/content` accepts both, so a reference stored from an older job still resolves for the rest of its life. Treat a reference as opaque: pass back exactly what you were given.  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so there is no template or schema parameter on the request.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.
+ * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  The asynchronous job endpoints do not take a file. Upload it first to `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the `artifact://` reference it returns.  ## Artifact references  A reference names one stored object. `POST /api/v1/artifacts` returns one, a job submit consumes one as `inputReference`, and a finished job returns one as `outputReference`. `GET /api/v1/artifacts/content` turns either back into bytes.  - References are scoped to the tenant that created them. One belonging to another   tenant is refused as an invalid reference — the answer does not distinguish a   reference that exists elsewhere from one that never existed. - An uploaded reference is **reusable**: one upload can back several jobs. - It expires **7 days** after upload, matching how long a job is retained. The   exact instant is returned as `expiresAt`. Reading it afterwards answers `410`,   which is not `404` — the reference was real, it aged out, and re-requesting it   will never succeed. Upload again. - A job's `outputReference` lives as long as the job does.  ### Two shapes, one of them historical  Everything this API produces today is `artifact://<key>`. Jobs that completed before 2026-09-22 carry a bucket-qualified path instead — `<bucket>/<tenant>/document-jobs/<jobId>/result.json`, sometimes with an `@<version>` suffix. `GET /api/v1/artifacts/content` accepts both, so a reference stored from an older job still resolves for the rest of its life. Treat a reference as opaque: pass back exactly what you were given.  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so the synchronous `/Document/_*` calls take no template or schema parameter. An asynchronous Extraction job may instead name one explicitly with `templateId` on `POST /api/v1/document-jobs`.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.  ## Errors  An error arrives in one of two shapes, and the `Content-Type` says which.  - `application/problem+json` — an RFC 9457 problem document, the same one the   Portal uses. Every route answers this way when the failure happens before your   request is processed: a missing or invalid key (`401`), the rate limit (`429`),   a request refused as malformed or unsafe (`400`), or an unexpected failure   (`500`). - `application/json` — the service envelope with `hasErrors: true` and the   reasons in `meta.errors`. The document, job and artifact routes answer this way   when processing itself fails. Each operation lists the statuses where it does.  Every operation lists `400`, `401`, `403`, `404`, `409`, `429` and `500`, because the API answers each of them in the same shape wherever it occurs. A status on an operation with nothing to miss or conflict with — a `409` on a read, say — is part of that uniform model and not something the operation returns in practice.
  *
- * The version of the OpenAPI document: 2026-09-22
+ * The version of the OpenAPI document: 2026-09-24
  * Generated by: https://github.com/openapitools/openapi-generator.git
  */
 
@@ -36,12 +36,36 @@ namespace Cogneris.DocumentAI.Model
         /// <param name="id">id</param>
         /// <param name="metadata">Operation-specific payload, shaped by the template or operation that ran. The keys are your template&#39;s, so the object itself is left open here.  Extraction and zero-shot fill it with one entry per extracted field, and each entry is an &#x60;ExtractedField&#x60;: the value, how certain the model is of it, and — when the value was visually located on the page — where it was read from. A table-shaped field carries an &#x60;items&#x60; array instead, whose rows hold &#x60;ExtractedField&#x60; cells under the same keys.  Source coordinates follow one convention, the same on every engine:  - &#x60;page&#x60; is 1-indexed, and never past the document&#39;s last page. - &#x60;bbox&#x60; is &#x60;[x0, y0, x1, y1]&#x60; as fractions of the page size with the   origin at the top-left, so &#x60;x0,y0&#x60; is the top-left corner and &#x60;x1,y1&#x60;   the bottom-right. Values are clamped into &#x60;0&#x60;–&#x60;1&#x60; and the corners are   ordered, so &#x60;x0 &lt;&#x3D; x1&#x60; and &#x60;y0 &lt;&#x3D; y1&#x60; always hold. - &#x60;page&#x60;, &#x60;bbox&#x60; and &#x60;bbox_confidence&#x60; are omitted **together** for any   value the model could not locate on the page — a computed total, for   instance. Their absence is not an error, and a field object carrying   none of the three is ordinary.  Every confidence this API returns is a number from &#x60;0&#x60; to &#x60;100&#x60;, &#x60;bbox_confidence&#x60; included. There is no second scale to convert from.  A document job&#39;s stored &#x60;result.json&#x60; holds the same field entries, sanitized the same way, so the asynchronous answer agrees with the synchronous one for the same document. It wraps them differently — see &#x60;outputReference&#x60;. </param>
         /// <param name="createdDate">createdDate</param>
+        /// <param name="results">&#x60;/Document/classifier&#x60; only: one entry per uploaded file. </param>
+        /// <param name="documentType">&#x60;/Document/zero-shot&#x60; only: the document type the model recognized.</param>
+        /// <param name="confidence">&#x60;/Document/zero-shot&#x60; only: certainty in &#x60;documentType&#x60;.</param>
+        /// <param name="fraudBlocked">&#x60;/Document/extraction&#x60; only. Always &#x60;false&#x60;: fraud screening is advisory and never withholds the extraction. Kept for clients that already read it. </param>
+        /// <param name="fraudRequestId">&#x60;/Document/extraction&#x60; only: the fraud screening that ran on this document. Null when screening was disabled, not enabled for the tenant, or failed. </param>
+        /// <param name="quality">&#x60;/Document/extraction&#x60; only: the input-quality pre-flight. Null when it did not run. On a &#x60;2&#x60; (block) verdict the extraction did not run and &#x60;metadata&#x60; is null; on a &#x60;1&#x60; (warn) it ran and this carries the findings. </param>
+        /// <param name="imageUrls">&#x60;/Document/crop&#x60; only: signed URLs of the cropped images.</param>
+        /// <param name="documents">&#x60;/Document/crop&#x60; only: each document found on the page, with where it sits.</param>
+        /// <param name="compositeImageUrl">&#x60;/Document/crop&#x60; only: signed URL of the composite image, when one was produced.</param>
+        /// <param name="requestId">&#x60;/Document/facematch&#x60; only: identifies this comparison. Facematch carries no &#x60;id&#x60;.</param>
+        /// <param name="extractions">&#x60;/Document/facematch&#x60; only: the face found, or not, in each uploaded document.</param>
+        /// <param name="matches">&#x60;/Document/facematch&#x60; only: the selfie compared against each document face.</param>
         [JsonConstructor]
-        public EnvelopeData(Option<Guid?> id = default, Option<Dictionary<string, Object>?> metadata = default, Option<DateTime?> createdDate = default)
+        public EnvelopeData(Option<Guid?> id = default, Option<Dictionary<string, Object>?> metadata = default, Option<DateTime?> createdDate = default, Option<List<ClassificationResult>?> results = default, Option<string?> documentType = default, Option<decimal?> confidence = default, Option<bool?> fraudBlocked = default, Option<Guid?> fraudRequestId = default, Option<QualityAssessment?> quality = default, Option<List<string>?> imageUrls = default, Option<List<CropDocument>?> documents = default, Option<string?> compositeImageUrl = default, Option<Guid?> requestId = default, Option<List<FaceExtraction>?> extractions = default, Option<List<FaceMatch>?> matches = default)
         {
             IdOption = id;
             MetadataOption = metadata;
             CreatedDateOption = createdDate;
+            ResultsOption = results;
+            DocumentTypeOption = documentType;
+            ConfidenceOption = confidence;
+            FraudBlockedOption = fraudBlocked;
+            FraudRequestIdOption = fraudRequestId;
+            QualityOption = quality;
+            ImageUrlsOption = imageUrls;
+            DocumentsOption = documents;
+            CompositeImageUrlOption = compositeImageUrl;
+            RequestIdOption = requestId;
+            ExtractionsOption = extractions;
+            MatchesOption = matches;
             OnCreated();
         }
 
@@ -89,6 +113,174 @@ namespace Cogneris.DocumentAI.Model
         public DateTime? CreatedDate { get { return this.CreatedDateOption.Value; } set { this.CreatedDateOption = new(value); } }
 
         /// <summary>
+        /// Used to track the state of Results
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<List<ClassificationResult>?> ResultsOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/classifier&#x60; only: one entry per uploaded file.
+        /// </summary>
+        /// <value>&#x60;/Document/classifier&#x60; only: one entry per uploaded file. </value>
+        [JsonPropertyName("results")]
+        public List<ClassificationResult>? Results { get { return this.ResultsOption.Value; } set { this.ResultsOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of DocumentType
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<string?> DocumentTypeOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/zero-shot&#x60; only: the document type the model recognized.
+        /// </summary>
+        /// <value>&#x60;/Document/zero-shot&#x60; only: the document type the model recognized.</value>
+        [JsonPropertyName("documentType")]
+        public string? DocumentType { get { return this.DocumentTypeOption.Value; } set { this.DocumentTypeOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of Confidence
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<decimal?> ConfidenceOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/zero-shot&#x60; only: certainty in &#x60;documentType&#x60;.
+        /// </summary>
+        /// <value>&#x60;/Document/zero-shot&#x60; only: certainty in &#x60;documentType&#x60;.</value>
+        [JsonPropertyName("confidence")]
+        public decimal? Confidence { get { return this.ConfidenceOption.Value; } set { this.ConfidenceOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of FraudBlocked
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<bool?> FraudBlockedOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/extraction&#x60; only. Always &#x60;false&#x60;: fraud screening is advisory and never withholds the extraction. Kept for clients that already read it.
+        /// </summary>
+        /// <value>&#x60;/Document/extraction&#x60; only. Always &#x60;false&#x60;: fraud screening is advisory and never withholds the extraction. Kept for clients that already read it. </value>
+        [JsonPropertyName("fraudBlocked")]
+        public bool? FraudBlocked { get { return this.FraudBlockedOption.Value; } set { this.FraudBlockedOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of FraudRequestId
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<Guid?> FraudRequestIdOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/extraction&#x60; only: the fraud screening that ran on this document. Null when screening was disabled, not enabled for the tenant, or failed.
+        /// </summary>
+        /// <value>&#x60;/Document/extraction&#x60; only: the fraud screening that ran on this document. Null when screening was disabled, not enabled for the tenant, or failed. </value>
+        [JsonPropertyName("fraudRequestId")]
+        public Guid? FraudRequestId { get { return this.FraudRequestIdOption.Value; } set { this.FraudRequestIdOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of Quality
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<QualityAssessment?> QualityOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/extraction&#x60; only: the input-quality pre-flight. Null when it did not run. On a &#x60;2&#x60; (block) verdict the extraction did not run and &#x60;metadata&#x60; is null; on a &#x60;1&#x60; (warn) it ran and this carries the findings.
+        /// </summary>
+        /// <value>&#x60;/Document/extraction&#x60; only: the input-quality pre-flight. Null when it did not run. On a &#x60;2&#x60; (block) verdict the extraction did not run and &#x60;metadata&#x60; is null; on a &#x60;1&#x60; (warn) it ran and this carries the findings. </value>
+        [JsonPropertyName("quality")]
+        public QualityAssessment? Quality { get { return this.QualityOption.Value; } set { this.QualityOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of ImageUrls
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<List<string>?> ImageUrlsOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/crop&#x60; only: signed URLs of the cropped images.
+        /// </summary>
+        /// <value>&#x60;/Document/crop&#x60; only: signed URLs of the cropped images.</value>
+        [JsonPropertyName("imageUrls")]
+        public List<string>? ImageUrls { get { return this.ImageUrlsOption.Value; } set { this.ImageUrlsOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of Documents
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<List<CropDocument>?> DocumentsOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/crop&#x60; only: each document found on the page, with where it sits.
+        /// </summary>
+        /// <value>&#x60;/Document/crop&#x60; only: each document found on the page, with where it sits.</value>
+        [JsonPropertyName("documents")]
+        public List<CropDocument>? Documents { get { return this.DocumentsOption.Value; } set { this.DocumentsOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of CompositeImageUrl
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<string?> CompositeImageUrlOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/crop&#x60; only: signed URL of the composite image, when one was produced.
+        /// </summary>
+        /// <value>&#x60;/Document/crop&#x60; only: signed URL of the composite image, when one was produced.</value>
+        [JsonPropertyName("compositeImageUrl")]
+        public string? CompositeImageUrl { get { return this.CompositeImageUrlOption.Value; } set { this.CompositeImageUrlOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of RequestId
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<Guid?> RequestIdOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/facematch&#x60; only: identifies this comparison. Facematch carries no &#x60;id&#x60;.
+        /// </summary>
+        /// <value>&#x60;/Document/facematch&#x60; only: identifies this comparison. Facematch carries no &#x60;id&#x60;.</value>
+        [JsonPropertyName("requestId")]
+        public Guid? RequestId { get { return this.RequestIdOption.Value; } set { this.RequestIdOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of Extractions
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<List<FaceExtraction>?> ExtractionsOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/facematch&#x60; only: the face found, or not, in each uploaded document.
+        /// </summary>
+        /// <value>&#x60;/Document/facematch&#x60; only: the face found, or not, in each uploaded document.</value>
+        [JsonPropertyName("extractions")]
+        public List<FaceExtraction>? Extractions { get { return this.ExtractionsOption.Value; } set { this.ExtractionsOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of Matches
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<List<FaceMatch>?> MatchesOption { get; private set; }
+
+        /// <summary>
+        /// &#x60;/Document/facematch&#x60; only: the selfie compared against each document face.
+        /// </summary>
+        /// <value>&#x60;/Document/facematch&#x60; only: the selfie compared against each document face.</value>
+        [JsonPropertyName("matches")]
+        public List<FaceMatch>? Matches { get { return this.MatchesOption.Value; } set { this.MatchesOption = new(value); } }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -99,6 +291,18 @@ namespace Cogneris.DocumentAI.Model
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  CreatedDate: ").Append(CreatedDate).Append("\n");
+            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("  DocumentType: ").Append(DocumentType).Append("\n");
+            sb.Append("  Confidence: ").Append(Confidence).Append("\n");
+            sb.Append("  FraudBlocked: ").Append(FraudBlocked).Append("\n");
+            sb.Append("  FraudRequestId: ").Append(FraudRequestId).Append("\n");
+            sb.Append("  Quality: ").Append(Quality).Append("\n");
+            sb.Append("  ImageUrls: ").Append(ImageUrls).Append("\n");
+            sb.Append("  Documents: ").Append(Documents).Append("\n");
+            sb.Append("  CompositeImageUrl: ").Append(CompositeImageUrl).Append("\n");
+            sb.Append("  RequestId: ").Append(RequestId).Append("\n");
+            sb.Append("  Extractions: ").Append(Extractions).Append("\n");
+            sb.Append("  Matches: ").Append(Matches).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -154,6 +358,18 @@ namespace Cogneris.DocumentAI.Model
             Option<Guid?> id = default;
             Option<Dictionary<string, Object>?> metadata = default;
             Option<DateTime?> createdDate = default;
+            Option<List<ClassificationResult>?> results = default;
+            Option<string?> documentType = default;
+            Option<decimal?> confidence = default;
+            Option<bool?> fraudBlocked = default;
+            Option<Guid?> fraudRequestId = default;
+            Option<QualityAssessment?> quality = default;
+            Option<List<string>?> imageUrls = default;
+            Option<List<CropDocument>?> documents = default;
+            Option<string?> compositeImageUrl = default;
+            Option<Guid?> requestId = default;
+            Option<List<FaceExtraction>?> extractions = default;
+            Option<List<FaceMatch>?> matches = default;
 
             while (utf8JsonReader.Read())
             {
@@ -179,6 +395,42 @@ namespace Cogneris.DocumentAI.Model
                         case "createdDate":
                             createdDate = new Option<DateTime?>(JsonSerializer.Deserialize<DateTime>(ref utf8JsonReader, jsonSerializerOptions));
                             break;
+                        case "results":
+                            results = new Option<List<ClassificationResult>?>(JsonSerializer.Deserialize<List<ClassificationResult>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
+                        case "documentType":
+                            documentType = new Option<string?>(utf8JsonReader.GetString()!);
+                            break;
+                        case "confidence":
+                            confidence = new Option<decimal?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (decimal?)null : utf8JsonReader.GetDecimal());
+                            break;
+                        case "fraudBlocked":
+                            fraudBlocked = new Option<bool?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (bool?)null : utf8JsonReader.GetBoolean());
+                            break;
+                        case "fraudRequestId":
+                            fraudRequestId = new Option<Guid?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (Guid?)null : utf8JsonReader.GetGuid());
+                            break;
+                        case "quality":
+                            quality = new Option<QualityAssessment?>(JsonSerializer.Deserialize<QualityAssessment>(ref utf8JsonReader, jsonSerializerOptions));
+                            break;
+                        case "imageUrls":
+                            imageUrls = new Option<List<string>?>(JsonSerializer.Deserialize<List<string>>(ref utf8JsonReader, jsonSerializerOptions));
+                            break;
+                        case "documents":
+                            documents = new Option<List<CropDocument>?>(JsonSerializer.Deserialize<List<CropDocument>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
+                        case "compositeImageUrl":
+                            compositeImageUrl = new Option<string?>(utf8JsonReader.GetString());
+                            break;
+                        case "requestId":
+                            requestId = new Option<Guid?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (Guid?)null : utf8JsonReader.GetGuid());
+                            break;
+                        case "extractions":
+                            extractions = new Option<List<FaceExtraction>?>(JsonSerializer.Deserialize<List<FaceExtraction>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
+                        case "matches":
+                            matches = new Option<List<FaceMatch>?>(JsonSerializer.Deserialize<List<FaceMatch>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
                         default:
                             break;
                     }
@@ -194,7 +446,31 @@ namespace Cogneris.DocumentAI.Model
             if (createdDate.IsSet && createdDate.Value == null)
                 throw new ArgumentNullException(nameof(createdDate), "Property is not nullable for class EnvelopeData.");
 
-            return new EnvelopeData(id, metadata, createdDate);
+            if (results.IsSet && results.Value == null)
+                throw new ArgumentNullException(nameof(results), "Property is not nullable for class EnvelopeData.");
+
+            if (documentType.IsSet && documentType.Value == null)
+                throw new ArgumentNullException(nameof(documentType), "Property is not nullable for class EnvelopeData.");
+
+            if (confidence.IsSet && confidence.Value == null)
+                throw new ArgumentNullException(nameof(confidence), "Property is not nullable for class EnvelopeData.");
+
+            if (fraudBlocked.IsSet && fraudBlocked.Value == null)
+                throw new ArgumentNullException(nameof(fraudBlocked), "Property is not nullable for class EnvelopeData.");
+
+            if (documents.IsSet && documents.Value == null)
+                throw new ArgumentNullException(nameof(documents), "Property is not nullable for class EnvelopeData.");
+
+            if (requestId.IsSet && requestId.Value == null)
+                throw new ArgumentNullException(nameof(requestId), "Property is not nullable for class EnvelopeData.");
+
+            if (extractions.IsSet && extractions.Value == null)
+                throw new ArgumentNullException(nameof(extractions), "Property is not nullable for class EnvelopeData.");
+
+            if (matches.IsSet && matches.Value == null)
+                throw new ArgumentNullException(nameof(matches), "Property is not nullable for class EnvelopeData.");
+
+            return new EnvelopeData(id, metadata, createdDate, results, documentType, confidence, fraudBlocked, fraudRequestId, quality, imageUrls, documents, compositeImageUrl, requestId, extractions, matches);
         }
 
         /// <summary>
@@ -224,6 +500,21 @@ namespace Cogneris.DocumentAI.Model
             if (envelopeData.MetadataOption.IsSet && envelopeData.Metadata == null)
                 throw new ArgumentNullException(nameof(envelopeData.Metadata), "Property is required for class EnvelopeData.");
 
+            if (envelopeData.ResultsOption.IsSet && envelopeData.Results == null)
+                throw new ArgumentNullException(nameof(envelopeData.Results), "Property is required for class EnvelopeData.");
+
+            if (envelopeData.DocumentTypeOption.IsSet && envelopeData.DocumentType == null)
+                throw new ArgumentNullException(nameof(envelopeData.DocumentType), "Property is required for class EnvelopeData.");
+
+            if (envelopeData.DocumentsOption.IsSet && envelopeData.Documents == null)
+                throw new ArgumentNullException(nameof(envelopeData.Documents), "Property is required for class EnvelopeData.");
+
+            if (envelopeData.ExtractionsOption.IsSet && envelopeData.Extractions == null)
+                throw new ArgumentNullException(nameof(envelopeData.Extractions), "Property is required for class EnvelopeData.");
+
+            if (envelopeData.MatchesOption.IsSet && envelopeData.Matches == null)
+                throw new ArgumentNullException(nameof(envelopeData.Matches), "Property is required for class EnvelopeData.");
+
             if (envelopeData.IdOption.IsSet)
                 writer.WriteString("id", envelopeData.IdOption.Value!.Value);
 
@@ -234,6 +525,67 @@ namespace Cogneris.DocumentAI.Model
             }
             if (envelopeData.CreatedDateOption.IsSet)
                 writer.WriteString("createdDate", envelopeData.CreatedDateOption.Value!.Value.ToString(CreatedDateFormat));
+
+            if (envelopeData.ResultsOption.IsSet)
+            {
+                writer.WritePropertyName("results");
+                JsonSerializer.Serialize(writer, envelopeData.Results, jsonSerializerOptions);
+            }
+            if (envelopeData.DocumentTypeOption.IsSet)
+                writer.WriteString("documentType", envelopeData.DocumentType);
+
+            if (envelopeData.ConfidenceOption.IsSet)
+                writer.WriteNumber("confidence", envelopeData.ConfidenceOption.Value!.Value);
+
+            if (envelopeData.FraudBlockedOption.IsSet)
+                writer.WriteBoolean("fraudBlocked", envelopeData.FraudBlockedOption.Value!.Value);
+
+            if (envelopeData.FraudRequestIdOption.IsSet)
+                if (envelopeData.FraudRequestIdOption.Value != null)
+                    writer.WriteString("fraudRequestId", envelopeData.FraudRequestIdOption.Value!.Value);
+                else
+                    writer.WriteNull("fraudRequestId");
+
+            if (envelopeData.QualityOption.IsSet)
+                if (envelopeData.QualityOption.Value != null)
+                {
+                    writer.WritePropertyName("quality");
+                    JsonSerializer.Serialize(writer, envelopeData.Quality, jsonSerializerOptions);
+                }
+                else
+                    writer.WriteNull("quality");
+            if (envelopeData.ImageUrlsOption.IsSet)
+                if (envelopeData.ImageUrlsOption.Value != null)
+                {
+                    writer.WritePropertyName("imageUrls");
+                    JsonSerializer.Serialize(writer, envelopeData.ImageUrls, jsonSerializerOptions);
+                }
+                else
+                    writer.WriteNull("imageUrls");
+            if (envelopeData.DocumentsOption.IsSet)
+            {
+                writer.WritePropertyName("documents");
+                JsonSerializer.Serialize(writer, envelopeData.Documents, jsonSerializerOptions);
+            }
+            if (envelopeData.CompositeImageUrlOption.IsSet)
+                if (envelopeData.CompositeImageUrlOption.Value != null)
+                    writer.WriteString("compositeImageUrl", envelopeData.CompositeImageUrl);
+                else
+                    writer.WriteNull("compositeImageUrl");
+
+            if (envelopeData.RequestIdOption.IsSet)
+                writer.WriteString("requestId", envelopeData.RequestIdOption.Value!.Value);
+
+            if (envelopeData.ExtractionsOption.IsSet)
+            {
+                writer.WritePropertyName("extractions");
+                JsonSerializer.Serialize(writer, envelopeData.Extractions, jsonSerializerOptions);
+            }
+            if (envelopeData.MatchesOption.IsSet)
+            {
+                writer.WritePropertyName("matches");
+                JsonSerializer.Serialize(writer, envelopeData.Matches, jsonSerializerOptions);
+            }
         }
     }
 }

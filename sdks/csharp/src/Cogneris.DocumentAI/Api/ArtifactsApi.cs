@@ -2,9 +2,9 @@
 /*
  * Cogneris Document AI API
  *
- * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  The asynchronous job endpoints do not take a file. Upload it first to `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the `artifact://` reference it returns.  ## Artifact references  A reference names one stored object. `POST /api/v1/artifacts` returns one, a job submit consumes one as `inputReference`, and a finished job returns one as `outputReference`. `GET /api/v1/artifacts/content` turns either back into bytes.  - References are scoped to the tenant that created them. One belonging to another   tenant is refused as an invalid reference — the answer does not distinguish a   reference that exists elsewhere from one that never existed. - An uploaded reference is **reusable**: one upload can back several jobs. - It expires **7 days** after upload, matching how long a job is retained. The   exact instant is returned as `expiresAt`. Reading it afterwards answers `410`,   which is not `404` — the reference was real, it aged out, and re-requesting it   will never succeed. Upload again. - A job's `outputReference` lives as long as the job does.  ### Two shapes, one of them historical  Everything this API produces today is `artifact://<key>`. Jobs that completed before 2026-09-22 carry a bucket-qualified path instead — `<bucket>/<tenant>/document-jobs/<jobId>/result.json`, sometimes with an `@<version>` suffix. `GET /api/v1/artifacts/content` accepts both, so a reference stored from an older job still resolves for the rest of its life. Treat a reference as opaque: pass back exactly what you were given.  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so there is no template or schema parameter on the request.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.
+ * The Cogneris Document AI API turns unstructured documents — PDFs, images, scans — into structured JSON.  This document describes the endpoints that are actually deployed. It is written from the running service (`cogneris-api-be`) rather than from a design, so what is listed here is what you can call.  ## Authentication  Every endpoint takes an API key in the `Authorization` header as `Bearer <key>`. Keys begin with `xtkt_live_` (production) or `xtkt_test_` (sandbox); either prefix is accepted before the key is looked up for validation. The key selects the application environment. A recognized prefix alone does not authenticate a request: the key must also be valid and active. Keys are tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard under **Settings → API keys**.  ## Uploads  The synchronous document endpoints take `multipart/form-data`. There is no fetch-by-URL variant — the file travels in the request body.  - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,   `.bmp`, `.doc`, `.docx` - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB  The asynchronous job endpoints do not take a file. Upload it first to `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the `artifact://` reference it returns.  ## Artifact references  A reference names one stored object. `POST /api/v1/artifacts` returns one, a job submit consumes one as `inputReference`, and a finished job returns one as `outputReference`. `GET /api/v1/artifacts/content` turns either back into bytes.  - References are scoped to the tenant that created them. One belonging to another   tenant is refused as an invalid reference — the answer does not distinguish a   reference that exists elsewhere from one that never existed. - An uploaded reference is **reusable**: one upload can back several jobs. - It expires **7 days** after upload, matching how long a job is retained. The   exact instant is returned as `expiresAt`. Reading it afterwards answers `410`,   which is not `404` — the reference was real, it aged out, and re-requesting it   will never succeed. Upload again. - A job's `outputReference` lives as long as the job does.  ### Two shapes, one of them historical  Everything this API produces today is `artifact://<key>`. Jobs that completed before 2026-09-22 carry a bucket-qualified path instead — `<bucket>/<tenant>/document-jobs/<jobId>/result.json`, sometimes with an `@<version>` suffix. `GET /api/v1/artifacts/content` accepts both, so a reference stored from an older job still resolves for the rest of its life. Treat a reference as opaque: pass back exactly what you were given.  ## Templates  Extraction and classification are driven by the document types and templates configured for your tenant. The platform selects the template from the document itself, so the synchronous `/Document/_*` calls take no template or schema parameter. An asynchronous Extraction job may instead name one explicitly with `templateId` on `POST /api/v1/document-jobs`.  ## Scopes  Keys carry scopes. The Portal endpoints check them and answer `403` when the required one is absent; the document endpoints accept any valid key for the tenant without consulting the list. `*` is a real scope meaning full access, and it is what a key receives when it is created without an explicit scope list.  ## Rate limits  One shared policy covers every surface in this document, Portal included: **50 requests per API key per fixed 1-minute window**. It is a fixed window rather than a token bucket, so the allowance resets on the minute instead of refilling gradually. Requests over the limit receive `429`.  ## Response envelope  Successful responses from the **document and job** endpoints share one wrapper: `data` for the payload, `meta` for the status and any messages, and `hasErrors` for a fast failure check.  The **Portal** endpoints do not use that wrapper. They return the payload directly, and their errors are RFC 9457 problem documents sent as `application/problem+json`, with a stable `code`, a `correlationId` that is also returned in the `x-correlation-id` header, and a `retryable` flag. Branch on `code`; treat `type` as an opaque identifier.  ## Errors  An error arrives in one of two shapes, and the `Content-Type` says which.  - `application/problem+json` — an RFC 9457 problem document, the same one the   Portal uses. Every route answers this way when the failure happens before your   request is processed: a missing or invalid key (`401`), the rate limit (`429`),   a request refused as malformed or unsafe (`400`), or an unexpected failure   (`500`). - `application/json` — the service envelope with `hasErrors: true` and the   reasons in `meta.errors`. The document, job and artifact routes answer this way   when processing itself fails. Each operation lists the statuses where it does.  Every operation lists `400`, `401`, `403`, `404`, `409`, `429` and `500`, because the API answers each of them in the same shape wherever it occurs. A status on an operation with nothing to miss or conflict with — a `409` on a read, say — is part of that uniform model and not something the operation returns in practice.
  *
- * The version of the OpenAPI document: 2026-09-22
+ * The version of the OpenAPI document: 2026-09-24
  * Generated by: https://github.com/openapitools/openapi-generator.git
  */
 
@@ -88,7 +88,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IDownloadArtifactApiResponse"/>
     /// </summary>
-    public interface IDownloadArtifactApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<System.IO.Stream?>, IBadRequest<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGone<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IDownloadArtifactApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<System.IO.Stream?>, IBadRequest<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IGone<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -109,10 +109,22 @@ namespace Cogneris.DocumentAI.Api
         bool IsUnauthorized { get; }
 
         /// <summary>
+        /// Returns true if the response is 403 Forbidden
+        /// </summary>
+        /// <returns></returns>
+        bool IsForbidden { get; }
+
+        /// <summary>
         /// Returns true if the response is 404 NotFound
         /// </summary>
         /// <returns></returns>
         bool IsNotFound { get; }
+
+        /// <summary>
+        /// Returns true if the response is 409 Conflict
+        /// </summary>
+        /// <returns></returns>
+        bool IsConflict { get; }
 
         /// <summary>
         /// Returns true if the response is 410 Gone
@@ -125,12 +137,18 @@ namespace Cogneris.DocumentAI.Api
         /// </summary>
         /// <returns></returns>
         bool IsTooManyRequests { get; }
+
+        /// <summary>
+        /// Returns true if the response is 500 InternalServerError
+        /// </summary>
+        /// <returns></returns>
+        bool IsInternalServerError { get; }
     }
 
     /// <summary>
     /// The <see cref="IUploadArtifactApiResponse"/>
     /// </summary>
-    public interface IUploadArtifactApiResponse : Cogneris.DocumentAI.Client.IApiResponse, ICreated<Cogneris.DocumentAI.Model.ArtifactUploadEnvelope?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IUploadArtifactApiResponse : Cogneris.DocumentAI.Client.IApiResponse, ICreated<Cogneris.DocumentAI.Model.ArtifactUploadEnvelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 201 Created
@@ -139,10 +157,34 @@ namespace Cogneris.DocumentAI.Api
         bool IsCreated { get; }
 
         /// <summary>
+        /// Returns true if the response is 400 BadRequest
+        /// </summary>
+        /// <returns></returns>
+        bool IsBadRequest { get; }
+
+        /// <summary>
         /// Returns true if the response is 401 Unauthorized
         /// </summary>
         /// <returns></returns>
         bool IsUnauthorized { get; }
+
+        /// <summary>
+        /// Returns true if the response is 403 Forbidden
+        /// </summary>
+        /// <returns></returns>
+        bool IsForbidden { get; }
+
+        /// <summary>
+        /// Returns true if the response is 404 NotFound
+        /// </summary>
+        /// <returns></returns>
+        bool IsNotFound { get; }
+
+        /// <summary>
+        /// Returns true if the response is 409 Conflict
+        /// </summary>
+        /// <returns></returns>
+        bool IsConflict { get; }
 
         /// <summary>
         /// Returns true if the response is 413 ContentTooLarge
@@ -167,6 +209,12 @@ namespace Cogneris.DocumentAI.Api
         /// </summary>
         /// <returns></returns>
         bool IsTooManyRequests { get; }
+
+        /// <summary>
+        /// Returns true if the response is 500 InternalServerError
+        /// </summary>
+        /// <returns></returns>
+        bool IsInternalServerError { get; }
 
         /// <summary>
         /// Returns true if the response is 503 ServiceUnavailable
@@ -382,7 +430,8 @@ namespace Cogneris.DocumentAI.Api
 
                     string[] acceptLocalVars = new string[] {
                         "application/octet-stream",
-                        "application/json"
+                        "application/json",
+                        "application/problem+json"
                     };
 
                     IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderValuesLocalVar = ClientUtils.SelectHeaderAcceptArray(acceptLocalVars);
@@ -586,10 +635,198 @@ namespace Cogneris.DocumentAI.Api
             public bool IsUnauthorized => 401 == (int)StatusCode;
 
             /// <summary>
+            /// Deserializes the response if the response is 401 Unauthorized
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Unauthorized()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnUnauthorized(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultUnauthorized();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultUnauthorized()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsUnauthorized
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnUnauthorized(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 401 Unauthorized and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryUnauthorized([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Unauthorized();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)401);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public bool IsForbidden => 403 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Forbidden()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnForbidden(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultForbidden();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultForbidden()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsForbidden
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnForbidden(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryForbidden([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Forbidden();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)403);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
             /// Returns true if the response is 404 NotFound
             /// </summary>
             /// <returns></returns>
             public bool IsNotFound => 404 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 404 NotFound
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? NotFound()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
+                OnNotFound(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultNotFound();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultNotFound()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsNotFound
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnNotFound(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
+
+            /// <summary>
+            /// Returns true if the response is 404 NotFound and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryNotFound([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = NotFound();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)404);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 409 Conflict
+            /// </summary>
+            /// <returns></returns>
+            public bool IsConflict => 409 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 409 Conflict
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Conflict()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnConflict(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultConflict();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultConflict()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsConflict
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnConflict(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 409 Conflict and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryConflict([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Conflict();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)409);
+                }
+
+                return result != null;
+            }
 
             /// <summary>
             /// Returns true if the response is 410 Gone
@@ -646,6 +883,100 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsTooManyRequests => 429 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 429 TooManyRequests
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? TooManyRequests()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnTooManyRequests(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultTooManyRequests();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultTooManyRequests()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsTooManyRequests
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnTooManyRequests(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 429 TooManyRequests and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryTooManyRequests([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = TooManyRequests();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)429);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 500 InternalServerError
+            /// </summary>
+            /// <returns></returns>
+            public bool IsInternalServerError => 500 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 500 InternalServerError
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? InternalServerError()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnInternalServerError(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultInternalServerError();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultInternalServerError()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsInternalServerError
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnInternalServerError(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 500 InternalServerError and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryInternalServerError([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = InternalServerError();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)500);
+                }
+
+                return result != null;
+            }
 
             private void OnDeserializationErrorDefaultImplementation(Exception exception, HttpStatusCode httpStatusCode)
             {
@@ -790,7 +1121,8 @@ namespace Cogneris.DocumentAI.Api
                     };
 
                     string[] acceptLocalVars = new string[] {
-                        "application/json"
+                        "application/json",
+                        "application/problem+json"
                     };
 
                     IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderValuesLocalVar = ClientUtils.SelectHeaderAcceptArray(acceptLocalVars);
@@ -930,10 +1262,254 @@ namespace Cogneris.DocumentAI.Api
             }
 
             /// <summary>
+            /// Returns true if the response is 400 BadRequest
+            /// </summary>
+            /// <returns></returns>
+            public bool IsBadRequest => 400 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 400 BadRequest
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? BadRequest()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnBadRequest(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultBadRequest();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultBadRequest()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsBadRequest
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnBadRequest(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 400 BadRequest and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryBadRequest([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = BadRequest();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)400);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
             /// Returns true if the response is 401 Unauthorized
             /// </summary>
             /// <returns></returns>
             public bool IsUnauthorized => 401 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 401 Unauthorized
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Unauthorized()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnUnauthorized(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultUnauthorized();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultUnauthorized()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsUnauthorized
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnUnauthorized(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 401 Unauthorized and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryUnauthorized([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Unauthorized();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)401);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public bool IsForbidden => 403 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Forbidden()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnForbidden(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultForbidden();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultForbidden()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsForbidden
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnForbidden(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryForbidden([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Forbidden();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)403);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 404 NotFound
+            /// </summary>
+            /// <returns></returns>
+            public bool IsNotFound => 404 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 404 NotFound
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? NotFound()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnNotFound(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultNotFound();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultNotFound()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsNotFound
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnNotFound(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 404 NotFound and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryNotFound([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = NotFound();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)404);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 409 Conflict
+            /// </summary>
+            /// <returns></returns>
+            public bool IsConflict => 409 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 409 Conflict
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? Conflict()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnConflict(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultConflict();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultConflict()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsConflict
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnConflict(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 409 Conflict and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryConflict([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Conflict();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)409);
+                }
+
+                return result != null;
+            }
 
             /// <summary>
             /// Returns true if the response is 413 ContentTooLarge
@@ -1002,6 +1578,100 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsTooManyRequests => 429 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 429 TooManyRequests
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? TooManyRequests()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnTooManyRequests(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultTooManyRequests();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultTooManyRequests()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsTooManyRequests
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnTooManyRequests(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 429 TooManyRequests and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryTooManyRequests([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = TooManyRequests();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)429);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 500 InternalServerError
+            /// </summary>
+            /// <returns></returns>
+            public bool IsInternalServerError => 500 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 500 InternalServerError
+            /// </summary>
+            /// <returns></returns>
+            public Cogneris.DocumentAI.Model.ProblemDetails? InternalServerError()
+            {
+                bool suppressDefault = false;
+                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                OnInternalServerError(ref suppressDefault, ref result);
+                if (!suppressDefault)
+                    result = DefaultInternalServerError();
+                return result;
+            }
+
+            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultInternalServerError()
+            {
+                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
+                return IsInternalServerError
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            partial void OnInternalServerError(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+
+            /// <summary>
+            /// Returns true if the response is 500 InternalServerError and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryInternalServerError([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = InternalServerError();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)500);
+                }
+
+                return result != null;
+            }
 
             /// <summary>
             /// Returns true if the response is 503 ServiceUnavailable

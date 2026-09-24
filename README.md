@@ -4,7 +4,7 @@ This repository is the canonical first-result path for the public Cogneris
 Document AI API: TypeScript, Python, C#/.NET, Java, the `cogneris` CLI, and
 Postman. All of them are built from
 [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
-OpenAPI contract version `2026-09-22`.
+OpenAPI contract version `2026-09-24`.
 
 For WhatsApp consent and delivery outcomes on the generated Portal API, see
 [Portal magic links](docs/portal-magic-links.md).
@@ -95,9 +95,10 @@ an alternative for inspecting owner-provided artifacts. No repository workflow
 publishes to NuGet or Maven Central.
 
 The committed source is version `0.2.0`, generated from OpenAPI contract
-`2026-09-22`. The registry releases linked above are `0.1.0`, generated from
+`2026-09-24`. The registry releases linked above are `0.1.0`, generated from
 `2026-08-07`; `0.2.0` is not yet published to any registry. The change is
-additive: see the release notes in [VERSIONING.md](VERSIONING.md). The local
+additive apart from one nullable widening: see the release notes in
+[VERSIONING.md](VERSIONING.md). The local
 release artifacts below build `0.2.0`.
 
 ## Install local release artifacts
@@ -370,7 +371,7 @@ response, exception context, document, or credential.
   `data.metadata` is an `ExtractedField` carrying `value`, `confidence`, and,
   when the value was located on the page, `page`, `bbox`, and `bbox_confidence`.
   Separate evidence, cost, destination, and webhook-signature APIs are absent
-  from OpenAPI contract `2026-09-22`. Do not fabricate calls or infer private
+  from OpenAPI contract `2026-09-24`. Do not fabricate calls or infer private
   service behavior for those capabilities.
 - `CognerisClient` is the maintained document/job helper. Portal,
   administrative, and internal APIs are not SDK helper features. Public Portal
