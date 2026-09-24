@@ -82,6 +82,9 @@ class PythonInstalledSdkSmokeTests(unittest.TestCase):
     def test_transport_and_parse_failures_are_safe_typed_errors(self):
         self.run_installed("test_transport_and_parse_failures_are_safe_typed_errors")
 
+    def test_error_status_without_a_json_body_keeps_its_status(self):
+        self.run_installed("test_error_status_without_a_json_body_keeps_its_status")
+
     def test_poll_intervals_handle_non_finite_values_safely(self):
         self.run_installed("test_poll_intervals_handle_non_finite_values_safely")
 

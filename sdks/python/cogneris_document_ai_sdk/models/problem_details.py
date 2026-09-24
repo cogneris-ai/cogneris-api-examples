@@ -26,6 +26,7 @@ class ProblemDetails:
         code (Union[Unset, str]): Stable machine-readable error code — branch on this.
         correlation_id (Union[Unset, str]): Also returned in the `x-correlation-id` header.
         retryable (Union[Unset, bool]):
+        field (Union[None, Unset, str]): The request field at fault, on validation failures.
         errors (Union[Unset, list['ProblemDetailsErrorsItem']]):
     """
 
@@ -37,6 +38,7 @@ class ProblemDetails:
     code: Union[Unset, str] = UNSET
     correlation_id: Union[Unset, str] = UNSET
     retryable: Union[Unset, bool] = UNSET
+    field: Union[None, Unset, str] = UNSET
     errors: Union[Unset, list["ProblemDetailsErrorsItem"]] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -60,6 +62,12 @@ class ProblemDetails:
         correlation_id = self.correlation_id
 
         retryable = self.retryable
+
+        field: Union[None, Unset, str]
+        if isinstance(self.field, Unset):
+            field = UNSET
+        else:
+            field = self.field
 
         errors: Union[Unset, list[dict[str, Any]]] = UNSET
         if not isinstance(self.errors, Unset):
@@ -87,6 +95,8 @@ class ProblemDetails:
             field_dict["correlationId"] = correlation_id
         if retryable is not UNSET:
             field_dict["retryable"] = retryable
+        if field is not UNSET:
+            field_dict["field"] = field
         if errors is not UNSET:
             field_dict["errors"] = errors
 
@@ -120,6 +130,15 @@ class ProblemDetails:
 
         retryable = d.pop("retryable", UNSET)
 
+        def _parse_field(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        field = _parse_field(d.pop("field", UNSET))
+
         errors = []
         _errors = d.pop("errors", UNSET)
         for errors_item_data in _errors or []:
@@ -136,6 +155,7 @@ class ProblemDetails:
             code=code,
             correlation_id=correlation_id,
             retryable=retryable,
+            field=field,
             errors=errors,
         )
 

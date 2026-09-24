@@ -107,7 +107,7 @@ An owner must complete these steps outside this workflow:
 
 The `registry` input selects `all` (default), `npm`, or `pypi`. Select only a
 registry where the exact release version is not yet published and its prerequisites
-are complete. Version `0.2.0` (OpenAPI contract `2026-09-22`) is committed and
+are complete. Version `0.2.0` (OpenAPI contract `2026-09-24`) is committed and
 not yet published to any registry; the owner gates below, including confirming
 that the Apache-2.0 release authorization covers the `0.2.0` source commit,
 apply before a real release. Both npm packages and PyPI `0.1.0` are already published: do not

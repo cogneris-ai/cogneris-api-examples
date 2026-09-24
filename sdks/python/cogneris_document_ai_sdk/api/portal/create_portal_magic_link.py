@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -35,22 +35,25 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Optional[Union[PortalMagicLink, ProblemDetails]]:
     if response.status_code == 201:
         response_201 = PortalMagicLink.from_dict(response.json())
 
         return response_201
 
     if response.status_code == 400:
-        response_400 = cast(Any, None)
+        response_400 = ProblemDetails.from_dict(response.json())
+
         return response_400
 
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ProblemDetails.from_dict(response.json())
+
         return response_401
 
     if response.status_code == 402:
-        response_402 = cast(Any, None)
+        response_402 = ProblemDetails.from_dict(response.json())
+
         return response_402
 
     if response.status_code == 403:
@@ -59,12 +62,24 @@ def _parse_response(
         return response_403
 
     if response.status_code == 404:
-        response_404 = cast(Any, None)
+        response_404 = ProblemDetails.from_dict(response.json())
+
         return response_404
 
+    if response.status_code == 409:
+        response_409 = ProblemDetails.from_dict(response.json())
+
+        return response_409
+
     if response.status_code == 429:
-        response_429 = cast(Any, None)
+        response_429 = ProblemDetails.from_dict(response.json())
+
         return response_429
+
+    if response.status_code == 500:
+        response_500 = ProblemDetails.from_dict(response.json())
+
+        return response_500
 
     if response.status_code == 502:
         response_502 = ProblemDetails.from_dict(response.json())
@@ -79,7 +94,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Response[Union[PortalMagicLink, ProblemDetails]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -93,7 +108,7 @@ def sync_detailed(
     client: Union[AuthenticatedClient, Client],
     body: PortalMagicLinkRequest,
     idempotency_key: Union[Unset, str] = UNSET,
-) -> Response[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Response[Union[PortalMagicLink, ProblemDetails]]:
     """Create a magic link
 
      Creates a link to an intake form for a named recipient and, when `sendChannel`
@@ -116,7 +131,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, PortalMagicLink, ProblemDetails]]
+        Response[Union[PortalMagicLink, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -136,7 +151,7 @@ def sync(
     client: Union[AuthenticatedClient, Client],
     body: PortalMagicLinkRequest,
     idempotency_key: Union[Unset, str] = UNSET,
-) -> Optional[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Optional[Union[PortalMagicLink, ProblemDetails]]:
     """Create a magic link
 
      Creates a link to an intake form for a named recipient and, when `sendChannel`
@@ -159,7 +174,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, PortalMagicLink, ProblemDetails]
+        Union[PortalMagicLink, ProblemDetails]
     """
 
     return sync_detailed(
@@ -174,7 +189,7 @@ async def asyncio_detailed(
     client: Union[AuthenticatedClient, Client],
     body: PortalMagicLinkRequest,
     idempotency_key: Union[Unset, str] = UNSET,
-) -> Response[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Response[Union[PortalMagicLink, ProblemDetails]]:
     """Create a magic link
 
      Creates a link to an intake form for a named recipient and, when `sendChannel`
@@ -197,7 +212,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, PortalMagicLink, ProblemDetails]]
+        Response[Union[PortalMagicLink, ProblemDetails]]
     """
 
     kwargs = _get_kwargs(
@@ -215,7 +230,7 @@ async def asyncio(
     client: Union[AuthenticatedClient, Client],
     body: PortalMagicLinkRequest,
     idempotency_key: Union[Unset, str] = UNSET,
-) -> Optional[Union[Any, PortalMagicLink, ProblemDetails]]:
+) -> Optional[Union[PortalMagicLink, ProblemDetails]]:
     """Create a magic link
 
      Creates a link to an intake form for a named recipient and, when `sendChannel`
@@ -238,7 +253,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, PortalMagicLink, ProblemDetails]
+        Union[PortalMagicLink, ProblemDetails]
     """
 
     return (

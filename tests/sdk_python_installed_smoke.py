@@ -19,6 +19,8 @@ PARSE_JOB_ID = "55555555-5555-4555-8555-555555555555"
 TRANSPORT_JOB_ID = "66666666-6666-4666-8666-666666666666"
 NAN_HINT_JOB_ID = "77777777-7777-4777-8777-777777777777"
 INFINITY_HINT_JOB_ID = "88888888-8888-4888-8888-888888888888"
+HTML_429_JOB_ID = "99999999-9999-4999-8999-999999999999"
+EMPTY_401_JOB_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
 REFLECTED_API_KEY = "xtkt_live_TEST_ONLY_NOT_A_SECRET-reflected-sentinel"
 REFLECTED_DOCUMENT = "document-reflected-sentinel"
 
@@ -135,6 +137,14 @@ class _Handler(BaseHTTPRequestHandler):
         if job_id == TRANSPORT_JOB_ID:
             self.connection.shutdown(socket.SHUT_RDWR)
             self.connection.close()
+            return
+        if job_id in (HTML_429_JOB_ID, EMPTY_401_JOB_ID):
+            raw = f"<html>{REFLECTED_API_KEY}</html>".encode() if job_id == HTML_429_JOB_ID else b""
+            self.send_response(429 if job_id == HTML_429_JOB_ID else 401)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
             return
         if job_id == PARSE_JOB_ID:
             raw = f"not-json {REFLECTED_API_KEY} {REFLECTED_DOCUMENT}".encode()
@@ -300,6 +310,21 @@ class InstalledPythonSdkTests(unittest.TestCase):
                 self.assertIsNone(caught.exception.__context__)
                 self.assertFalse(hasattr(caught.exception, "request"))
                 self.assertFalse(hasattr(caught.exception, "response"))
+
+    def test_error_status_without_a_json_body_keeps_its_status(self):
+        # The contract declares a problem document on every error status, but an edge
+        # proxy can answer with HTML or nothing; that is still an API error, not a
+        # contract mismatch.
+        client = self.client(api_key=REFLECTED_API_KEY)
+        for job_id, status in [(HTML_429_JOB_ID, 429), (EMPTY_401_JOB_ID, 401)]:
+            with self.subTest(status=status):
+                with self.assertRaises(sdk.CognerisApiError) as caught:
+                    client.get_job(job_id)
+                self.assertEqual(caught.exception.status, status)
+                self.assertIsNone(caught.exception.retryable)
+                self.assertNotIn(REFLECTED_API_KEY, error_exposure(caught.exception))
+                self.assertIsNone(caught.exception.__cause__)
+                self.assertIsNone(caught.exception.__context__)
 
     def test_poll_intervals_handle_non_finite_values_safely(self):
         client = self.client()

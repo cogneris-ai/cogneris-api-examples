@@ -42,6 +42,63 @@ export type Envelope = {
             [key: string]: unknown;
         };
         createdDate?: string;
+        /**
+         * `/Document/classifier` only: one entry per uploaded file.
+         *
+         */
+        results?: Array<ClassificationResult>;
+        /**
+         * `/Document/zero-shot` only: the document type the model recognized.
+         */
+        documentType?: string;
+        /**
+         * `/Document/zero-shot` only: certainty in `documentType`.
+         */
+        confidence?: number;
+        /**
+         * `/Document/extraction` only. Always `false`: fraud screening is advisory
+         * and never withholds the extraction. Kept for clients that already read it.
+         *
+         */
+        fraudBlocked?: boolean;
+        /**
+         * `/Document/extraction` only: the fraud screening that ran on this
+         * document. Null when screening was disabled, not enabled for the tenant,
+         * or failed.
+         *
+         */
+        fraudRequestId?: string | null;
+        /**
+         * `/Document/extraction` only: the input-quality pre-flight. Null when it
+         * did not run. On a `2` (block) verdict the extraction did not run and
+         * `metadata` is null; on a `1` (warn) it ran and this carries the findings.
+         *
+         */
+        quality?: QualityAssessment | null;
+        /**
+         * `/Document/crop` only: signed URLs of the cropped images.
+         */
+        imageUrls?: Array<string> | null;
+        /**
+         * `/Document/crop` only: each document found on the page, with where it sits.
+         */
+        documents?: Array<CropDocument>;
+        /**
+         * `/Document/crop` only: signed URL of the composite image, when one was produced.
+         */
+        compositeImageUrl?: string | null;
+        /**
+         * `/Document/facematch` only: identifies this comparison. Facematch carries no `id`.
+         */
+        requestId?: string;
+        /**
+         * `/Document/facematch` only: the face found, or not, in each uploaded document.
+         */
+        extractions?: Array<FaceExtraction>;
+        /**
+         * `/Document/facematch` only: the selfie compared against each document face.
+         */
+        matches?: Array<FaceMatch>;
     };
     meta?: ServiceResponseMeta;
     hasErrors?: boolean;
@@ -95,6 +152,96 @@ export type BoundingBox = [
     number,
     number
 ];
+
+export type ClassificationResult = {
+    /**
+     * The uploaded file this entry classifies.
+     */
+    fileName?: string;
+    documentType?: string;
+    /**
+     * Certainty in `documentType`.
+     */
+    confidence?: number;
+    pages?: number | null;
+    /**
+     * The template the document type resolves to, when one is configured.
+     */
+    templateId?: string | null;
+    /**
+     * The matched template's schema. Null when `templateId` is, or the template has no schema yet.
+     */
+    templateMetadata?: string | null;
+};
+
+/**
+ * `0` pass, `1` warn, `2` block. Sent as the number, not the name.
+ */
+export type QualityVerdict = 0 | 1 | 2;
+
+export type QualityAssessment = {
+    /**
+     * The worst level across `findings`; `0` when there are none.
+     */
+    overall: QualityVerdict;
+    /**
+     * Each probe that did not pass. Passing probes are left out.
+     */
+    findings: Array<QualityFinding>;
+};
+
+export type QualityFinding = {
+    /**
+     * The check that crossed its threshold, such as `blur` or `resolution`.
+     */
+    probe: string;
+    level: QualityVerdict;
+    measured: number;
+    threshold: number;
+    message: string;
+};
+
+export type CropDocument = {
+    /**
+     * Where the document sits on the source image.
+     */
+    box2D?: Array<number>;
+    /**
+     * The document's outline on the source image, as a list of points.
+     */
+    mask?: Array<Array<number>>;
+    side?: string;
+    /**
+     * The detected document type.
+     */
+    type?: string;
+    confidence?: number | null;
+    /**
+     * Signed URL of this document's crop.
+     */
+    imageUrl?: string;
+};
+
+export type FaceExtraction = {
+    sourceDocumentId?: string;
+    hasFace?: boolean;
+    documentType?: string;
+    /**
+     * Signed URL of the face crop. Null when none was produced.
+     */
+    cropSignedUrl?: string | null;
+};
+
+export type FaceMatch = {
+    sourceDocumentId?: string;
+    selfieDocumentId?: string;
+    /**
+     * Similarity between the selfie and the document face.
+     */
+    score?: number;
+    matched?: boolean;
+    tooManyFaces?: boolean;
+};
 
 export type DocumentJobOperation = 'Extraction' | 'Classification' | 'ZeroShot' | 'Crop' | 'Split' | 'Redaction' | 'Facematch';
 
@@ -244,6 +391,15 @@ export type DocumentJob = {
     completedAt?: string | null;
     cancellationRequestedAt?: string | null;
     expiresAt?: string;
+    /**
+     * What the job consumed, in credits. Absent — never `0` — while the cost is
+     * unknown: a job still queued or running, an operation that is not metered,
+     * or one billing could not price. `0` is a real value meaning the job was
+     * free. It is a property of the job, so polling a finished job twice reports
+     * the same figure; it is not a charge per read.
+     *
+     */
+    creditsConsumed?: number | null;
 };
 
 export type PortalForm = {
@@ -385,14 +541,21 @@ export type ProblemDetails = {
      */
     correlationId?: string;
     retryable?: boolean;
+    /**
+     * The request field at fault, on validation failures.
+     */
+    field?: string | null;
     errors?: Array<{
         code?: string;
         message?: string;
         /**
          * Present on validation failures.
          */
-        field?: string;
+        field?: string | null;
         retryable?: boolean;
+        details?: {
+            [key: string]: string;
+        } | null;
     }>;
 };
 
@@ -420,11 +583,30 @@ export type ExtractDocumentData = {
 
 export type ExtractDocumentErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -434,10 +616,21 @@ export type ExtractDocumentErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type ExtractDocumentError = ExtractDocumentErrors[keyof ExtractDocumentErrors];
 
 export type ExtractDocumentResponses = {
     /**
@@ -466,11 +659,30 @@ export type ClassifyDocumentsData = {
 
 export type ClassifyDocumentsErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -480,10 +692,21 @@ export type ClassifyDocumentsErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type ClassifyDocumentsError = ClassifyDocumentsErrors[keyof ClassifyDocumentsErrors];
 
 export type ClassifyDocumentsResponses = {
     /**
@@ -507,11 +730,30 @@ export type ZeroShotDocumentData = {
 
 export type ZeroShotDocumentErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -521,10 +763,21 @@ export type ZeroShotDocumentErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type ZeroShotDocumentError = ZeroShotDocumentErrors[keyof ZeroShotDocumentErrors];
 
 export type ZeroShotDocumentResponses = {
     /**
@@ -548,11 +801,30 @@ export type CropDocumentData = {
 
 export type CropDocumentErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -562,10 +834,21 @@ export type CropDocumentErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type CropDocumentError = CropDocumentErrors[keyof CropDocumentErrors];
 
 export type CropDocumentResponses = {
     /**
@@ -589,11 +872,30 @@ export type SplitDocumentData = {
 
 export type SplitDocumentErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -603,10 +905,21 @@ export type SplitDocumentErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type SplitDocumentError = SplitDocumentErrors[keyof SplitDocumentErrors];
 
 export type SplitDocumentResponses = {
     /**
@@ -639,11 +952,30 @@ export type FaceMatchDocumentData = {
 
 export type FaceMatchDocumentErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -653,10 +985,21 @@ export type FaceMatchDocumentErrors = {
      */
     415: unknown;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type FaceMatchDocumentError = FaceMatchDocumentErrors[keyof FaceMatchDocumentErrors];
 
 export type FaceMatchDocumentResponses = {
     /**
@@ -687,11 +1030,30 @@ export type UploadArtifactData = {
 
 export type UploadArtifactErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
      */
@@ -707,9 +1069,18 @@ export type UploadArtifactErrors = {
      */
     422: ServiceErrorEnvelope;
     /**
-     * Over 50 requests in the current 1-minute window for this key.
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
     /**
      * Document admission is temporarily unavailable. Marked retryable — back
      * off and upload again.
@@ -756,11 +1127,19 @@ export type DownloadArtifactErrors = {
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
     /**
      * No artifact with that reference in this tenant.
      */
-    404: unknown;
+    404: ServiceErrorEnvelope;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * The reference was valid and has expired. Distinct from `404` on purpose:
      * retrying will never succeed, so upload again.
@@ -770,7 +1149,13 @@ export type DownloadArtifactErrors = {
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
 
 export type DownloadArtifactError = DownloadArtifactErrors[keyof DownloadArtifactErrors];
@@ -797,16 +1182,43 @@ export type ListDocumentJobsData = {
 
 export type ListDocumentJobsErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type ListDocumentJobsError = ListDocumentJobsErrors[keyof ListDocumentJobsErrors];
 
 export type ListDocumentJobsResponses = {
     /**
@@ -819,7 +1231,23 @@ export type ListDocumentJobsResponse = ListDocumentJobsResponses[keyof ListDocum
 
 export type SubmitDocumentJobData = {
     body: {
+        /**
+         * The work to run. A finished classifier is a published, immutable
+         * template version: updates are rejected, and a changed definition must
+         * be published as a new classifier with a new id.
+         *
+         */
         operation: DocumentJobSubmitOperation;
+        /**
+         * Optional, Extraction only. The id of one of your tenant's finished
+         * templates; its schema drives the extraction instead of the template
+         * the platform would select from the document. Any other operation
+         * rejects the submit when this is set. An id the platform cannot resolve
+         * to a finished template of yours is rejected; the job never falls back
+         * to a generic extraction without the schema you asked for.
+         *
+         */
+        templateId?: string;
         /**
          * The `reference` returned by `POST /api/v1/artifacts`. That upload
          * is the only way to obtain one, and it can back more than one job
@@ -835,16 +1263,43 @@ export type SubmitDocumentJobData = {
 
 export type SubmitDocumentJobErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type SubmitDocumentJobError = SubmitDocumentJobErrors[keyof SubmitDocumentJobErrors];
 
 export type SubmitDocumentJobResponses = {
     /**
@@ -866,20 +1321,43 @@ export type GetDocumentJobData = {
 
 export type GetDocumentJobErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
     /**
      * No job with that id in this tenant.
      */
-    404: unknown;
+    404: ServiceErrorEnvelope;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
+
+export type GetDocumentJobError = GetDocumentJobErrors[keyof GetDocumentJobErrors];
 
 export type GetDocumentJobResponses = {
     /**
@@ -901,11 +1379,26 @@ export type CancelDocumentJobData = {
 
 export type CancelDocumentJobErrors = {
     /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
     /**
      * The job does not exist or can no longer be cancelled.
      */
@@ -913,7 +1406,13 @@ export type CancelDocumentJobErrors = {
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
 };
 
 export type CancelDocumentJobError = CancelDocumentJobErrors[keyof CancelDocumentJobErrors];
@@ -936,11 +1435,17 @@ export type ListPortalFormsData = {
 
 export type ListPortalFormsErrors = {
     /**
+     * The request was refused before it was processed — malformed, unsafe, or
+     * missing something it needs. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
     /**
      * The key is valid but lacks the scope this endpoint requires —
      * `portal.forms.read` to read, `portal.magiclinks.write` to create. The missing
@@ -949,9 +1454,23 @@ export type ListPortalFormsErrors = {
      */
     403: ProblemDetails;
     /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
+    /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
     /**
      * The Portal service is unreachable. Marked retryable — back off and try again.
      */
@@ -978,11 +1497,17 @@ export type ListPortalChannelsData = {
 
 export type ListPortalChannelsErrors = {
     /**
+     * The request was refused before it was processed — malformed, unsafe, or
+     * missing something it needs. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
     /**
      * The key is valid but lacks the scope this endpoint requires —
      * `portal.forms.read` to read, `portal.magiclinks.write` to create. The missing
@@ -991,9 +1516,23 @@ export type ListPortalChannelsErrors = {
      */
     403: ProblemDetails;
     /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
+    /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
     /**
      * The Portal service is unreachable. Marked retryable — back off and try again.
      */
@@ -1031,17 +1570,17 @@ export type CreatePortalMagicLinkErrors = {
      * The offending field is named in `errors[].field`.
      *
      */
-    400: unknown;
+    400: ProblemDetails;
     /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
      *
      */
-    401: unknown;
+    401: ProblemDetails;
     /**
      * Billing quota exhausted. `detail` carries the reason and, where one applies, an upgrade URL.
      */
-    402: unknown;
+    402: ProblemDetails;
     /**
      * The key is valid but lacks the scope this endpoint requires —
      * `portal.forms.read` to read, `portal.magiclinks.write` to create. The missing
@@ -1052,11 +1591,21 @@ export type CreatePortalMagicLinkErrors = {
     /**
      * No such form, or it belongs to another tenant. The two are indistinguishable by design.
      */
-    404: unknown;
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
     /**
      * Over 50 requests in the current 1-minute window for this key.
      */
-    429: unknown;
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
     /**
      * The Portal service is unreachable. Marked retryable — back off and try again.
      */

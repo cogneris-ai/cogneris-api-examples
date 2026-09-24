@@ -1,11 +1,12 @@
 from http import HTTPStatus
 from io import BytesIO
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.problem_details import ProblemDetails
 from ...models.service_error_envelope import ServiceErrorEnvelope
 from ...types import UNSET, File, Response
 
@@ -31,7 +32,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Optional[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     if response.status_code == 200:
         response_200 = File(payload=BytesIO(response.content))
 
@@ -43,12 +44,24 @@ def _parse_response(
         return response_400
 
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ProblemDetails.from_dict(response.json())
+
         return response_401
 
+    if response.status_code == 403:
+        response_403 = ProblemDetails.from_dict(response.json())
+
+        return response_403
+
     if response.status_code == 404:
-        response_404 = cast(Any, None)
+        response_404 = ServiceErrorEnvelope.from_dict(response.json())
+
         return response_404
+
+    if response.status_code == 409:
+        response_409 = ProblemDetails.from_dict(response.json())
+
+        return response_409
 
     if response.status_code == 410:
         response_410 = ServiceErrorEnvelope.from_dict(response.json())
@@ -56,8 +69,14 @@ def _parse_response(
         return response_410
 
     if response.status_code == 429:
-        response_429 = cast(Any, None)
+        response_429 = ProblemDetails.from_dict(response.json())
+
         return response_429
+
+    if response.status_code == 500:
+        response_500 = ProblemDetails.from_dict(response.json())
+
+        return response_500
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -67,7 +86,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Response[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -80,7 +99,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     reference: str,
-) -> Response[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Response[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     """Download the bytes behind a reference
 
      Returns the stored bytes of an upload, or of a finished job's
@@ -99,7 +118,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, File, ServiceErrorEnvelope]]
+        Response[Union[File, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -117,7 +136,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     reference: str,
-) -> Optional[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Optional[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     """Download the bytes behind a reference
 
      Returns the stored bytes of an upload, or of a finished job's
@@ -136,7 +155,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, File, ServiceErrorEnvelope]
+        Union[File, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return sync_detailed(
@@ -149,7 +168,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     reference: str,
-) -> Response[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Response[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     """Download the bytes behind a reference
 
      Returns the stored bytes of an upload, or of a finished job's
@@ -168,7 +187,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, File, ServiceErrorEnvelope]]
+        Response[Union[File, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -184,7 +203,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     reference: str,
-) -> Optional[Union[Any, File, ServiceErrorEnvelope]]:
+) -> Optional[Union[File, ProblemDetails, ServiceErrorEnvelope]]:
     """Download the bytes behind a reference
 
      Returns the stored bytes of an upload, or of a finished job's
@@ -203,7 +222,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, File, ServiceErrorEnvelope]
+        Union[File, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return (

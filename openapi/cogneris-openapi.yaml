@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Cogneris Document AI API
-  version: '2026-09-22'
+  version: '2026-09-24'
   summary: Turn documents into structured data.
   description: |
     The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —
@@ -63,7 +63,9 @@ info:
 
     Extraction and classification are driven by the document types and templates
     configured for your tenant. The platform selects the template from the document
-    itself, so there is no template or schema parameter on the request.
+    itself, so the synchronous `/Document/*` calls take no template or schema
+    parameter. An asynchronous Extraction job may instead name one explicitly with
+    `templateId` on `POST /api/v1/document-jobs`.
 
     ## Scopes
 
@@ -90,6 +92,24 @@ info:
     `application/problem+json`, with a stable `code`, a `correlationId` that is also
     returned in the `x-correlation-id` header, and a `retryable` flag. Branch on
     `code`; treat `type` as an opaque identifier.
+
+    ## Errors
+
+    An error arrives in one of two shapes, and the `Content-Type` says which.
+
+    - `application/problem+json` — an RFC 9457 problem document, the same one the
+      Portal uses. Every route answers this way when the failure happens before your
+      request is processed: a missing or invalid key (`401`), the rate limit (`429`),
+      a request refused as malformed or unsafe (`400`), or an unexpected failure
+      (`500`).
+    - `application/json` — the service envelope with `hasErrors: true` and the
+      reasons in `meta.errors`. The document, job and artifact routes answer this way
+      when processing itself fails. Each operation lists the statuses where it does.
+
+    Every operation lists `400`, `401`, `403`, `404`, `409`, `429` and `500`, because
+    the API answers each of them in the same shape wherever it occurs. A status on
+    an operation with nothing to miss or conflict with — a `409` on a read, say — is
+    part of that uniform model and not something the operation returns in practice.
 servers:
   - url: https://api-us.cogneris.ai
     description: Production — United States (us-central1)
@@ -140,10 +160,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /Document/classifier:
     post:
@@ -170,10 +195,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /Document/zero-shot:
     post:
@@ -188,10 +218,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /Document/crop:
     post:
@@ -206,10 +241,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /Document/split:
     post:
@@ -226,10 +266,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /Document/facematch:
     post:
@@ -257,10 +302,15 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DocumentResult'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /api/v1/artifacts:
     post:
@@ -299,7 +349,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ArtifactUploadEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '422':
@@ -309,7 +363,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
         '503':
           description: |
             Document admission is temporarily unavailable. Marked retryable — back
@@ -361,8 +416,18 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '404': { description: No artifact with that reference in this tenant. }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No artifact with that reference in this tenant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '410':
           description: |
             The reference was valid and has expired. Distinct from `404` on purpose:
@@ -371,6 +436,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /api/v1/document-jobs:
     post:
@@ -391,6 +457,20 @@ paths:
               properties:
                 operation:
                   $ref: '#/components/schemas/DocumentJobSubmitOperation'
+                  description: |
+                    The work to run. A finished classifier is a published, immutable
+                    template version: updates are rejected, and a changed definition must
+                    be published as a new classifier with a new id.
+                templateId:
+                  type: string
+                  format: uuid
+                  description: |
+                    Optional, Extraction only. The id of one of your tenant's finished
+                    templates; its schema drives the extraction instead of the template
+                    the platform would select from the document. Any other operation
+                    rejects the submit when this is set. An id the platform cannot resolve
+                    to a finished template of yours is rejected; the job never falls back
+                    to a generic extraction without the schema you asked for.
                 inputReference:
                   type: string
                   pattern: '^artifact://.+$'
@@ -413,8 +493,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentJobSubmissionEnvelope'
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
     get:
       tags: [Jobs]
       summary: List document jobs
@@ -430,8 +515,13 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentJobListEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /api/v1/document-jobs/{jobId}:
     parameters:
@@ -449,9 +539,19 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentJobEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '404': { description: No job with that id in this tenant. }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No job with that id in this tenant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /api/v1/document-jobs/{jobId}/cancel:
     parameters:
@@ -469,13 +569,19 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentJobCancellationEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '409':
           description: The job does not exist or can no longer be cancelled.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
 
   /api/v1/portal/forms:
     get:
@@ -496,9 +602,13 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/PortalForm' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/PortalForbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
         '502': { $ref: '#/components/responses/PortalUnavailable' }
 
   /api/v1/portal/available-channels:
@@ -519,9 +629,13 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/PortalChannels' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/PortalForbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
         '502': { $ref: '#/components/responses/PortalUnavailable' }
 
   /api/v1/portal/magic-link:
@@ -562,13 +676,24 @@ paths:
             A field failed validation — a missing `formId` or `name`, a `sendChannel`
             outside the allowed set, or a channel whose matching contact field is absent.
             The offending field is named in `errors[].field`.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '402':
           description: Billing quota exhausted. `detail` carries the reason and, where one applies, an upgrade URL.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '403': { $ref: '#/components/responses/PortalForbidden' }
         '404':
           description: No such form, or it belongs to another tenant. The two are indistinguishable by design.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
         '502': { $ref: '#/components/responses/PortalUnavailable' }
 
 components:
@@ -607,12 +732,75 @@ components:
       description: |
         Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
         (sandbox) prefixes are accepted, but the key must also be valid and active.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
     PayloadTooLarge:
       description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
     UnsupportedMediaType:
       description: Extension outside the supported list.
     RateLimited:
       description: Over 50 requests in the current 1-minute window for this key.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: Seconds until the window resets.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    BadRequest:
+      description: |
+        The request was refused before it was processed — malformed, unsafe, or
+        missing something it needs. `code` says which.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Forbidden:
+      description: The key is valid but not allowed to make this request.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Nothing answers at this address for this tenant.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Conflict:
+      description: The request conflicts with the current state of what it acts on.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    ProcessingBadRequest:
+      description: |
+        The request is invalid. Refused before processing — malformed or unsafe — it
+        is a problem document; refused by processing itself, such as a missing file,
+        it is the service envelope with the reason in `meta.errors`.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+        application/json:
+          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+    ProcessingRateLimited:
+      description: |
+        Over 50 requests in the current 1-minute window for this key, answered as a
+        problem document; or the document admission quota is exhausted, answered as
+        the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: Seconds until the rate-limit window resets. Sent with the problem document.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+        application/json:
+          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+    ServerError:
+      description: |
+        Unexpected failure. `correlationId` identifies the request — quote it when
+        you contact support.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
     PortalForbidden:
       description: |
         The key is valid but lacks the scope this endpoint requires —
@@ -678,6 +866,60 @@ components:
                   value: '1840.00'
                   confidence: 95
             createdDate: { type: string, format: date-time }
+            results:
+              type: array
+              description: |
+                `/Document/classifier` only: one entry per uploaded file.
+              items: { $ref: '#/components/schemas/ClassificationResult' }
+            documentType:
+              type: string
+              description: '`/Document/zero-shot` only: the document type the model recognized.'
+            confidence:
+              type: number
+              description: '`/Document/zero-shot` only: certainty in `documentType`.'
+            fraudBlocked:
+              type: boolean
+              description: |
+                `/Document/extraction` only. Always `false`: fraud screening is advisory
+                and never withholds the extraction. Kept for clients that already read it.
+            fraudRequestId:
+              type: [string, 'null']
+              format: uuid
+              description: |
+                `/Document/extraction` only: the fraud screening that ran on this
+                document. Null when screening was disabled, not enabled for the tenant,
+                or failed.
+            quality:
+              description: |
+                `/Document/extraction` only: the input-quality pre-flight. Null when it
+                did not run. On a `2` (block) verdict the extraction did not run and
+                `metadata` is null; on a `1` (warn) it ran and this carries the findings.
+              oneOf:
+                - $ref: '#/components/schemas/QualityAssessment'
+                - type: 'null'
+            imageUrls:
+              type: [array, 'null']
+              items: { type: string }
+              description: '`/Document/crop` only: signed URLs of the cropped images.'
+            documents:
+              type: array
+              description: '`/Document/crop` only: each document found on the page, with where it sits.'
+              items: { $ref: '#/components/schemas/CropDocument' }
+            compositeImageUrl:
+              type: [string, 'null']
+              description: '`/Document/crop` only: signed URL of the composite image, when one was produced.'
+            requestId:
+              type: string
+              format: uuid
+              description: '`/Document/facematch` only: identifies this comparison. Facematch carries no `id`.'
+            extractions:
+              type: array
+              description: '`/Document/facematch` only: the face found, or not, in each uploaded document.'
+              items: { $ref: '#/components/schemas/FaceExtraction' }
+            matches:
+              type: array
+              description: '`/Document/facematch` only: the selfie compared against each document face.'
+              items: { $ref: '#/components/schemas/FaceMatch' }
         meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
         hasErrors: { type: boolean }
 
@@ -737,6 +979,85 @@ components:
         minimum: 0
         maximum: 1
       example: [0.62, 0.11, 0.83, 0.14]
+
+    ClassificationResult:
+      type: object
+      properties:
+        fileName: { type: string, description: The uploaded file this entry classifies. }
+        documentType: { type: string }
+        confidence: { type: number, description: Certainty in `documentType`. }
+        pages: { type: [integer, 'null'] }
+        templateId:
+          type: [string, 'null']
+          format: uuid
+          description: The template the document type resolves to, when one is configured.
+        templateMetadata:
+          type: [string, 'null']
+          description: The matched template's schema. Null when `templateId` is, or the template has no schema yet.
+
+    QualityVerdict:
+      type: integer
+      enum: [0, 1, 2]
+      description: '`0` pass, `1` warn, `2` block. Sent as the number, not the name.'
+
+    QualityAssessment:
+      type: object
+      required: [overall, findings]
+      properties:
+        overall:
+          $ref: '#/components/schemas/QualityVerdict'
+          description: The worst level across `findings`; `0` when there are none.
+        findings:
+          type: array
+          description: Each probe that did not pass. Passing probes are left out.
+          items: { $ref: '#/components/schemas/QualityFinding' }
+
+    QualityFinding:
+      type: object
+      required: [probe, level, measured, threshold, message]
+      properties:
+        probe: { type: string, description: 'The check that crossed its threshold, such as `blur` or `resolution`.' }
+        level: { $ref: '#/components/schemas/QualityVerdict' }
+        measured: { type: number }
+        threshold: { type: number }
+        message: { type: string }
+
+    CropDocument:
+      type: object
+      properties:
+        box2D:
+          type: array
+          items: { type: integer }
+          description: Where the document sits on the source image.
+        mask:
+          type: array
+          items:
+            type: array
+            items: { type: integer }
+          description: The document's outline on the source image, as a list of points.
+        side: { type: string }
+        type: { type: string, description: The detected document type. }
+        confidence: { type: [number, 'null'] }
+        imageUrl: { type: string, description: Signed URL of this document's crop. }
+
+    FaceExtraction:
+      type: object
+      properties:
+        sourceDocumentId: { type: string, format: uuid }
+        hasFace: { type: boolean }
+        documentType: { type: string }
+        cropSignedUrl:
+          type: [string, 'null']
+          description: Signed URL of the face crop. Null when none was produced.
+
+    FaceMatch:
+      type: object
+      properties:
+        sourceDocumentId: { type: string, format: uuid }
+        selfieDocumentId: { type: string, format: uuid }
+        score: { type: number, description: Similarity between the selfie and the document face. }
+        matched: { type: boolean }
+        tooManyFaces: { type: boolean }
 
     DocumentJobOperation:
       type: string
@@ -928,6 +1249,14 @@ components:
         completedAt: { type: [string, 'null'], format: date-time }
         cancellationRequestedAt: { type: [string, 'null'], format: date-time }
         expiresAt: { type: string, format: date-time }
+        creditsConsumed:
+          type: [number, 'null']
+          description: |
+            What the job consumed, in credits. Absent — never `0` — while the cost is
+            unknown: a job still queued or running, an operation that is not metered,
+            or one billing could not price. `0` is a real value meaning the job was
+            free. It is a property of the job, so polling a finished job twice reports
+            the same figure; it is not a charge per read.
 
     PortalForm:
       type: object
@@ -1060,6 +1389,7 @@ components:
         code: { type: string, description: Stable machine-readable error code — branch on this. }
         correlationId: { type: string, description: Also returned in the `x-correlation-id` header. }
         retryable: { type: boolean }
+        field: { type: [string, 'null'], description: 'The request field at fault, on validation failures.' }
         errors:
           type: array
           items:
@@ -1067,5 +1397,8 @@ components:
             properties:
               code: { type: string }
               message: { type: string }
-              field: { type: string, description: Present on validation failures. }
+              field: { type: [string, 'null'], description: Present on validation failures. }
               retryable: { type: boolean }
+              details:
+                type: [object, 'null']
+                additionalProperties: { type: string }
