@@ -94,6 +94,12 @@ is available on NuGet.org. Its public package was installed and passed all nine
 an alternative for inspecting owner-provided artifacts. No repository workflow
 publishes to NuGet or Maven Central.
 
+On 2026-09-25, fresh consumer directories successfully installed npm SDK/CLI
+0.1.0, the PyPI SDK 0.1.0, and the NuGet package 0.1.0. The NuGet restore used
+a .NET 10 consumer because this host has only the .NET 10 SDK. The Java 17
+consumer result above remains the latest Java install evidence; a Java runtime
+was unavailable for a repeat install on this host.
+
 The committed source is version `0.2.0`, generated from OpenAPI contract
 `2026-09-24`. The registry releases linked above are `0.1.0`, generated from
 `2026-08-07`; `0.2.0` is not yet published to any registry. The change is
@@ -342,6 +348,24 @@ Asynchronous job endpoints use the same wire envelope. The maintained SDK
 helpers unwrap its `data` payload, so `submitJob`/`submit_job`, `getJob`/`get_job`,
 and polling return the typed job payload directly. Cancellation is accepted with
 HTTP 202 and returns `{jobId, cancellationRequested}` after unwrapping.
+
+Artifact upload uses the generated `ArtifactsApi` operation in all four
+languages, but only TypeScript and Python add a `CognerisClient` convenience
+method. Their maintained methods unwrap the service envelope and return the
+typed `Artifact`; the C# and Java generated operations expose generated
+response models:
+
+| Language | Maintained upload entry point | Input and result |
+|---|---|---|
+| TypeScript | `CognerisClient.uploadArtifact(file)` | `Blob` or `File`; returns unwrapped `Artifact` |
+| Python | `CognerisClient.upload_artifact(content, file_name=...)` | bytes or binary stream plus required filename; returns unwrapped `Artifact` |
+| C# | `ArtifactsApi.UploadArtifactAsync(FileParameter)` | generated operation; returns `IUploadArtifactApiResponse` |
+| Java | `ArtifactsApi.uploadArtifact(File)` | generated operation; returns `ArtifactUploadEnvelope` |
+
+Downloads follow the same split: TypeScript and Python have
+`CognerisClient.downloadArtifact` / `download_artifact`; C# and Java expose
+`ArtifactsApi.DownloadArtifactAsync` / `ArtifactsApi.downloadArtifact`.
+Pass the returned artifact reference unchanged to job submission.
 
 The maintained SDK helpers raise typed, locally controlled errors. TypeScript
 uses `CognerisApiError`, `CognerisJobTerminalError`, and
