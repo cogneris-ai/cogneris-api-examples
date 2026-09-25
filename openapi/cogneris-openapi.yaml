@@ -64,15 +64,67 @@ info:
     Extraction and classification are driven by the document types and templates
     configured for your tenant. The platform selects the template from the document
     itself, so the synchronous `/Document/*` calls take no template or schema
-    parameter. An asynchronous Extraction job may instead name one explicitly with
-    `templateId` on `POST /api/v1/document-jobs`.
+    parameter. Use `GET /api/v1/templates` to list the finished templates available
+    to your key before naming one explicitly with `templateId` on
+    `POST /api/v1/document-jobs`. The list is cursor-paginated; pass its
+    `nextCursor` as `cursor` to read the next page.
 
     ## Scopes
 
-    Keys carry scopes. The Portal endpoints check them and answer `403` when the
-    required one is absent; the document endpoints accept any valid key for the
-    tenant without consulting the list. `*` is a real scope meaning full access, and
+    Keys carry scopes. The Portal and webhook-endpoint routes check them and answer
+    `403` when the required one is absent; the document endpoints accept any valid
+    key for the tenant without consulting the list. `*` is a real scope meaning full access, and
     it is what a key receives when it is created without an explicit scope list.
+
+    ## Webhooks
+
+    A finished asynchronous job can announce itself, so you do not have to poll it.
+    Register an HTTPS endpoint with `POST /api/v1/webhook-endpoints` and it receives a
+    signed `POST` when a job you subscribed to succeeds, fails or is cancelled. The
+    webhook **announces** the result and does not carry it: read the bytes with
+    `GET /api/v1/artifacts/content?reference=<OutputReference>`.
+
+    Endpoints are managed with a **production** key holding `webhooks.manage` (or
+    `*`). An endpoint receives your whole account's production events for the events
+    it subscribes to, and events from sandbox jobs are never delivered, so a sandbox
+    key is refused.
+
+    Each delivery carries three headers:
+
+    - `X-Xtrakt-Event` — the event name, such as `extract.processed`.
+    - `X-Xtrakt-Delivery` — a fresh id per send. It is not a deduplication key.
+    - `X-Xtrakt-Signature` — `t=<unix seconds>,v1=<hex>`, where `v1` is the
+      HMAC-SHA256 of `<t>.<raw body>` keyed with the endpoint's `whsec_` secret.
+      Recompute it over the raw bytes, compare in constant time, and reject a `t`
+      outside your tolerance.
+
+    For a job, the body is the job's terminal state. **Its property names are
+    PascalCase**, unlike the rest of this API:
+
+    ```json
+    {"JobId":"7c9e6679-7425-40de-944b-e07fc1f90ae7","Operation":"Extraction",
+     "Status":"succeeded","OutputReference":"artifact://document-jobs/7c9e6679-7425-40de-944b-e07fc1f90ae7/result.json",
+     "Stage":null,"ProcessedPages":null,"TotalPages":null,"FailureCode":null,
+     "AttemptCount":1,"CompletedAt":"2026-09-23T14:02:11.482Z"}
+    ```
+
+    `Status` is `succeeded`, `failed` or `cancelled`, and a cancelled job sends the
+    `.failed` event. `OutputReference` is null unless the job succeeded, and always
+    null for `Redaction`. The synchronous `/Document/*` calls fire the same event
+    names with their own response as the body; a delivery about a job is the one
+    that has `JobId`. An endpoint with a `body` sends that fixed text **instead of**
+    the payload.
+
+    Delivery semantics:
+
+    - **A job's outcome never depends on its webhook.** A job that succeeded stays
+      succeeded when the delivery fails; `GET /api/v1/document-jobs/{jobId}` is the
+      source of truth.
+    - **One attempt per endpoint, no retry.** A timeout or a non-2xx answer is
+      recorded and not sent again. Answer `2xx` fast and do the work afterwards, and
+      reconcile periodically with `GET /api/v1/document-jobs`.
+    - **Duplicates are rare but possible.** Deduplicate on `JobId` plus the event.
+    - Every delivery attempt is metered as webhook usage, successful or not.
 
     ## Rate limits
 
@@ -83,9 +135,10 @@ info:
 
     ## Response envelope
 
-    Successful responses from the **document and job** endpoints share one wrapper:
-    `data` for the payload, `meta` for the status and any messages, and `hasErrors`
-    for a fast failure check.
+    Successful responses from the **document, job and webhook-endpoint** routes share
+    one wrapper: `data` for the payload, `meta` for the status and any messages, and
+    `hasErrors` for a fast failure check. The webhook-endpoint routes send their
+    **errors** as problem documents, described next.
 
     The **Portal** endpoints do not use that wrapper. They return the payload
     directly, and their errors are RFC 9457 problem documents sent as
@@ -126,6 +179,8 @@ tags:
     description: Asynchronous document processing.
   - name: Artifacts
     description: Upload the input of a job, and read back its result.
+  - name: Webhooks
+    description: Endpoints that are told when an asynchronous job finishes.
   - name: Portal
     description: Magic links to intake forms — ask a recipient for documents.
 
@@ -461,16 +516,6 @@ paths:
                     The work to run. A finished classifier is a published, immutable
                     template version: updates are rejected, and a changed definition must
                     be published as a new classifier with a new id.
-                templateId:
-                  type: string
-                  format: uuid
-                  description: |
-                    Optional, Extraction only. The id of one of your tenant's finished
-                    templates; its schema drives the extraction instead of the template
-                    the platform would select from the document. Any other operation
-                    rejects the submit when this is set. An id the platform cannot resolve
-                    to a finished template of yours is rejected; the job never falls back
-                    to a generic extraction without the schema you asked for.
                 inputReference:
                   type: string
                   pattern: '^artifact://.+$'
@@ -479,6 +524,16 @@ paths:
                     The `reference` returned by `POST /api/v1/artifacts`. That upload
                     is the only way to obtain one, and it can back more than one job
                     until it expires.
+                templateId:
+                  type: [string, 'null']
+                  format: uuid
+                  description: |
+                    Extraction only: the id of one of your tenant's finished templates,
+                    whose schema drives the extraction. Omit it and the platform picks the
+                    template from the document, as the synchronous endpoint does. Sent with
+                    any other operation, the job is refused with `400`. An id the platform
+                    cannot resolve to a finished template of yours is refused too; the job
+                    never falls back to a generic extraction without the schema you asked for.
       responses:
         '202':
           description: Job accepted.
@@ -498,6 +553,15 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
+        '422':
+          description: |
+            The requested extraction template cannot be used for this job.
+            `template_unknown` means the id is not a finished template in the API
+            key's tenant; `template_not_applicable` means the finished template does
+            not apply to the submitted job.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/ServerError' }
     get:
@@ -515,6 +579,38 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentJobListEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/v1/templates:
+    get:
+      tags: [Templates]
+      summary: List finished templates
+      description: |
+        Returns only finished templates belonging to the API key's tenant. Use an id from
+        this list as `templateId` when submitting an asynchronous Extraction job.
+      operationId: listTemplates
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 50 }
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+          description: The `nextCursor` returned by the preceding page.
+      responses:
+        '200':
+          description: Finished templates for the tenant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TemplateListEnvelope' }
         '400': { $ref: '#/components/responses/ProcessingBadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -582,6 +678,121 @@ paths:
               schema: { $ref: '#/components/schemas/ProblemDetails' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/v1/webhook-endpoints:
+    get:
+      tags: [Webhooks]
+      summary: List webhook endpoints
+      description: |
+        Every endpoint registered for the tenant. A signing secret is never returned
+        here — only by the create, and by an update that changed the `url`. The
+        custom `headers` are returned, which is why listing needs the same scope as
+        writing.
+      operationId: listWebhookEndpoints
+      responses:
+        '200':
+          description: The tenant's endpoints.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookEndpointListEnvelope' }
+        '400': { $ref: '#/components/responses/WebhookBadRequest' }
+        '401': { $ref: '#/components/responses/WebhookUnauthorized' }
+        '403': { $ref: '#/components/responses/WebhookForbidden' }
+        '404': { $ref: '#/components/responses/WebhookNotFound' }
+        '409': { $ref: '#/components/responses/WebhookConflict' }
+        '429': { $ref: '#/components/responses/WebhookRateLimited' }
+        '500': { $ref: '#/components/responses/WebhookUnexpected' }
+    post:
+      tags: [Webhooks]
+      summary: Register a webhook endpoint
+      description: |
+        Registers an endpoint and returns its signing secret. **This is the only
+        time the secret is shown** — store it before you close the response.
+
+        `Idempotency-Key` is required. Repeating the request with the same key and
+        body returns the same endpoint and the same secret, with
+        `Idempotency-Replayed: true`; the same key with a different body answers
+        `409`.
+      operationId: createWebhookEndpoint
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WebhookEndpointCreateRequest' }
+      responses:
+        '200':
+          description: Registered.
+          headers:
+            Idempotency-Replayed:
+              schema: { type: string, enum: ['true'] }
+              description: Present when this answer is a replay of an earlier create.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookEndpointCreatedEnvelope' }
+        '400': { $ref: '#/components/responses/WebhookBadRequest' }
+        '401': { $ref: '#/components/responses/WebhookUnauthorized' }
+        '403': { $ref: '#/components/responses/WebhookForbidden' }
+        '404': { $ref: '#/components/responses/WebhookNotFound' }
+        '409': { $ref: '#/components/responses/WebhookConflict' }
+        '429': { $ref: '#/components/responses/WebhookRateLimited' }
+        '500': { $ref: '#/components/responses/WebhookUnexpected' }
+
+  /api/v1/webhook-endpoints/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      tags: [Webhooks]
+      summary: Replace a webhook endpoint
+      description: |
+        Replaces every field. **Changing `url` rotates the signing secret**, and the
+        new one is returned as `data.secret` on this response only. Deliveries already
+        in flight were signed with the old secret, so accept both until they drain.
+        An update that keeps the `url` keeps the secret and returns `secret: null`.
+
+        `Idempotency-Key` is required, with the same replay rules as the create.
+      operationId: updateWebhookEndpoint
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WebhookEndpointUpdateRequest' }
+      responses:
+        '200':
+          description: Replaced.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookEndpointEnvelope' }
+        '400': { $ref: '#/components/responses/WebhookBadRequest' }
+        '401': { $ref: '#/components/responses/WebhookUnauthorized' }
+        '403': { $ref: '#/components/responses/WebhookForbidden' }
+        '404': { $ref: '#/components/responses/WebhookNotFound' }
+        '409': { $ref: '#/components/responses/WebhookConflict' }
+        '429': { $ref: '#/components/responses/WebhookRateLimited' }
+        '500': { $ref: '#/components/responses/WebhookUnexpected' }
+    delete:
+      tags: [Webhooks]
+      summary: Remove a webhook endpoint
+      operationId: deleteWebhookEndpoint
+      responses:
+        '200':
+          description: Removed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookEndpointDeletionEnvelope' }
+        '400': { $ref: '#/components/responses/WebhookBadRequest' }
+        '401': { $ref: '#/components/responses/WebhookUnauthorized' }
+        '403': { $ref: '#/components/responses/WebhookForbidden' }
+        '404': { $ref: '#/components/responses/WebhookNotFound' }
+        '409': { $ref: '#/components/responses/WebhookConflict' }
+        '429': { $ref: '#/components/responses/WebhookRateLimited' }
+        '500': { $ref: '#/components/responses/WebhookUnexpected' }
 
   /api/v1/portal/forms:
     get:
@@ -705,6 +916,17 @@ components:
         An API key prefixed `xtkt_live_` (production) or `xtkt_test_` (sandbox),
         sent as `Authorization: Bearer <key>`.
 
+  parameters:
+    WebhookIdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Your identifier for this write, so a retry cannot register or change an
+        endpoint twice. Reuse it only to repeat the identical request. Kept for 24
+        hours.
+      schema: { type: string }
+
   requestBodies:
     SingleFile:
       required: true
@@ -806,6 +1028,49 @@ components:
         The key is valid but lacks the scope this endpoint requires —
         `portal.forms.read` to read, `portal.magiclinks.write` to create. The missing
         scope is named in the response.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookBadRequest:
+      description: |
+        Invalid request — a `url` that is not absolute HTTPS on a public address, no
+        events, an unknown event, or a missing `Idempotency-Key`. `code` says which.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookUnauthorized:
+      description: Missing, invalid or inactive API key.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookForbidden:
+      description: |
+        The key cannot manage webhook endpoints. `webhook.scope_required`: it lacks
+        `webhooks.manage` (or `*`). `webhook.production_key_required`: it is not a
+        production key — endpoints receive production events only.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookNotFound:
+      description: No endpoint with that id in this tenant.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookConflict:
+      description: |
+        The `Idempotency-Key` was used with a different body (`idempotency_key_reused`),
+        or the first request with it is still in progress (`idempotency_in_progress`,
+        retryable, with `Retry-After`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookRateLimited:
+      description: Over 50 requests in the current 1-minute window for this key.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    WebhookUnexpected:
+      description: Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
       content:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
@@ -1175,6 +1440,29 @@ components:
         hasMore: { type: boolean }
         limit: { type: integer }
 
+    Template:
+      type: object
+      required: [id, name, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        status:
+          type: string
+          enum: [Finished]
+          description: Only finished templates are returned by this endpoint.
+
+    TemplateList:
+      type: object
+      required: [templates, hasMore, limit]
+      properties:
+        templates:
+          type: array
+          items: { $ref: '#/components/schemas/Template' }
+        nextCursor: { type: [string, 'null'] }
+        hasMore: { type: boolean }
+        limit: { type: integer }
+
     DocumentJobCancellation:
       type: object
       required: [jobId, cancellationRequested]
@@ -1206,6 +1494,14 @@ components:
         meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
         hasErrors: { type: boolean }
 
+    TemplateListEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/TemplateList' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
     DocumentJobCancellationEnvelope:
       type: object
       required: [data, meta, hasErrors]
@@ -1220,6 +1516,14 @@ components:
         jobId: { type: string, format: uuid }
         operation: { $ref: '#/components/schemas/DocumentJobOperation' }
         status: { $ref: '#/components/schemas/DocumentJobStatus' }
+        templateId:
+          type: [string, 'null']
+          format: uuid
+          description: |
+            The finished extraction template explicitly selected when the job was
+            submitted. Null when the job did not use a template. Obtain available ids
+            from `GET /api/v1/templates`; synchronous `/Document/*` endpoints always
+            select a tenant template from the document and do not take this parameter.
         outputReference:
           type: [string, 'null']
           example: artifact://document-jobs/7c9e6679-7425-40de-944b-e07fc1f90ae7/result.json
@@ -1257,6 +1561,167 @@ components:
             or one billing could not price. `0` is a real value meaning the job was
             free. It is a property of the job, so polling a finished job twice reports
             the same figure; it is not a charge per read.
+
+    WebhookEvent:
+      type: string
+      enum:
+        - extract.processed
+        - extract.failed
+        - classifier.processed
+        - classifier.failed
+        - zeroshot.processed
+        - zeroshot.failed
+        - crop.processed
+        - crop.failed
+        - split.processed
+        - split.failed
+        - redaction.processed
+        - redaction.failed
+        - facematch.processed
+        - facematch.failed
+      description: |
+        `<operation>.processed` when a job succeeds, `<operation>.failed` when it fails
+        or is cancelled. Case-insensitive on input, stored lower-case.
+
+    WebhookEndpointCreateRequest:
+      type: object
+      required: [name, url, events]
+      properties:
+        name: { type: string, maxLength: 100 }
+        url:
+          type: string
+          format: uri
+          maxLength: 500
+          example: https://hooks.example.com/cogneris
+          description: Absolute HTTPS on a public address. Private, loopback and link-local targets are refused.
+        events:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/WebhookEvent' }
+        headers:
+          type: [object, 'null']
+          additionalProperties: { type: string }
+          description: Sent on every delivery, for example your receiver's own credential. Stored encrypted.
+        body:
+          type: [string, 'null']
+          description: |
+            Sent **instead of** the event payload when set. Leave it unset to receive
+            the job fields.
+
+    WebhookEndpointUpdateRequest:
+      type: object
+      required: [name, url, events]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Ignored. The endpoint is the one named in the path.
+        name: { type: string, maxLength: 100 }
+        url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: Changing it rotates the signing secret.
+        events:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/WebhookEvent' }
+        headers:
+          type: [object, 'null']
+          additionalProperties: { type: string }
+        body: { type: [string, 'null'] }
+        isActive:
+          type: boolean
+          default: true
+          description: An inactive endpoint is kept but receives nothing.
+
+    WebhookEndpoint:
+      type: object
+      required: [id, name, url, events, isActive, createdWhen]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        url: { type: string }
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/WebhookEvent' }
+        headers:
+          type: [object, 'null']
+          additionalProperties: { type: string }
+        body: { type: [string, 'null'] }
+        isActive: { type: boolean }
+        environment:
+          type: string
+          enum: [production, sandbox]
+          description: |
+            Which environment's events this endpoint receives. Read-only: it is taken
+            from the API key that registered the endpoint, never from the request body,
+            so a sandbox key's endpoint can never be sent production events and a
+            production key's endpoint can never be sent sandbox ones.
+        createdWhen: { type: string, format: date-time }
+        changedWhen: { type: [string, 'null'], format: date-time }
+        secret:
+          type: [string, 'null']
+          example: whsec_3f9a0c1e5b7d2468ace013579bdf2468ace013579bdf2468ace013579bdf2468
+          description: |
+            The new signing secret, only on the update response that rotated it
+            because `url` changed. Null everywhere else.
+
+    WebhookEndpointList:
+      type: object
+      required: [endpoints]
+      properties:
+        endpoints:
+          type: array
+          items: { $ref: '#/components/schemas/WebhookEndpoint' }
+
+    WebhookEndpointCreated:
+      type: object
+      required: [endpoint, secret]
+      properties:
+        endpoint: { $ref: '#/components/schemas/WebhookEndpoint' }
+        secret:
+          type: string
+          example: whsec_3f9a0c1e5b7d2468ace013579bdf2468ace013579bdf2468ace013579bdf2468
+          description: The signing secret. Shown once — store it now.
+
+    WebhookEndpointDeletion:
+      type: object
+      required: [deleted]
+      properties:
+        deleted: { type: boolean }
+
+    WebhookEndpointListEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/WebhookEndpointList' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    WebhookEndpointCreatedEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/WebhookEndpointCreated' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    WebhookEndpointEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/WebhookEndpoint' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    WebhookEndpointDeletionEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/WebhookEndpointDeletion' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
 
     PortalForm:
       type: object

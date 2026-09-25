@@ -7,6 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.document_job_submission_envelope import DocumentJobSubmissionEnvelope
 from ...models.problem_details import ProblemDetails
+from ...models.service_error_envelope import ServiceErrorEnvelope
 from ...models.submit_document_job_body import SubmitDocumentJobBody
 from ...types import Response
 
@@ -32,7 +33,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     if response.status_code == 202:
         response_202 = DocumentJobSubmissionEnvelope.from_dict(response.json())
 
@@ -63,6 +64,11 @@ def _parse_response(
 
         return response_409
 
+    if response.status_code == 422:
+        response_422 = ServiceErrorEnvelope.from_dict(response.json())
+
+        return response_422
+
     if response.status_code == 429:
         response_429 = ProblemDetails.from_dict(response.json())
 
@@ -81,7 +87,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -94,7 +100,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: SubmitDocumentJobBody,
-) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Submit an asynchronous document job
 
      Queues a long-running operation. Answers `202` with a `Location` header
@@ -109,7 +115,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]
+        Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -127,7 +133,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: SubmitDocumentJobBody,
-) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Submit an asynchronous document job
 
      Queues a long-running operation. Answers `202` with a `Location` header
@@ -142,7 +148,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[DocumentJobSubmissionEnvelope, ProblemDetails]
+        Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return sync_detailed(
@@ -155,7 +161,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: SubmitDocumentJobBody,
-) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Submit an asynchronous document job
 
      Queues a long-running operation. Answers `202` with a `Location` header
@@ -170,7 +176,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]
+        Response[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -186,7 +192,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: SubmitDocumentJobBody,
-) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails]]:
+) -> Optional[Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Submit an asynchronous document job
 
      Queues a long-running operation. Answers `202` with a `Location` header
@@ -201,7 +207,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[DocumentJobSubmissionEnvelope, ProblemDetails]
+        Union[DocumentJobSubmissionEnvelope, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return (

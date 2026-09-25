@@ -329,6 +329,23 @@ export type DocumentJobList = {
     limit: number;
 };
 
+export type Template = {
+    id: string;
+    name: string;
+    description?: string | null;
+    /**
+     * Only finished templates are returned by this endpoint.
+     */
+    status: 'Finished';
+};
+
+export type TemplateList = {
+    templates: Array<Template>;
+    nextCursor?: string | null;
+    hasMore: boolean;
+    limit: number;
+};
+
 export type DocumentJobCancellation = {
     jobId: string;
     cancellationRequested: boolean;
@@ -352,6 +369,12 @@ export type DocumentJobListEnvelope = {
     hasErrors: boolean;
 };
 
+export type TemplateListEnvelope = {
+    data: TemplateList;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
 export type DocumentJobCancellationEnvelope = {
     data: DocumentJobCancellation;
     meta: ServiceResponseMeta;
@@ -362,6 +385,14 @@ export type DocumentJob = {
     jobId?: string;
     operation?: DocumentJobOperation;
     status?: DocumentJobStatus;
+    /**
+     * The finished extraction template explicitly selected when the job was
+     * submitted. Null when the job did not use a template. Obtain available ids
+     * from `GET /api/v1/templates`; synchronous `/Document*` endpoints always
+     * select a tenant template from the document and do not take this parameter.
+     *
+     */
+    templateId?: string | null;
     /**
      * Where the finished result is stored, as an `artifact://` reference. Read it
      * with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
@@ -400,6 +431,123 @@ export type DocumentJob = {
      *
      */
     creditsConsumed?: number | null;
+};
+
+/**
+ * `<operation>.processed` when a job succeeds, `<operation>.failed` when it fails
+ * or is cancelled. Case-insensitive on input, stored lower-case.
+ *
+ */
+export type WebhookEvent = 'extract.processed' | 'extract.failed' | 'classifier.processed' | 'classifier.failed' | 'zeroshot.processed' | 'zeroshot.failed' | 'crop.processed' | 'crop.failed' | 'split.processed' | 'split.failed' | 'redaction.processed' | 'redaction.failed' | 'facematch.processed' | 'facematch.failed';
+
+export type WebhookEndpointCreateRequest = {
+    name: string;
+    /**
+     * Absolute HTTPS on a public address. Private, loopback and link-local targets are refused.
+     */
+    url: string;
+    events: Array<WebhookEvent>;
+    /**
+     * Sent on every delivery, for example your receiver's own credential. Stored encrypted.
+     */
+    headers?: {
+        [key: string]: string;
+    } | null;
+    /**
+     * Sent **instead of** the event payload when set. Leave it unset to receive
+     * the job fields.
+     *
+     */
+    body?: string | null;
+};
+
+export type WebhookEndpointUpdateRequest = {
+    /**
+     * Ignored. The endpoint is the one named in the path.
+     */
+    id?: string;
+    name: string;
+    /**
+     * Changing it rotates the signing secret.
+     */
+    url: string;
+    events: Array<WebhookEvent>;
+    headers?: {
+        [key: string]: string;
+    } | null;
+    body?: string | null;
+    /**
+     * An inactive endpoint is kept but receives nothing.
+     */
+    isActive?: boolean;
+};
+
+export type WebhookEndpoint = {
+    id: string;
+    name: string;
+    url: string;
+    events: Array<WebhookEvent>;
+    headers?: {
+        [key: string]: string;
+    } | null;
+    body?: string | null;
+    isActive: boolean;
+    /**
+     * Which environment's events this endpoint receives. Read-only: it is taken
+     * from the API key that registered the endpoint, never from the request body,
+     * so a sandbox key's endpoint can never be sent production events and a
+     * production key's endpoint can never be sent sandbox ones.
+     *
+     */
+    environment?: 'production' | 'sandbox';
+    createdWhen: string;
+    changedWhen?: string | null;
+    /**
+     * The new signing secret, only on the update response that rotated it
+     * because `url` changed. Null everywhere else.
+     *
+     */
+    secret?: string | null;
+};
+
+export type WebhookEndpointList = {
+    endpoints: Array<WebhookEndpoint>;
+};
+
+export type WebhookEndpointCreated = {
+    endpoint: WebhookEndpoint;
+    /**
+     * The signing secret. Shown once — store it now.
+     */
+    secret: string;
+};
+
+export type WebhookEndpointDeletion = {
+    deleted: boolean;
+};
+
+export type WebhookEndpointListEnvelope = {
+    data: WebhookEndpointList;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type WebhookEndpointCreatedEnvelope = {
+    data: WebhookEndpointCreated;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type WebhookEndpointEnvelope = {
+    data: WebhookEndpoint;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type WebhookEndpointDeletionEnvelope = {
+    data: WebhookEndpointDeletion;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
 };
 
 export type PortalForm = {
@@ -558,6 +706,14 @@ export type ProblemDetails = {
         } | null;
     }>;
 };
+
+/**
+ * Your identifier for this write, so a retry cannot register or change an
+ * endpoint twice. Reuse it only to repeat the identical request. Kept for 24
+ * hours.
+ *
+ */
+export type WebhookIdempotencyKey = string;
 
 export type SingleFile = {
     file: Blob | File;
@@ -1239,22 +1395,22 @@ export type SubmitDocumentJobData = {
          */
         operation: DocumentJobSubmitOperation;
         /**
-         * Optional, Extraction only. The id of one of your tenant's finished
-         * templates; its schema drives the extraction instead of the template
-         * the platform would select from the document. Any other operation
-         * rejects the submit when this is set. An id the platform cannot resolve
-         * to a finished template of yours is rejected; the job never falls back
-         * to a generic extraction without the schema you asked for.
-         *
-         */
-        templateId?: string;
-        /**
          * The `reference` returned by `POST /api/v1/artifacts`. That upload
          * is the only way to obtain one, and it can back more than one job
          * until it expires.
          *
          */
         inputReference: string;
+        /**
+         * Extraction only: the id of one of your tenant's finished templates,
+         * whose schema drives the extraction. Omit it and the platform picks the
+         * template from the document, as the synchronous endpoint does. Sent with
+         * any other operation, the job is refused with `400`. An id the platform
+         * cannot resolve to a finished template of yours is refused too; the job
+         * never falls back to a generic extraction without the schema you asked for.
+         *
+         */
+        templateId?: string | null;
     };
     path?: never;
     query?: never;
@@ -1262,6 +1418,76 @@ export type SubmitDocumentJobData = {
 };
 
 export type SubmitDocumentJobErrors = {
+    /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
+     */
+    401: ProblemDetails;
+    /**
+     * The key is valid but not allowed to make this request.
+     */
+    403: ProblemDetails;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
+    /**
+     * The requested extraction template cannot be used for this job.
+     * `template_unknown` means the id is not a finished template in the API
+     * key's tenant; `template_not_applicable` means the finished template does
+     * not apply to the submitted job.
+     *
+     */
+    422: ServiceErrorEnvelope;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
+};
+
+export type SubmitDocumentJobError = SubmitDocumentJobErrors[keyof SubmitDocumentJobErrors];
+
+export type SubmitDocumentJobResponses = {
+    /**
+     * Job accepted.
+     */
+    202: DocumentJobSubmissionEnvelope;
+};
+
+export type SubmitDocumentJobResponse = SubmitDocumentJobResponses[keyof SubmitDocumentJobResponses];
+
+export type ListTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        /**
+         * The `nextCursor` returned by the preceding page.
+         */
+        cursor?: string;
+    };
+    url: '/api/v1/templates';
+};
+
+export type ListTemplatesErrors = {
     /**
      * The request is invalid. Refused before processing — malformed or unsafe — it
      * is a problem document; refused by processing itself, such as a missing file,
@@ -1299,16 +1525,16 @@ export type SubmitDocumentJobErrors = {
     500: ProblemDetails;
 };
 
-export type SubmitDocumentJobError = SubmitDocumentJobErrors[keyof SubmitDocumentJobErrors];
+export type ListTemplatesError = ListTemplatesErrors[keyof ListTemplatesErrors];
 
-export type SubmitDocumentJobResponses = {
+export type ListTemplatesResponses = {
     /**
-     * Job accepted.
+     * Finished templates for the tenant.
      */
-    202: DocumentJobSubmissionEnvelope;
+    200: TemplateListEnvelope;
 };
 
-export type SubmitDocumentJobResponse = SubmitDocumentJobResponses[keyof SubmitDocumentJobResponses];
+export type ListTemplatesResponse = ListTemplatesResponses[keyof ListTemplatesResponses];
 
 export type GetDocumentJobData = {
     body?: never;
@@ -1425,6 +1651,256 @@ export type CancelDocumentJobResponses = {
 };
 
 export type CancelDocumentJobResponse = CancelDocumentJobResponses[keyof CancelDocumentJobResponses];
+
+export type ListWebhookEndpointsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/webhook-endpoints';
+};
+
+export type ListWebhookEndpointsErrors = {
+    /**
+     * Invalid request — a `url` that is not absolute HTTPS on a public address, no
+     * events, an unknown event, or a missing `Idempotency-Key`. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing, invalid or inactive API key.
+     */
+    401: ProblemDetails;
+    /**
+     * The key cannot manage webhook endpoints. `webhook.scope_required`: it lacks
+     * `webhooks.manage` (or `*`). `webhook.production_key_required`: it is not a
+     * production key — endpoints receive production events only.
+     *
+     */
+    403: ProblemDetails;
+    /**
+     * No endpoint with that id in this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The `Idempotency-Key` was used with a different body (`idempotency_key_reused`),
+     * or the first request with it is still in progress (`idempotency_in_progress`,
+     * retryable, with `Retry-After`).
+     *
+     */
+    409: ProblemDetails;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
+     */
+    500: ProblemDetails;
+};
+
+export type ListWebhookEndpointsError = ListWebhookEndpointsErrors[keyof ListWebhookEndpointsErrors];
+
+export type ListWebhookEndpointsResponses = {
+    /**
+     * The tenant's endpoints.
+     */
+    200: WebhookEndpointListEnvelope;
+};
+
+export type ListWebhookEndpointsResponse = ListWebhookEndpointsResponses[keyof ListWebhookEndpointsResponses];
+
+export type CreateWebhookEndpointData = {
+    body: WebhookEndpointCreateRequest;
+    headers: {
+        /**
+         * Your identifier for this write, so a retry cannot register or change an
+         * endpoint twice. Reuse it only to repeat the identical request. Kept for 24
+         * hours.
+         *
+         */
+        'Idempotency-Key': string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/webhook-endpoints';
+};
+
+export type CreateWebhookEndpointErrors = {
+    /**
+     * Invalid request — a `url` that is not absolute HTTPS on a public address, no
+     * events, an unknown event, or a missing `Idempotency-Key`. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing, invalid or inactive API key.
+     */
+    401: ProblemDetails;
+    /**
+     * The key cannot manage webhook endpoints. `webhook.scope_required`: it lacks
+     * `webhooks.manage` (or `*`). `webhook.production_key_required`: it is not a
+     * production key — endpoints receive production events only.
+     *
+     */
+    403: ProblemDetails;
+    /**
+     * No endpoint with that id in this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The `Idempotency-Key` was used with a different body (`idempotency_key_reused`),
+     * or the first request with it is still in progress (`idempotency_in_progress`,
+     * retryable, with `Retry-After`).
+     *
+     */
+    409: ProblemDetails;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
+     */
+    500: ProblemDetails;
+};
+
+export type CreateWebhookEndpointError = CreateWebhookEndpointErrors[keyof CreateWebhookEndpointErrors];
+
+export type CreateWebhookEndpointResponses = {
+    /**
+     * Registered.
+     */
+    200: WebhookEndpointCreatedEnvelope;
+};
+
+export type CreateWebhookEndpointResponse = CreateWebhookEndpointResponses[keyof CreateWebhookEndpointResponses];
+
+export type DeleteWebhookEndpointData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/webhook-endpoints/{id}';
+};
+
+export type DeleteWebhookEndpointErrors = {
+    /**
+     * Invalid request — a `url` that is not absolute HTTPS on a public address, no
+     * events, an unknown event, or a missing `Idempotency-Key`. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing, invalid or inactive API key.
+     */
+    401: ProblemDetails;
+    /**
+     * The key cannot manage webhook endpoints. `webhook.scope_required`: it lacks
+     * `webhooks.manage` (or `*`). `webhook.production_key_required`: it is not a
+     * production key — endpoints receive production events only.
+     *
+     */
+    403: ProblemDetails;
+    /**
+     * No endpoint with that id in this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The `Idempotency-Key` was used with a different body (`idempotency_key_reused`),
+     * or the first request with it is still in progress (`idempotency_in_progress`,
+     * retryable, with `Retry-After`).
+     *
+     */
+    409: ProblemDetails;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
+     */
+    500: ProblemDetails;
+};
+
+export type DeleteWebhookEndpointError = DeleteWebhookEndpointErrors[keyof DeleteWebhookEndpointErrors];
+
+export type DeleteWebhookEndpointResponses = {
+    /**
+     * Removed.
+     */
+    200: WebhookEndpointDeletionEnvelope;
+};
+
+export type DeleteWebhookEndpointResponse = DeleteWebhookEndpointResponses[keyof DeleteWebhookEndpointResponses];
+
+export type UpdateWebhookEndpointData = {
+    body: WebhookEndpointUpdateRequest;
+    headers: {
+        /**
+         * Your identifier for this write, so a retry cannot register or change an
+         * endpoint twice. Reuse it only to repeat the identical request. Kept for 24
+         * hours.
+         *
+         */
+        'Idempotency-Key': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/webhook-endpoints/{id}';
+};
+
+export type UpdateWebhookEndpointErrors = {
+    /**
+     * Invalid request — a `url` that is not absolute HTTPS on a public address, no
+     * events, an unknown event, or a missing `Idempotency-Key`. `code` says which.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing, invalid or inactive API key.
+     */
+    401: ProblemDetails;
+    /**
+     * The key cannot manage webhook endpoints. `webhook.scope_required`: it lacks
+     * `webhooks.manage` (or `*`). `webhook.production_key_required`: it is not a
+     * production key — endpoints receive production events only.
+     *
+     */
+    403: ProblemDetails;
+    /**
+     * No endpoint with that id in this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The `Idempotency-Key` was used with a different body (`idempotency_key_reused`),
+     * or the first request with it is still in progress (`idempotency_in_progress`,
+     * retryable, with `Retry-After`).
+     *
+     */
+    409: ProblemDetails;
+    /**
+     * Over 50 requests in the current 1-minute window for this key.
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
+     */
+    500: ProblemDetails;
+};
+
+export type UpdateWebhookEndpointError = UpdateWebhookEndpointErrors[keyof UpdateWebhookEndpointErrors];
+
+export type UpdateWebhookEndpointResponses = {
+    /**
+     * Replaced.
+     */
+    200: WebhookEndpointEnvelope;
+};
+
+export type UpdateWebhookEndpointResponse = UpdateWebhookEndpointResponses[keyof UpdateWebhookEndpointResponses];
 
 export type ListPortalFormsData = {
     body?: never;
