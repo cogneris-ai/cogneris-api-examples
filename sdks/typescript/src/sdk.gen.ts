@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, DownloadArtifactData, DownloadArtifactErrors, DownloadArtifactResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, UploadArtifactData, UploadArtifactErrors, UploadArtifactResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
+import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CreateWebhookEndpointData, CreateWebhookEndpointErrors, CreateWebhookEndpointResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, DeleteWebhookEndpointData, DeleteWebhookEndpointErrors, DeleteWebhookEndpointResponses, DownloadArtifactData, DownloadArtifactErrors, DownloadArtifactResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWebhookEndpointsData, ListWebhookEndpointsErrors, ListWebhookEndpointsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, UpdateWebhookEndpointData, UpdateWebhookEndpointErrors, UpdateWebhookEndpointResponses, UploadArtifactData, UploadArtifactErrors, UploadArtifactResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -198,6 +198,19 @@ export const submitDocumentJob = <ThrowOnError extends boolean = false>(options:
 });
 
 /**
+ * List finished templates
+ *
+ * Returns only finished templates belonging to the API key's tenant. Use an id from
+ * this list as `templateId` when submitting an asynchronous Extraction job.
+ *
+ */
+export const listTemplates = <ThrowOnError extends boolean = false>(options?: Options<ListTemplatesData, ThrowOnError>): RequestResult<ListTemplatesResponses, ListTemplatesErrors, ThrowOnError> => (options?.client ?? client).get<ListTemplatesResponses, ListTemplatesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/templates',
+    ...options
+});
+
+/**
  * Get a document job
  */
 export const getDocumentJob = <ThrowOnError extends boolean = false>(options: Options<GetDocumentJobData, ThrowOnError>): RequestResult<GetDocumentJobResponses, GetDocumentJobErrors, ThrowOnError> => (options.client ?? client).get<GetDocumentJobResponses, GetDocumentJobErrors, ThrowOnError>({
@@ -213,6 +226,73 @@ export const cancelDocumentJob = <ThrowOnError extends boolean = false>(options:
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/document-jobs/{jobId}/cancel',
     ...options
+});
+
+/**
+ * List webhook endpoints
+ *
+ * Every endpoint registered for the tenant. A signing secret is never returned
+ * here — only by the create, and by an update that changed the `url`. The
+ * custom `headers` are returned, which is why listing needs the same scope as
+ * writing.
+ *
+ */
+export const listWebhookEndpoints = <ThrowOnError extends boolean = false>(options?: Options<ListWebhookEndpointsData, ThrowOnError>): RequestResult<ListWebhookEndpointsResponses, ListWebhookEndpointsErrors, ThrowOnError> => (options?.client ?? client).get<ListWebhookEndpointsResponses, ListWebhookEndpointsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/webhook-endpoints',
+    ...options
+});
+
+/**
+ * Register a webhook endpoint
+ *
+ * Registers an endpoint and returns its signing secret. **This is the only
+ * time the secret is shown** — store it before you close the response.
+ *
+ * `Idempotency-Key` is required. Repeating the request with the same key and
+ * body returns the same endpoint and the same secret, with
+ * `Idempotency-Replayed: true`; the same key with a different body answers
+ * `409`.
+ *
+ */
+export const createWebhookEndpoint = <ThrowOnError extends boolean = false>(options: Options<CreateWebhookEndpointData, ThrowOnError>): RequestResult<CreateWebhookEndpointResponses, CreateWebhookEndpointErrors, ThrowOnError> => (options.client ?? client).post<CreateWebhookEndpointResponses, CreateWebhookEndpointErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/webhook-endpoints',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Remove a webhook endpoint
+ */
+export const deleteWebhookEndpoint = <ThrowOnError extends boolean = false>(options: Options<DeleteWebhookEndpointData, ThrowOnError>): RequestResult<DeleteWebhookEndpointResponses, DeleteWebhookEndpointErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWebhookEndpointResponses, DeleteWebhookEndpointErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/webhook-endpoints/{id}',
+    ...options
+});
+
+/**
+ * Replace a webhook endpoint
+ *
+ * Replaces every field. **Changing `url` rotates the signing secret**, and the
+ * new one is returned as `data.secret` on this response only. Deliveries already
+ * in flight were signed with the old secret, so accept both until they drain.
+ * An update that keeps the `url` keeps the secret and returns `secret: null`.
+ *
+ * `Idempotency-Key` is required, with the same replay rules as the create.
+ *
+ */
+export const updateWebhookEndpoint = <ThrowOnError extends boolean = false>(options: Options<UpdateWebhookEndpointData, ThrowOnError>): RequestResult<UpdateWebhookEndpointResponses, UpdateWebhookEndpointErrors, ThrowOnError> => (options.client ?? client).put<UpdateWebhookEndpointResponses, UpdateWebhookEndpointErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/webhook-endpoints/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**

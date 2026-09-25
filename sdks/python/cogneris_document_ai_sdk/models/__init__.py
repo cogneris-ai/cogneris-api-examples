@@ -46,7 +46,26 @@ from .service_error_envelope_data_type_0 import ServiceErrorEnvelopeDataType0
 from .service_response_meta import ServiceResponseMeta
 from .split_document_body import SplitDocumentBody
 from .submit_document_job_body import SubmitDocumentJobBody
+from .template import Template
+from .template_list import TemplateList
+from .template_list_envelope import TemplateListEnvelope
+from .template_status import TemplateStatus
 from .upload_artifact_body import UploadArtifactBody
+from .webhook_endpoint import WebhookEndpoint
+from .webhook_endpoint_create_request import WebhookEndpointCreateRequest
+from .webhook_endpoint_create_request_headers_type_0 import WebhookEndpointCreateRequestHeadersType0
+from .webhook_endpoint_created import WebhookEndpointCreated
+from .webhook_endpoint_created_envelope import WebhookEndpointCreatedEnvelope
+from .webhook_endpoint_deletion import WebhookEndpointDeletion
+from .webhook_endpoint_deletion_envelope import WebhookEndpointDeletionEnvelope
+from .webhook_endpoint_envelope import WebhookEndpointEnvelope
+from .webhook_endpoint_environment import WebhookEndpointEnvironment
+from .webhook_endpoint_headers_type_0 import WebhookEndpointHeadersType0
+from .webhook_endpoint_list import WebhookEndpointList
+from .webhook_endpoint_list_envelope import WebhookEndpointListEnvelope
+from .webhook_endpoint_update_request import WebhookEndpointUpdateRequest
+from .webhook_endpoint_update_request_headers_type_0 import WebhookEndpointUpdateRequestHeadersType0
+from .webhook_event import WebhookEvent
 from .zero_shot_document_body import ZeroShotDocumentBody
 
 __all__ = (
@@ -96,6 +115,25 @@ __all__ = (
     "ServiceResponseMeta",
     "SplitDocumentBody",
     "SubmitDocumentJobBody",
+    "Template",
+    "TemplateList",
+    "TemplateListEnvelope",
+    "TemplateStatus",
     "UploadArtifactBody",
+    "WebhookEndpoint",
+    "WebhookEndpointCreated",
+    "WebhookEndpointCreatedEnvelope",
+    "WebhookEndpointCreateRequest",
+    "WebhookEndpointCreateRequestHeadersType0",
+    "WebhookEndpointDeletion",
+    "WebhookEndpointDeletionEnvelope",
+    "WebhookEndpointEnvelope",
+    "WebhookEndpointEnvironment",
+    "WebhookEndpointHeadersType0",
+    "WebhookEndpointList",
+    "WebhookEndpointListEnvelope",
+    "WebhookEndpointUpdateRequest",
+    "WebhookEndpointUpdateRequestHeadersType0",
+    "WebhookEvent",
     "ZeroShotDocumentBody",
 )

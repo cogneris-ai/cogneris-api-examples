@@ -21,6 +21,10 @@ class DocumentJob:
         job_id (Union[Unset, UUID]):
         operation (Union[Unset, DocumentJobOperation]):
         status (Union[Unset, DocumentJobStatus]):
+        template_id (Union[None, UUID, Unset]): The finished extraction template explicitly selected when the job was
+            submitted. Null when the job did not use a template. Obtain available ids
+            from `GET /api/v1/templates`; synchronous `/Document/*` endpoints always
+            select a tenant template from the document and do not take this parameter.
         output_reference (Union[None, Unset, str]): Where the finished result is stored, as an `artifact://` reference.
             Read it
             with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
@@ -59,6 +63,7 @@ class DocumentJob:
     job_id: Union[Unset, UUID] = UNSET
     operation: Union[Unset, DocumentJobOperation] = UNSET
     status: Union[Unset, DocumentJobStatus] = UNSET
+    template_id: Union[None, UUID, Unset] = UNSET
     output_reference: Union[None, Unset, str] = UNSET
     stage: Union[None, Unset, str] = UNSET
     processed_pages: Union[None, Unset, int] = UNSET
@@ -85,6 +90,14 @@ class DocumentJob:
         status: Union[Unset, str] = UNSET
         if not isinstance(self.status, Unset):
             status = self.status.value
+
+        template_id: Union[None, Unset, str]
+        if isinstance(self.template_id, Unset):
+            template_id = UNSET
+        elif isinstance(self.template_id, UUID):
+            template_id = str(self.template_id)
+        else:
+            template_id = self.template_id
 
         output_reference: Union[None, Unset, str]
         if isinstance(self.output_reference, Unset):
@@ -163,6 +176,8 @@ class DocumentJob:
             field_dict["operation"] = operation
         if status is not UNSET:
             field_dict["status"] = status
+        if template_id is not UNSET:
+            field_dict["templateId"] = template_id
         if output_reference is not UNSET:
             field_dict["outputReference"] = output_reference
         if stage is not UNSET:
@@ -213,6 +228,23 @@ class DocumentJob:
             status = UNSET
         else:
             status = DocumentJobStatus(_status)
+
+        def _parse_template_id(data: object) -> Union[None, UUID, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                template_id_type_0 = UUID(data)
+
+                return template_id_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, UUID, Unset], data)
+
+        template_id = _parse_template_id(d.pop("templateId", UNSET))
 
         def _parse_output_reference(data: object) -> Union[None, Unset, str]:
             if data is None:
@@ -334,6 +366,7 @@ class DocumentJob:
             job_id=job_id,
             operation=operation,
             status=status,
+            template_id=template_id,
             output_reference=output_reference,
             stage=stage,
             processed_pages=processed_pages,

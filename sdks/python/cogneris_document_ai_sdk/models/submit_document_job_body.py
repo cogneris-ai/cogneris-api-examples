@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar, Union, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -20,17 +20,17 @@ class SubmitDocumentJobBody:
             is the only way to obtain one, and it can back more than one job
             until it expires.
              Example: artifact://uploads/9f2c1b7a4d8e4f06b1a25c3e7d9f0a11/invoice.pdf.
-        template_id (Union[Unset, UUID]): Optional, Extraction only. The id of one of your tenant's finished
-            templates; its schema drives the extraction instead of the template
-            the platform would select from the document. Any other operation
-            rejects the submit when this is set. An id the platform cannot resolve
-            to a finished template of yours is rejected; the job never falls back
-            to a generic extraction without the schema you asked for.
+        template_id (Union[None, UUID, Unset]): Extraction only: the id of one of your tenant's finished templates,
+            whose schema drives the extraction. Omit it and the platform picks the
+            template from the document, as the synchronous endpoint does. Sent with
+            any other operation, the job is refused with `400`. An id the platform
+            cannot resolve to a finished template of yours is refused too; the job
+            never falls back to a generic extraction without the schema you asked for.
     """
 
     operation: DocumentJobSubmitOperation
     input_reference: str
-    template_id: Union[Unset, UUID] = UNSET
+    template_id: Union[None, UUID, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -38,9 +38,13 @@ class SubmitDocumentJobBody:
 
         input_reference = self.input_reference
 
-        template_id: Union[Unset, str] = UNSET
-        if not isinstance(self.template_id, Unset):
+        template_id: Union[None, Unset, str]
+        if isinstance(self.template_id, Unset):
+            template_id = UNSET
+        elif isinstance(self.template_id, UUID):
             template_id = str(self.template_id)
+        else:
+            template_id = self.template_id
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -62,12 +66,22 @@ class SubmitDocumentJobBody:
 
         input_reference = d.pop("inputReference")
 
-        _template_id = d.pop("templateId", UNSET)
-        template_id: Union[Unset, UUID]
-        if isinstance(_template_id, Unset):
-            template_id = UNSET
-        else:
-            template_id = UUID(_template_id)
+        def _parse_template_id(data: object) -> Union[None, UUID, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                template_id_type_0 = UUID(data)
+
+                return template_id_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, UUID, Unset], data)
+
+        template_id = _parse_template_id(d.pop("templateId", UNSET))
 
         submit_document_job_body = cls(
             operation=operation,
