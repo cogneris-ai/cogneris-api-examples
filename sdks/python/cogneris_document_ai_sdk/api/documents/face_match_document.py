@@ -8,6 +8,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.envelope import Envelope
 from ...models.face_match_document_body import FaceMatchDocumentBody
 from ...models.problem_details import ProblemDetails
+from ...models.service_error_envelope import ServiceErrorEnvelope
 from ...types import Response
 
 
@@ -30,7 +31,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, Envelope, ProblemDetails]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     if response.status_code == 200:
         response_200 = Envelope.from_dict(response.json())
 
@@ -79,6 +80,21 @@ def _parse_response(
 
         return response_500
 
+    if response.status_code == 502:
+        response_502 = ServiceErrorEnvelope.from_dict(response.json())
+
+        return response_502
+
+    if response.status_code == 503:
+        response_503 = ServiceErrorEnvelope.from_dict(response.json())
+
+        return response_503
+
+    if response.status_code == 504:
+        response_504 = ServiceErrorEnvelope.from_dict(response.json())
+
+        return response_504
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -87,7 +103,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, Envelope, ProblemDetails]]:
+) -> Response[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -100,7 +116,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Response[Union[Any, Envelope, ProblemDetails]]:
+) -> Response[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Match a selfie against identity documents
 
     Args:
@@ -111,7 +127,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Envelope, ProblemDetails]]
+        Response[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -129,7 +145,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Optional[Union[Any, Envelope, ProblemDetails]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Match a selfie against identity documents
 
     Args:
@@ -140,7 +156,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, Envelope, ProblemDetails]
+        Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return sync_detailed(
@@ -153,7 +169,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Response[Union[Any, Envelope, ProblemDetails]]:
+) -> Response[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Match a selfie against identity documents
 
     Args:
@@ -164,7 +180,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Envelope, ProblemDetails]]
+        Response[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]
     """
 
     kwargs = _get_kwargs(
@@ -180,7 +196,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: FaceMatchDocumentBody,
-) -> Optional[Union[Any, Envelope, ProblemDetails]]:
+) -> Optional[Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]]:
     """Match a selfie against identity documents
 
     Args:
@@ -191,7 +207,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, Envelope, ProblemDetails]
+        Union[Any, Envelope, ProblemDetails, ServiceErrorEnvelope]
     """
 
     return (
