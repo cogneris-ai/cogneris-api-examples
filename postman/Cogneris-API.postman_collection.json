@@ -732,6 +732,210 @@
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "extraction"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document to extract from.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "Free-text instruction appended to the model prompt. Use it to ask\nfor extra fields, enforce formatting, or narrow the scope.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "ComplementaryPrompt",
+                          "value": "<string>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
                 }
               ],
               "event": [],
@@ -1380,6 +1584,186 @@
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "classifier"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) One or more files to classify.",
+                            "type": "text/plain"
+                          },
+                          "key": "files",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
                 }
               ],
               "event": [],
@@ -2015,6 +2399,183 @@
                     }
                   ],
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "zero-shot"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 }
@@ -2654,6 +3215,183 @@
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "crop"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
                 }
               ],
               "event": [],
@@ -3289,6 +4027,183 @@
                     }
                   ],
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "split"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) ",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 }
@@ -4024,6 +4939,210 @@
                   "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": {\n        \"key_0\": \"<string>\"\n      }\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Gateway",
+                  "code": 502,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Service Unavailable",
+                  "code": 503,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "Document",
+                        "facematch"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": {
+                          "content": "Added as a part of security scheme: bearer",
+                          "type": "text/plain"
+                        },
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The selfie to compare.",
+                            "type": "text/plain"
+                          },
+                          "key": "selfie",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "(Required) One or more identity documents to compare against.",
+                            "type": "text/plain"
+                          },
+                          "key": "documents",
+                          "value": "<binary>,<binary>",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Gateway Timeout",
+                  "code": 504,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
                 }
               ],
               "event": [],
@@ -4744,7 +5863,67 @@
                       "_postman_previewlanguage": "json"
                     },
                     {
-                      "name": "Document admission is temporarily unavailable. Marked retryable — back\noff and upload again.",
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "artifacts"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document a job will consume. Same accepted extensions and the\nsame 10 MB limit as the synchronous endpoints.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Bad Gateway",
+                      "code": 502,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
                       "originalRequest": {
                         "url": {
                           "path": [
@@ -4793,6 +5972,66 @@
                       },
                       "status": "Service Unavailable",
                       "code": 503,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": 8477,\n    \"key_1\": \"string\",\n    \"key_2\": false\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "artifacts"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document a job will consume. Same accepted extensions and the\nsame 10 MB limit as the synchronous endpoints.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Gateway Timeout",
+                      "code": 504,
                       "header": [
                         {
                           "key": "Content-Type",
@@ -5778,7 +7017,7 @@
                       "_postman_previewlanguage": "json"
                     },
                     {
-                      "name": "The requested extraction template cannot be used for this job.\n`template_unknown` means the id is not a finished template in the API\nkey's tenant; `template_not_applicable` means the finished template does\nnot apply to the submitted job.",
+                      "name": "The requested extraction template cannot be used for this job.\n`template_unknown` means the id is not a finished template in the API\nkey's tenant; `template_not_applicable` means a nonzero template id was\nsupplied for an operation other than Extraction.",
                       "originalRequest": {
                         "url": {
                           "path": [

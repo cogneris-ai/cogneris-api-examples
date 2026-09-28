@@ -784,6 +784,30 @@ export type ExtractDocumentErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type ExtractDocumentError = ExtractDocumentErrors[keyof ExtractDocumentErrors];
@@ -860,6 +884,30 @@ export type ClassifyDocumentsErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type ClassifyDocumentsError = ClassifyDocumentsErrors[keyof ClassifyDocumentsErrors];
@@ -931,6 +979,30 @@ export type ZeroShotDocumentErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type ZeroShotDocumentError = ZeroShotDocumentErrors[keyof ZeroShotDocumentErrors];
@@ -1002,6 +1074,30 @@ export type CropDocumentErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type CropDocumentError = CropDocumentErrors[keyof CropDocumentErrors];
@@ -1073,6 +1169,30 @@ export type SplitDocumentErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type SplitDocumentError = SplitDocumentErrors[keyof SplitDocumentErrors];
@@ -1153,6 +1273,30 @@ export type FaceMatchDocumentErrors = {
      *
      */
     500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type FaceMatchDocumentError = FaceMatchDocumentErrors[keyof FaceMatchDocumentErrors];
@@ -1238,11 +1382,29 @@ export type UploadArtifactErrors = {
      */
     500: ProblemDetails;
     /**
-     * Document admission is temporarily unavailable. Marked retryable — back
-     * off and upload again.
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
      *
      */
     503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
 };
 
 export type UploadArtifactError = UploadArtifactErrors[keyof UploadArtifactErrors];
@@ -1388,10 +1550,7 @@ export type ListDocumentJobsResponse = ListDocumentJobsResponses[keyof ListDocum
 export type SubmitDocumentJobData = {
     body: {
         /**
-         * The work to run. A finished classifier is a published, immutable
-         * template version: updates are rejected, and a changed definition must
-         * be published as a new classifier with a new id.
-         *
+         * The work to run.
          */
         operation: DocumentJobSubmitOperation;
         /**
@@ -1403,11 +1562,17 @@ export type SubmitDocumentJobData = {
         inputReference: string;
         /**
          * Extraction only: the id of one of your tenant's finished templates,
-         * whose schema drives the extraction. Omit it and the platform picks the
-         * template from the document, as the synchronous endpoint does. Sent with
-         * any other operation, the job is refused with `400`. An id the platform
-         * cannot resolve to a finished template of yours is refused too; the job
+         * whose schema drives the extraction. A finished classifier is a published, immutable
+         * template addressed by its id: updates and deletion are rejected by the
+         * classifier endpoints. Publish a changed definition as a new classifier with a new id.
+         * Omit it and the platform picks the template from the document, as the
+         * synchronous endpoint does. A nonzero id sent with any other operation is
+         * refused with `422` and `template_not_applicable`. An unknown id, another
+         * tenant's id, or an unfinished template is refused with `422` and
+         * `template_unknown`. An all-zero UUID is treated as omitted. The job
          * never falls back to a generic extraction without the schema you asked for.
+         * If the selected template cannot be resolved during processing, the job
+         * fails with `template_unresolved` and `retryable: false`.
          *
          */
         templateId?: string | null;
@@ -1446,8 +1611,8 @@ export type SubmitDocumentJobErrors = {
     /**
      * The requested extraction template cannot be used for this job.
      * `template_unknown` means the id is not a finished template in the API
-     * key's tenant; `template_not_applicable` means the finished template does
-     * not apply to the submitted job.
+     * key's tenant; `template_not_applicable` means a nonzero template id was
+     * supplied for an operation other than Extraction.
      *
      */
     422: ServiceErrorEnvelope;
