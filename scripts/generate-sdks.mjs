@@ -176,6 +176,10 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
     }
     await fs.writeFile(projectPath, project);
   } else if (sdkName === "java") {
+    const jacksonVersion = generators.java.jacksonVersion;
+    if (!/^\d+\.\d+\.\d+$/.test(jacksonVersion ?? "")) {
+      throw new Error("generated Java Jackson dependency must have a pinned version");
+    }
     const buildPath = path.join(outputPath, "build.gradle");
     let build = await fs.readFile(buildPath, "utf8");
     if (build.split("JavaVersion.VERSION_11").length !== 3) {
@@ -227,6 +231,11 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
                     url = 'https://github.com/cogneris-ai/cogneris-api-examples'
                 }
             }`);
+    const gradleJacksonVersion = /^(\s*jackson_version\s*=\s*")[^"]+("\s*)$/m;
+    if (!gradleJacksonVersion.test(build)) {
+      throw new Error("generated Java Gradle Jackson version template changed");
+    }
+    build = build.replace(gradleJacksonVersion, `$1${jacksonVersion}$2`);
     await fs.writeFile(buildPath, build);
     const pomPath = path.join(outputPath, "pom.xml");
     let pom = await fs.readFile(pomPath, "utf8");
@@ -264,6 +273,11 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
       }
       pom = pom.replace(generated, approved);
     }
+    const pomJacksonVersion = /(<jackson-version>)[^<]+(<\/jackson-version>)/;
+    if (!pomJacksonVersion.test(pom)) {
+      throw new Error("generated Java Maven Jackson version template changed");
+    }
+    pom = pom.replace(pomJacksonVersion, `$1${jacksonVersion}$2`);
     await fs.writeFile(pomPath, pom);
     const wrapperPath = path.join(outputPath, "gradle", "wrapper", "gradle-wrapper.properties");
     const wrapper = await fs.readFile(wrapperPath, "utf8");
@@ -329,7 +343,7 @@ async function normalizeGeneratedText(directory) {
   }
 }
 
-async function validatePackages(stagedOutput) {
+async function validatePackages(stagedOutput, generators) {
   const typescriptPackage = await readJson(
     path.join(stagedOutput, "typescript", "package.json"),
   );
@@ -395,10 +409,17 @@ async function validatePackages(stagedOutput) {
   if (!/<requireJavaVersion>\s*<version>17<\/version>\s*<\/requireJavaVersion>/.test(javaPom)) {
     throw new Error("generated Java POM must enforce Java 17");
   }
+  const jacksonVersion = generators.java.jacksonVersion;
+  if (!javaPom.includes(`<jackson-version>${jacksonVersion}</jackson-version>`)) {
+    throw new Error("generated Java Maven dependencies must use the pinned Jackson version");
+  }
   await fs.access(path.join(stagedOutput, "java", "src", "main", "java", "ai", "cogneris", "documentai", "ApiClient.java"));
   const javaBuild = await fs.readFile(path.join(stagedOutput, "java", "build.gradle"), "utf8");
   if (javaBuild.split("JavaVersion.VERSION_17").length !== 3 || javaBuild.includes("JavaVersion.VERSION_11")) {
     throw new Error("generated Java runtime targets must both be Java 17");
+  }
+  if (!javaBuild.includes(`jackson_version = "${jacksonVersion}"`)) {
+    throw new Error("generated Java Gradle dependencies must use the pinned Jackson version");
   }
 
   for (const sdkName of ["typescript", "python", "csharp", "java"]) {
@@ -564,7 +585,7 @@ async function main() {
 
     await applyApprovedLicense(stagedOutput);
 
-    await validatePackages(stagedOutput);
+    await validatePackages(stagedOutput, generators);
     const manifest = {
       schemaVersion: 1,
       source: {
