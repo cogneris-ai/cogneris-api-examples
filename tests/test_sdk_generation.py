@@ -136,6 +136,7 @@ class SdkGenerationTests(unittest.TestCase):
                 "java": {
                     "package": "openapi-generator-cli",
                     "version": "7.25.0",
+                    "jacksonVersion": "2.21.6",
                     "runtime": {"package": "jdk4py", "version": "17.0.9.2"},
                     "gradle": {
                         "version": "8.14.5",

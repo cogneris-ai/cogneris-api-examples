@@ -16,24 +16,38 @@ steps:
       - |
         set +e
         mkdir -p .compliance-evidence
-        {
-          echo "xTrakt secret pattern scan (Cloud Build)"
-          echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          echo "Service: ${_SERVICE_NAME}"
-          echo "Commit: $COMMIT_SHA"
-        } > .compliance-evidence/secret-scan.txt
+
         git grep -nE \
           '(BEGIN (RSA |DSA |EC |OPENSSH )?PRIVATE KEY|sk-[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{20,})' \
           -- ':!**/package-lock.json' ':!**/node_modules/**' \
-          >> .compliance-evidence/secret-scan.txt
-        scan_exit=$$?
-        echo "git_grep_exit=$$scan_exit" >> .compliance-evidence/secret-scan.txt
-        if [ "$$scan_exit" -eq 0 ]; then
-          echo true > .compliance-evidence/.secret-scan-failed
-        else
-          echo false > .compliance-evidence/.secret-scan-failed
-        fi
+          2>/dev/null | wc -l > .compliance-evidence/.secret-scan-matched-line-count
 
+        scan_pipeline_status=( "$${PIPESTATUS[@]}" )
+        scan_exit="$${scan_pipeline_status[0]:-2}"
+        count_exit="$${scan_pipeline_status[1]:-2}"
+        matched_line_count="$$(< .compliance-evidence/.secret-scan-matched-line-count)"
+        matched_line_count="$${matched_line_count//[[:space:]]/}"
+        scan_status=error
+        scan_failed=true
+        if [ "$$count_exit" -eq 0 ] && [[ "$$matched_line_count" =~ ^[0-9]+$$ ]]; then
+          if [ "$$scan_exit" -eq 0 ]; then
+            scan_status=findings
+          elif [ "$$scan_exit" -eq 1 ] && [ "$$matched_line_count" -eq 0 ]; then
+            scan_status=clean
+            scan_failed=false
+          fi
+        fi
+        {
+          echo "Cogneris secret pattern scan (Cloud Build)"
+          echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Service: ${_SERVICE_NAME}"
+          echo "Commit: $COMMIT_SHA"
+          echo "secret_scan_status=$$scan_status"
+          echo "matched_line_count=$$matched_line_count"
+          echo "git_grep_exit=$$scan_exit"
+        } > .compliance-evidence/secret-scan.txt
+        echo "$$scan_failed" > .compliance-evidence/.secret-scan-failed
+        rm -f .compliance-evidence/.secret-scan-matched-line-count
   - id: npm-audit
     name: node:24-alpine
     entrypoint: sh

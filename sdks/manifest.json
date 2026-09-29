@@ -27,6 +27,7 @@
     "java": {
       "package": "openapi-generator-cli",
       "version": "7.25.0",
+      "jacksonVersion": "2.21.6",
       "runtime": {
         "package": "jdk4py",
         "version": "17.0.9.2"
@@ -135,7 +136,7 @@
       "name": "ai.cogneris:cogneris-document-ai-sdk",
       "version": "0.2.0",
       "files": {
-        "build.gradle": "743009102dc4ab55f31b7525ca4606a961d673bbbb6ce243b2f6a867eead18dc",
+        "build.gradle": "58eaad960123824e94e77eadf128a70b55c4a80caad611a625a73512f680236d",
         "gradle/wrapper/gradle-wrapper.jar": "cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8",
         "gradle/wrapper/gradle-wrapper.properties": "5f23b090b2d8ba9b2affdacb735a892fe95e906ed05669a562d390fa6c3c67a7",
         "gradle.properties": "5b1ba6ab64d9629afbbf2a851ff460cd43acba63f1ab32f36822bb3dfbaef374",
@@ -143,7 +144,7 @@
         "gradlew.bat": "95e8ae8e8a256a2f066cdd745d56f7a3fc87aa058a2e4beb483300db7171bd1f",
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
-        "pom.xml": "b7a65736f889e7a625ea9ca77f39cde0a0159fd0b632aace565bad8a7f261a2a",
+        "pom.xml": "e63614f84f94b4854d65a2892423949cca5eb375c425d706a2e83cbb18dcbf90",
         "README.md": "079bc6bc13fe8282e7c1e5ededc803d1dbc98dfde87839105106da244e8cdbcf",
         "settings.gradle": "ae626ed1e338312b81ddfc5efc61570e109ffb1c1f71b864b7c4f56b62f8e365",
         "src/main/AndroidManifest.xml": "d69604f63dc342c761749def4fea6544c2a31e3338fe95b46ee86851f036b6b5",
