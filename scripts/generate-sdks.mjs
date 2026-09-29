@@ -11,6 +11,8 @@ const configDirectory = path.join(root, "scripts", "sdk-config");
 const overlayDirectory = path.join(root, "scripts", "sdk-overlays");
 const sourcePath = path.join(root, "openapi", "cogneris-openapi.yaml");
 const committedOutput = path.join(root, "sdks");
+// Floor for the Java SDK's Jackson runtime; see the CVE note in normalizeOpenApiSdk.
+const JAVA_JACKSON_VERSION = "2.21.6";
 
 const arguments_ = process.argv.slice(2);
 if (arguments_.length > 1 || (arguments_.length === 1 && arguments_[0] !== "--check")) {
@@ -227,6 +229,14 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
                     url = 'https://github.com/cogneris-ai/cogneris-api-examples'
                 }
             }`);
+    // CVE-2026-68497 (jackson-databind CPU DoS, fixed in 2.21.6): the pinned
+    // generator's template still emits 2.21.5. An exact match keeps a future
+    // generator bump from silently replacing this floor with its own value.
+    const generatedJackson = 'jackson_version = "2.21.5"';
+    if (build.split(generatedJackson).length !== 2) {
+      throw new Error(`generated Java Jackson version changed: ${generatedJackson}`);
+    }
+    build = build.replace(generatedJackson, `jackson_version = "${JAVA_JACKSON_VERSION}"`);
     await fs.writeFile(buildPath, build);
     const pomPath = path.join(outputPath, "pom.xml");
     let pom = await fs.readFile(pomPath, "utf8");
@@ -264,6 +274,11 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
       }
       pom = pom.replace(generated, approved);
     }
+    const generatedPomJackson = "<jackson-version>2.21.5</jackson-version>";
+    if (pom.split(generatedPomJackson).length !== 2) {
+      throw new Error(`generated Java POM Jackson version changed: ${generatedPomJackson}`);
+    }
+    pom = pom.replace(generatedPomJackson, `<jackson-version>${JAVA_JACKSON_VERSION}</jackson-version>`);
     await fs.writeFile(pomPath, pom);
     const wrapperPath = path.join(outputPath, "gradle", "wrapper", "gradle-wrapper.properties");
     const wrapper = await fs.readFile(wrapperPath, "utf8");
