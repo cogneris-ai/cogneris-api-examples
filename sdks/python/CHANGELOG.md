@@ -2,7 +2,7 @@
 
 ## 0.2.0
 
-Generated from OpenAPI contract `2026-09-24` (was `2026-08-07`). Compatibility: additive, with one nullable widening. No operation, model, or field from 0.1.0 was removed or renamed. `ProblemDetailsErrorsItem.field` is now `Union[None, Unset, str]`, because the service sends `null` there.
+Generated from OpenAPI contract `2026-09-28` (was `2026-08-07`). Compatibility: additive, with two nullable widenings. No operation, model, or field from 0.1.0 was removed or renamed. `ProblemDetailsErrorsItem.field` is now `Union[None, Unset, str]`, because the service sends `null` there, and `SubmitDocumentJobBody.template_id` is now `Union[None, UUID, Unset]`.
 
 - Add the `artifacts` API: `upload_artifact` (`POST /api/v1/artifacts`) stores a job's input document and returns an `ArtifactUploadEnvelope` whose `Artifact.reference` is the `artifact://` value `submit_job` takes; `download_artifact` (`GET /api/v1/artifacts/content`) reads back the bytes of an upload or of a finished job's `output_reference`. New models: `Artifact`, `ArtifactUploadEnvelope`, `UploadArtifactBody` (XTRAK-1742, #33).
 - Add the `ExtractedField` model, which documents what each entry of `EnvelopeData.metadata` holds: `value`, `confidence` (0–100), and, when the value was located on the page, `page`, `bbox`, and `bbox_confidence` (0–100). `EnvelopeData.metadata` keeps its open `EnvelopeDataMetadata` type, whose entries still arrive in `additional_properties` exactly as before; `ExtractedField` and the docstrings describe them rather than retyping them (XTRAK-1744, #33).
@@ -11,6 +11,10 @@ Generated from OpenAPI contract `2026-09-24` (was `2026-08-07`). Compatibility: 
 - `SubmitDocumentJobBody` gains optional `template_id`, the finished template an `Extraction` job extracts with (XTRAK-1816, #37).
 - `CognerisClient` reports an error status whose body is not JSON as `CognerisApiError` with its `status`, as 0.1.0 did, instead of `CognerisResponseError` (XTRAK-1798, #37).
 - Docstrings now describe the per-field source-coordinate convention, the `artifact://` reference lifecycle, and `DocumentJob.output_reference` (XTRAK-1744, XTRAK-1742, #33).
+- Add the `templates` API: `list_templates` (`GET /api/v1/templates`) lists the tenant's finished templates, with the models `Template`, `TemplateList`, `TemplateListEnvelope` and `TemplateStatus`. `DocumentJob` gains `template_id`, the template the job was submitted with (XTRAK-1830, #42).
+- Add the `webhooks` API: `list_webhook_endpoints`, `create_webhook_endpoint`, `update_webhook_endpoint` and `delete_webhook_endpoint` (`/api/v1/webhook-endpoints`), with the `WebhookEndpoint*` models and the `WebhookEvent` enum (XTRAK-1830, #42).
+- The generated `submit_document_job` parses a `422` as `ServiceErrorEnvelope`, the response for a `template_id` the platform refuses (`template_not_applicable`, `template_unknown`) (XTRAK-1830, #42; XTRAK-1859, #43).
+- `upload_artifact` and the synchronous `/Document/*` operations (classify, crop, extract, facematch, split, zero-shot) parse `502`, `503` and `504` as `ServiceErrorEnvelope` (XTRAK-1859, #43).
 
 ## 0.1.0
 
