@@ -19,7 +19,6 @@ from .document_job_status import DocumentJobStatus
 from .document_job_submission import DocumentJobSubmission
 from .document_job_submission_envelope import DocumentJobSubmissionEnvelope
 from .document_job_submit_operation import DocumentJobSubmitOperation
-from .document_job_submit_status import DocumentJobSubmitStatus
 from .envelope import Envelope
 from .envelope_data import EnvelopeData
 from .envelope_data_metadata import EnvelopeDataMetadata
@@ -88,7 +87,6 @@ __all__ = (
     "DocumentJobSubmission",
     "DocumentJobSubmissionEnvelope",
     "DocumentJobSubmitOperation",
-    "DocumentJobSubmitStatus",
     "Envelope",
     "EnvelopeData",
     "EnvelopeDataMetadata",

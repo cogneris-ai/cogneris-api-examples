@@ -21,14 +21,17 @@ class SubmitDocumentJobBody:
             until it expires.
              Example: artifact://uploads/9f2c1b7a4d8e4f06b1a25c3e7d9f0a11/invoice.pdf.
         template_id (Union[None, UUID, Unset]): Extraction only: the id of one of your tenant's finished templates,
-            whose schema drives the extraction. A finished classifier is a published, immutable
-            template addressed by its id: updates and deletion are rejected by the
-            classifier endpoints. Publish a changed definition as a new classifier with a new id.
-            Omit it and the platform picks the template from the document, as the
-            synchronous endpoint does. A nonzero id sent with any other operation is
-            refused with `422` and `template_not_applicable`. An unknown id, another
-            tenant's id, or an unfinished template is refused with `422` and
-            `template_unknown`. An all-zero UUID is treated as omitted. The job
+            whose schema drives the extraction. Templates are not versioned or
+            content-hashed. A template definition may change in place, so submits
+            with the same `templateId` can produce different results over time.
+            Deleting a finished template is allowed. A pending job may fail if its
+            selected template is deleted before processing can resolve it. Omit
+            `templateId` and the platform picks the template from the document, as
+            the synchronous endpoint does. A nonzero
+            id sent with any other operation is refused with `422` and
+            `template_not_applicable`. An unknown id, another tenant's id, or an
+            unfinished template is refused with `422` and `template_unknown`. An
+            all-zero UUID is treated as omitted. The job
             never falls back to a generic extraction without the schema you asked for.
             If the selected template cannot be resolved during processing, the job
             fails with `template_unresolved` and `retryable: false`.

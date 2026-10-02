@@ -515,7 +515,29 @@ paths:
         Queues a long-running operation. Answers `202` with a `Location` header
         pointing at the job and a `Retry-After` hint. Poll that URL, or subscribe to
         webhooks and let the completion event come to you.
+
+        Send a stable `Idempotency-Key` to make retries safe. Within the job's
+        7-day retention, a repeat with the same key and the same body returns the
+        **original** job instead of queuing a second one: the response is `202`
+        with `data.replayed: true` and an `Idempotent-Replayed: true` header, and
+        `data.status` is that job's current status. Keys are scoped to your tenant
+        and environment.
+        Reusing a key with a different body is rejected with `422`, and a repeat
+        that arrives while the first request is still being accepted gets `409`
+        and can be retried.
       operationId: submitDocumentJob
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+            pattern: '^[A-Za-z0-9._:-]+$'
+          description: |
+            Stable caller-supplied key that makes a retried submit resolve to the
+            job it first created. Use a new key for each distinct job.
       requestBody:
         required: true
         content:
@@ -540,14 +562,17 @@ paths:
                   format: uuid
                   description: |
                     Extraction only: the id of one of your tenant's finished templates,
-                    whose schema drives the extraction. A finished classifier is a published, immutable
-                    template addressed by its id: updates and deletion are rejected by the
-                    classifier endpoints. Publish a changed definition as a new classifier with a new id.
-                    Omit it and the platform picks the template from the document, as the
-                    synchronous endpoint does. A nonzero id sent with any other operation is
-                    refused with `422` and `template_not_applicable`. An unknown id, another
-                    tenant's id, or an unfinished template is refused with `422` and
-                    `template_unknown`. An all-zero UUID is treated as omitted. The job
+                    whose schema drives the extraction. Templates are not versioned or
+                    content-hashed. A template definition may change in place, so submits
+                    with the same `templateId` can produce different results over time.
+                    Deleting a finished template is allowed. A pending job may fail if its
+                    selected template is deleted before processing can resolve it. Omit
+                    `templateId` and the platform picks the template from the document, as
+                    the synchronous endpoint does. A nonzero
+                    id sent with any other operation is refused with `422` and
+                    `template_not_applicable`. An unknown id, another tenant's id, or an
+                    unfinished template is refused with `422` and `template_unknown`. An
+                    all-zero UUID is treated as omitted. The job
                     never falls back to a generic extraction without the schema you asked for.
                     If the selected template cannot be resolved during processing, the job
                     fails with `template_unresolved` and `retryable: false`.
@@ -561,17 +586,41 @@ paths:
             Retry-After:
               schema: { type: integer }
               description: Suggested seconds to wait before polling.
+            Idempotent-Replayed:
+              schema: { type: string, enum: ['true'] }
+              description: Present only when an `Idempotency-Key` matched an earlier submit.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentJobSubmissionEnvelope'
-        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
+        '400':
+          description: |
+            The request failed validation. A malformed `Idempotency-Key` is reported
+            with `errors[].code` `idempotency_key_invalid` and nothing is queued.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
-        '409': { $ref: '#/components/responses/Conflict' }
+        '409':
+          description: |
+            `errors[].code` is `idempotency_request_in_progress` (retryable) when a
+            request with the same key is still being accepted, or
+            `idempotency_replay_unavailable` when the job that key created is no
+            longer retained; submit again with a new key.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
         '422':
           description: |
+            `errors[].code` is `idempotency_key_conflict` when the key was already
+            used with a different `operation`, `inputReference` or `templateId`.
+
             The requested extraction template cannot be used for this job.
             `template_unknown` means the id is not a finished template in the API
             key's tenant; `template_not_applicable` means a nonzero template id was
@@ -620,7 +669,7 @@ paths:
         - name: cursor
           in: query
           required: false
-          schema: { type: string }
+          schema: { type: [string, 'null'] }
           description: The `nextCursor` returned by the preceding page.
       responses:
         '200':
@@ -1362,10 +1411,6 @@ components:
       type: string
       enum: [Queued, Processing, Succeeded, Failed, Cancelled]
 
-    DocumentJobSubmitStatus:
-      type: string
-      enum: [Queued]
-
     ServiceResponseMeta:
       type: object
       required: [httpStatusCode]
@@ -1448,12 +1493,19 @@ components:
 
     DocumentJobSubmission:
       type: object
-      required: [jobId, status, statusUrl, retryAfterSeconds]
+      required: [jobId, status, statusUrl, retryAfterSeconds, replayed]
       properties:
         jobId: { type: string, format: uuid }
-        status: { $ref: '#/components/schemas/DocumentJobSubmitStatus' }
+        status:
+          $ref: '#/components/schemas/DocumentJobStatus'
+          description: |
+            `Queued` for a newly accepted job. On an idempotent replay
+            (`replayed: true`) it is the original job's current status.
         statusUrl: { type: string }
         retryAfterSeconds: { type: integer }
+        replayed:
+          type: boolean
+          description: True when an `Idempotency-Key` matched an earlier submit and this is that job.
 
     DocumentJobList:
       type: object

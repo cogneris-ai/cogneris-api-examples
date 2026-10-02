@@ -105,6 +105,7 @@ before(async () => {
         status: "Queued",
         statusUrl: `/api/v1/document-jobs/${jobId}`,
         retryAfterSeconds: 0,
+        replayed: false,
       }), { "Retry-After": "0" });
       return;
     }

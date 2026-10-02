@@ -62,8 +62,6 @@ namespace Cogneris.DocumentAI.Client
             _jsonOptions.Converters.Add(new DocumentJobSubmissionEnvelopeJsonConverter());
             _jsonOptions.Converters.Add(new DocumentJobSubmitOperationJsonConverter());
             _jsonOptions.Converters.Add(new DocumentJobSubmitOperationNullableJsonConverter());
-            _jsonOptions.Converters.Add(new DocumentJobSubmitStatusJsonConverter());
-            _jsonOptions.Converters.Add(new DocumentJobSubmitStatusNullableJsonConverter());
             _jsonOptions.Converters.Add(new EnvelopeJsonConverter());
             _jsonOptions.Converters.Add(new EnvelopeDataJsonConverter());
             _jsonOptions.Converters.Add(new ExtractedFieldJsonConverter());

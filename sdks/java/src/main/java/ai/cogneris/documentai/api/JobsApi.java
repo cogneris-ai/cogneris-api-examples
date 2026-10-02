@@ -541,49 +541,53 @@ public class JobsApi {
 
   /**
    * Submit an asynchronous document job
-   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
    * @param submitDocumentJobRequest  (required)
+   * @param idempotencyKey Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)
    * @return DocumentJobSubmissionEnvelope
    * @throws ApiException if fails to make API call
    */
-  public DocumentJobSubmissionEnvelope submitDocumentJob(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest) throws ApiException {
-    return submitDocumentJob(submitDocumentJobRequest, null);
+  public DocumentJobSubmissionEnvelope submitDocumentJob(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
+    return submitDocumentJob(submitDocumentJobRequest, idempotencyKey, null);
   }
 
   /**
    * Submit an asynchronous document job
-   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
    * @param submitDocumentJobRequest  (required)
+   * @param idempotencyKey Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)
    * @param headers Optional headers to include in the request
    * @return DocumentJobSubmissionEnvelope
    * @throws ApiException if fails to make API call
    */
-  public DocumentJobSubmissionEnvelope submitDocumentJob(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, Map<String, String> headers) throws ApiException {
-    ApiResponse<DocumentJobSubmissionEnvelope> localVarResponse = submitDocumentJobWithHttpInfo(submitDocumentJobRequest, headers);
+  public DocumentJobSubmissionEnvelope submitDocumentJob(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, @javax.annotation.Nullable String idempotencyKey, Map<String, String> headers) throws ApiException {
+    ApiResponse<DocumentJobSubmissionEnvelope> localVarResponse = submitDocumentJobWithHttpInfo(submitDocumentJobRequest, idempotencyKey, headers);
     return localVarResponse.getData();
   }
 
   /**
    * Submit an asynchronous document job
-   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
    * @param submitDocumentJobRequest  (required)
+   * @param idempotencyKey Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)
    * @return ApiResponse&lt;DocumentJobSubmissionEnvelope&gt;
    * @throws ApiException if fails to make API call
    */
-  public ApiResponse<DocumentJobSubmissionEnvelope> submitDocumentJobWithHttpInfo(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest) throws ApiException {
-    return submitDocumentJobWithHttpInfo(submitDocumentJobRequest, null);
+  public ApiResponse<DocumentJobSubmissionEnvelope> submitDocumentJobWithHttpInfo(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
+    return submitDocumentJobWithHttpInfo(submitDocumentJobRequest, idempotencyKey, null);
   }
 
   /**
    * Submit an asynchronous document job
-   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+   * Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
    * @param submitDocumentJobRequest  (required)
+   * @param idempotencyKey Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)
    * @param headers Optional headers to include in the request
    * @return ApiResponse&lt;DocumentJobSubmissionEnvelope&gt;
    * @throws ApiException if fails to make API call
    */
-  public ApiResponse<DocumentJobSubmissionEnvelope> submitDocumentJobWithHttpInfo(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, Map<String, String> headers) throws ApiException {
-    HttpRequest.Builder localVarRequestBuilder = submitDocumentJobRequestBuilder(submitDocumentJobRequest, headers);
+  public ApiResponse<DocumentJobSubmissionEnvelope> submitDocumentJobWithHttpInfo(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, @javax.annotation.Nullable String idempotencyKey, Map<String, String> headers) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = submitDocumentJobRequestBuilder(submitDocumentJobRequest, idempotencyKey, headers);
     try {
       HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
           localVarRequestBuilder.build(),
@@ -630,7 +634,7 @@ public class JobsApi {
     }
   }
 
-  private HttpRequest.Builder submitDocumentJobRequestBuilder(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, Map<String, String> headers) throws ApiException {
+  private HttpRequest.Builder submitDocumentJobRequestBuilder(@javax.annotation.Nonnull SubmitDocumentJobRequest submitDocumentJobRequest, @javax.annotation.Nullable String idempotencyKey, Map<String, String> headers) throws ApiException {
     // verify the required parameter 'submitDocumentJobRequest' is set
     if (submitDocumentJobRequest == null) {
       throw new ApiException(400, "Missing the required parameter 'submitDocumentJobRequest' when calling submitDocumentJob");
@@ -642,6 +646,9 @@ public class JobsApi {
 
     localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
 
+    if (idempotencyKey != null) {
+      localVarRequestBuilder.header("Idempotency-Key", idempotencyKey.toString());
+    }
     localVarRequestBuilder.header("Content-Type", "application/json");
     localVarRequestBuilder.header("Accept", "application/json, application/problem+json");
 

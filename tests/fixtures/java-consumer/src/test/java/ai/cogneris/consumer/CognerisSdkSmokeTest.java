@@ -89,7 +89,7 @@ class CognerisSdkSmokeTest {
     }
     static String submission(int hint) {
         return envelope("{\"jobId\":\"" + JOB + "\",\"status\":\"Queued\",\"statusUrl\":\"/api/v1/document-jobs/"
-                + JOB + "\",\"retryAfterSeconds\":" + hint + "}");
+                + JOB + "\",\"retryAfterSeconds\":" + hint + ",\"replayed\":false}");
     }
     Path document() throws Exception {
         return Files.writeString(files.resolve("identity.pdf"), DOCUMENT);

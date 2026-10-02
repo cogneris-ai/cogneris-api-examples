@@ -5,7 +5,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.document_job_submit_status import DocumentJobSubmitStatus
+from ..models.document_job_status import DocumentJobStatus
 
 T = TypeVar("T", bound="DocumentJobSubmission")
 
@@ -15,15 +15,17 @@ class DocumentJobSubmission:
     """
     Attributes:
         job_id (UUID):
-        status (DocumentJobSubmitStatus):
+        status (DocumentJobStatus):
         status_url (str):
         retry_after_seconds (int):
+        replayed (bool): True when an `Idempotency-Key` matched an earlier submit and this is that job.
     """
 
     job_id: UUID
-    status: DocumentJobSubmitStatus
+    status: DocumentJobStatus
     status_url: str
     retry_after_seconds: int
+    replayed: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +37,8 @@ class DocumentJobSubmission:
 
         retry_after_seconds = self.retry_after_seconds
 
+        replayed = self.replayed
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -43,6 +47,7 @@ class DocumentJobSubmission:
                 "status": status,
                 "statusUrl": status_url,
                 "retryAfterSeconds": retry_after_seconds,
+                "replayed": replayed,
             }
         )
 
@@ -53,17 +58,20 @@ class DocumentJobSubmission:
         d = dict(src_dict)
         job_id = UUID(d.pop("jobId"))
 
-        status = DocumentJobSubmitStatus(d.pop("status"))
+        status = DocumentJobStatus(d.pop("status"))
 
         status_url = d.pop("statusUrl")
 
         retry_after_seconds = d.pop("retryAfterSeconds")
+
+        replayed = d.pop("replayed")
 
         document_job_submission = cls(
             job_id=job_id,
             status=status,
             status_url=status_url,
             retry_after_seconds=retry_after_seconds,
+            replayed=replayed,
         )
 
         document_job_submission.additional_properties = d

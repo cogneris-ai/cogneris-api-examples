@@ -51,7 +51,7 @@ public final class CognerisClient {
         if (operation == null || inputReference == null || inputReference.isBlank())
             throw new IllegalArgumentException("A job operation and input reference are required.");
         var request = new SubmitDocumentJobRequest().operation(operation).inputReference(inputReference);
-        var response = send(202, REQUEST_TIMEOUT, api -> new JobsApi(api).submitDocumentJobWithHttpInfo(request));
+        var response = send(202, REQUEST_TIMEOUT, api -> new JobsApi(api).submitDocumentJobWithHttpInfo(request, null));
         var envelope = response.getData();
         if (envelope == null || Boolean.TRUE.equals(envelope.getHasErrors()) || envelope.getData() == null
                 || envelope.getData().getJobId() == null)
