@@ -13,13 +13,18 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     limit: Union[Unset, int] = 50,
-    cursor: Union[Unset, str] = UNSET,
+    cursor: Union[None, Unset, str] = UNSET,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
     params["limit"] = limit
 
-    params["cursor"] = cursor
+    json_cursor: Union[None, Unset, str]
+    if isinstance(cursor, Unset):
+        json_cursor = UNSET
+    else:
+        json_cursor = cursor
+    params["cursor"] = json_cursor
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -96,7 +101,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 50,
-    cursor: Union[Unset, str] = UNSET,
+    cursor: Union[None, Unset, str] = UNSET,
 ) -> Response[Union[ProblemDetails, TemplateListEnvelope]]:
     """List finished templates
 
@@ -105,7 +110,7 @@ def sync_detailed(
 
     Args:
         limit (Union[Unset, int]):  Default: 50.
-        cursor (Union[Unset, str]):
+        cursor (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -131,7 +136,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 50,
-    cursor: Union[Unset, str] = UNSET,
+    cursor: Union[None, Unset, str] = UNSET,
 ) -> Optional[Union[ProblemDetails, TemplateListEnvelope]]:
     """List finished templates
 
@@ -140,7 +145,7 @@ def sync(
 
     Args:
         limit (Union[Unset, int]):  Default: 50.
-        cursor (Union[Unset, str]):
+        cursor (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -161,7 +166,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 50,
-    cursor: Union[Unset, str] = UNSET,
+    cursor: Union[None, Unset, str] = UNSET,
 ) -> Response[Union[ProblemDetails, TemplateListEnvelope]]:
     """List finished templates
 
@@ -170,7 +175,7 @@ async def asyncio_detailed(
 
     Args:
         limit (Union[Unset, int]):  Default: 50.
-        cursor (Union[Unset, str]):
+        cursor (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -194,7 +199,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     limit: Union[Unset, int] = 50,
-    cursor: Union[Unset, str] = UNSET,
+    cursor: Union[None, Unset, str] = UNSET,
 ) -> Optional[Union[ProblemDetails, TemplateListEnvelope]]:
     """List finished templates
 
@@ -203,7 +208,7 @@ async def asyncio(
 
     Args:
         limit (Union[Unset, int]):  Default: 50.
-        cursor (Union[Unset, str]):
+        cursor (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

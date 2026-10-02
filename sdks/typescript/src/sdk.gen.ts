@@ -186,6 +186,16 @@ export const listDocumentJobs = <ThrowOnError extends boolean = false>(options?:
  * pointing at the job and a `Retry-After` hint. Poll that URL, or subscribe to
  * webhooks and let the completion event come to you.
  *
+ * Send a stable `Idempotency-Key` to make retries safe. Within the job's
+ * 7-day retention, a repeat with the same key and the same body returns the
+ * **original** job instead of queuing a second one: the response is `202`
+ * with `data.replayed: true` and an `Idempotent-Replayed: true` header, and
+ * `data.status` is that job's current status. Keys are scoped to your tenant
+ * and environment.
+ * Reusing a key with a different body is rejected with `422`, and a repeat
+ * that arrives while the first request is still being accepted gets `409`
+ * and can be retried.
+ *
  */
 export const submitDocumentJob = <ThrowOnError extends boolean = false>(options: Options<SubmitDocumentJobData, ThrowOnError>): RequestResult<SubmitDocumentJobResponses, SubmitDocumentJobErrors, ThrowOnError> => (options.client ?? client).post<SubmitDocumentJobResponses, SubmitDocumentJobErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

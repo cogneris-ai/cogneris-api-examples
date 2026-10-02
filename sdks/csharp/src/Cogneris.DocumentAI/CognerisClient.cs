@@ -104,7 +104,7 @@ public sealed class CognerisClient : IAsyncDisposable
         CancellationToken cancellationToken = default)
     {
         var response = await SendAsync(() => jobs.SubmitDocumentJobAsync(
-            new SubmitDocumentJobRequest(operation, inputReference), cancellationToken), cancellationToken).ConfigureAwait(false);
+            new SubmitDocumentJobRequest(operation, inputReference), cancellationToken: cancellationToken), cancellationToken).ConfigureAwait(false);
         if (!response.IsAccepted) throw new CognerisApiException(response.StatusCode);
         var submission = Parse(() =>
         {

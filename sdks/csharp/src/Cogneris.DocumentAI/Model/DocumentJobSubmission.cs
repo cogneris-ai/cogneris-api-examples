@@ -34,26 +34,29 @@ namespace Cogneris.DocumentAI.Model
         /// Initializes a new instance of the <see cref="DocumentJobSubmission" /> class.
         /// </summary>
         /// <param name="jobId">jobId</param>
-        /// <param name="status">status</param>
+        /// <param name="status">&#x60;Queued&#x60; for a newly accepted job. On an idempotent replay (&#x60;replayed: true&#x60;) it is the original job&#39;s current status. </param>
         /// <param name="statusUrl">statusUrl</param>
         /// <param name="retryAfterSeconds">retryAfterSeconds</param>
+        /// <param name="replayed">True when an &#x60;Idempotency-Key&#x60; matched an earlier submit and this is that job.</param>
         [JsonConstructor]
-        public DocumentJobSubmission(Guid jobId, DocumentJobSubmitStatus status, string statusUrl, int retryAfterSeconds)
+        public DocumentJobSubmission(Guid jobId, DocumentJobStatus status, string statusUrl, int retryAfterSeconds, bool replayed)
         {
             JobId = jobId;
             Status = status;
             StatusUrl = statusUrl;
             RetryAfterSeconds = retryAfterSeconds;
+            Replayed = replayed;
             OnCreated();
         }
 
         partial void OnCreated();
 
         /// <summary>
-        /// Gets or Sets Status
+        /// &#x60;Queued&#x60; for a newly accepted job. On an idempotent replay (&#x60;replayed: true&#x60;) it is the original job&#39;s current status.
         /// </summary>
+        /// <value>&#x60;Queued&#x60; for a newly accepted job. On an idempotent replay (&#x60;replayed: true&#x60;) it is the original job&#39;s current status. </value>
         [JsonPropertyName("status")]
-        public DocumentJobSubmitStatus Status { get; set; }
+        public DocumentJobStatus Status { get; set; }
 
         /// <summary>
         /// Gets or Sets JobId
@@ -74,6 +77,13 @@ namespace Cogneris.DocumentAI.Model
         public int RetryAfterSeconds { get; set; }
 
         /// <summary>
+        /// True when an &#x60;Idempotency-Key&#x60; matched an earlier submit and this is that job.
+        /// </summary>
+        /// <value>True when an &#x60;Idempotency-Key&#x60; matched an earlier submit and this is that job.</value>
+        [JsonPropertyName("replayed")]
+        public bool Replayed { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -85,6 +95,7 @@ namespace Cogneris.DocumentAI.Model
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  StatusUrl: ").Append(StatusUrl).Append("\n");
             sb.Append("  RetryAfterSeconds: ").Append(RetryAfterSeconds).Append("\n");
+            sb.Append("  Replayed: ").Append(Replayed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -133,9 +144,10 @@ namespace Cogneris.DocumentAI.Model
             JsonTokenType startingTokenType = utf8JsonReader.TokenType;
 
             Option<Guid?> jobId = default;
-            Option<DocumentJobSubmitStatus?> status = default;
+            Option<DocumentJobStatus?> status = default;
             Option<string?> statusUrl = default;
             Option<int?> retryAfterSeconds = default;
+            Option<bool?> replayed = default;
 
             while (utf8JsonReader.Read())
             {
@@ -156,13 +168,16 @@ namespace Cogneris.DocumentAI.Model
                             jobId = new Option<Guid?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (Guid?)null : utf8JsonReader.GetGuid());
                             break;
                         case "status":
-                            status = new Option<DocumentJobSubmitStatus?>(JsonSerializer.Deserialize<DocumentJobSubmitStatus?>(ref utf8JsonReader, jsonSerializerOptions));
+                            status = new Option<DocumentJobStatus?>(JsonSerializer.Deserialize<DocumentJobStatus?>(ref utf8JsonReader, jsonSerializerOptions));
                             break;
                         case "statusUrl":
                             statusUrl = new Option<string?>(utf8JsonReader.GetString()!);
                             break;
                         case "retryAfterSeconds":
                             retryAfterSeconds = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
+                            break;
+                        case "replayed":
+                            replayed = new Option<bool?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (bool?)null : utf8JsonReader.GetBoolean());
                             break;
                         default:
                             break;
@@ -182,6 +197,9 @@ namespace Cogneris.DocumentAI.Model
             if (!retryAfterSeconds.IsSet)
                 throw new ArgumentException("Property is required for class DocumentJobSubmission.", nameof(retryAfterSeconds));
 
+            if (!replayed.IsSet)
+                throw new ArgumentException("Property is required for class DocumentJobSubmission.", nameof(replayed));
+
             if (jobId.IsSet && jobId.Value == null)
                 throw new ArgumentNullException(nameof(jobId), "Property is not nullable for class DocumentJobSubmission.");
 
@@ -194,7 +212,10 @@ namespace Cogneris.DocumentAI.Model
             if (retryAfterSeconds.IsSet && retryAfterSeconds.Value == null)
                 throw new ArgumentNullException(nameof(retryAfterSeconds), "Property is not nullable for class DocumentJobSubmission.");
 
-            return new DocumentJobSubmission(jobId.Value!.Value!, status.Value!.Value!, statusUrl.Value!, retryAfterSeconds.Value!.Value!);
+            if (replayed.IsSet && replayed.Value == null)
+                throw new ArgumentNullException(nameof(replayed), "Property is not nullable for class DocumentJobSubmission.");
+
+            return new DocumentJobSubmission(jobId.Value!.Value!, status.Value!.Value!, statusUrl.Value!, retryAfterSeconds.Value!.Value!, replayed.Value!.Value!);
         }
 
         /// <summary>
@@ -226,12 +247,14 @@ namespace Cogneris.DocumentAI.Model
 
             writer.WriteString("jobId", documentJobSubmission.JobId);
 
-            var statusRawValue = DocumentJobSubmitStatusValueConverter.ToJsonValue(documentJobSubmission.Status);
+            var statusRawValue = DocumentJobStatusValueConverter.ToJsonValue(documentJobSubmission.Status);
             writer.WriteString("status", statusRawValue);
 
             writer.WriteString("statusUrl", documentJobSubmission.StatusUrl);
 
             writer.WriteNumber("retryAfterSeconds", documentJobSubmission.RetryAfterSeconds);
+
+            writer.WriteBoolean("replayed", documentJobSubmission.Replayed);
         }
     }
 }

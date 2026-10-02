@@ -249,8 +249,6 @@ export type DocumentJobSubmitOperation = 'Extraction' | 'Classification' | 'Zero
 
 export type DocumentJobStatus = 'Queued' | 'Processing' | 'Succeeded' | 'Failed' | 'Cancelled';
 
-export type DocumentJobSubmitStatus = 'Queued';
-
 export type ServiceResponseMeta = {
     httpStatusCode: number;
     messages?: Array<string>;
@@ -317,9 +315,18 @@ export type ServiceErrorEnvelope = {
 
 export type DocumentJobSubmission = {
     jobId: string;
-    status: DocumentJobSubmitStatus;
+    /**
+     * `Queued` for a newly accepted job. On an idempotent replay
+     * (`replayed: true`) it is the original job's current status.
+     *
+     */
+    status: DocumentJobStatus;
     statusUrl: string;
     retryAfterSeconds: number;
+    /**
+     * True when an `Idempotency-Key` matched an earlier submit and this is that job.
+     */
+    replayed: boolean;
 };
 
 export type DocumentJobList = {
@@ -1562,20 +1569,31 @@ export type SubmitDocumentJobData = {
         inputReference: string;
         /**
          * Extraction only: the id of one of your tenant's finished templates,
-         * whose schema drives the extraction. A finished classifier is a published, immutable
-         * template addressed by its id: updates and deletion are rejected by the
-         * classifier endpoints. Publish a changed definition as a new classifier with a new id.
-         * Omit it and the platform picks the template from the document, as the
-         * synchronous endpoint does. A nonzero id sent with any other operation is
-         * refused with `422` and `template_not_applicable`. An unknown id, another
-         * tenant's id, or an unfinished template is refused with `422` and
-         * `template_unknown`. An all-zero UUID is treated as omitted. The job
+         * whose schema drives the extraction. Templates are not versioned or
+         * content-hashed. A template definition may change in place, so submits
+         * with the same `templateId` can produce different results over time.
+         * Deleting a finished template is allowed. A pending job may fail if its
+         * selected template is deleted before processing can resolve it. Omit
+         * `templateId` and the platform picks the template from the document, as
+         * the synchronous endpoint does. A nonzero
+         * id sent with any other operation is refused with `422` and
+         * `template_not_applicable`. An unknown id, another tenant's id, or an
+         * unfinished template is refused with `422` and `template_unknown`. An
+         * all-zero UUID is treated as omitted. The job
          * never falls back to a generic extraction without the schema you asked for.
          * If the selected template cannot be resolved during processing, the job
          * fails with `template_unresolved` and `retryable: false`.
          *
          */
         templateId?: string | null;
+    };
+    headers?: {
+        /**
+         * Stable caller-supplied key that makes a retried submit resolve to the
+         * job it first created. Use a new key for each distinct job.
+         *
+         */
+        'Idempotency-Key'?: string;
     };
     path?: never;
     query?: never;
@@ -1584,12 +1602,11 @@ export type SubmitDocumentJobData = {
 
 export type SubmitDocumentJobErrors = {
     /**
-     * The request is invalid. Refused before processing — malformed or unsafe — it
-     * is a problem document; refused by processing itself, such as a missing file,
-     * it is the service envelope with the reason in `meta.errors`.
+     * The request failed validation. A malformed `Idempotency-Key` is reported
+     * with `errors[].code` `idempotency_key_invalid` and nothing is queued.
      *
      */
-    400: ProblemDetails;
+    400: ServiceErrorEnvelope;
     /**
      * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
      * (sandbox) prefixes are accepted, but the key must also be valid and active.
@@ -1605,10 +1622,17 @@ export type SubmitDocumentJobErrors = {
      */
     404: ProblemDetails;
     /**
-     * The request conflicts with the current state of what it acts on.
+     * `errors[].code` is `idempotency_request_in_progress` (retryable) when a
+     * request with the same key is still being accepted, or
+     * `idempotency_replay_unavailable` when the job that key created is no
+     * longer retained; submit again with a new key.
+     *
      */
-    409: ProblemDetails;
+    409: ServiceErrorEnvelope;
     /**
+     * `errors[].code` is `idempotency_key_conflict` when the key was already
+     * used with a different `operation`, `inputReference` or `templateId`.
+     *
      * The requested extraction template cannot be used for this job.
      * `template_unknown` means the id is not a finished template in the API
      * key's tenant; `template_not_applicable` means a nonzero template id was
@@ -1647,7 +1671,7 @@ export type ListTemplatesData = {
         /**
          * The `nextCursor` returned by the preceding page.
          */
-        cursor?: string;
+        cursor?: string | null;
     };
     url: '/api/v1/templates';
 };

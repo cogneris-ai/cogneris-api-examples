@@ -111,24 +111,26 @@ namespace Cogneris.DocumentAI.Api
         /// Submit an asynchronous document job
         /// </summary>
         /// <remarks>
-        /// Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+        /// Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
         /// </remarks>
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="submitDocumentJobRequest"></param>
+        /// <param name="idempotencyKey">Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="ISubmitDocumentJobApiResponse"/>&gt;</returns>
-        Task<ISubmitDocumentJobApiResponse> SubmitDocumentJobAsync(SubmitDocumentJobRequest submitDocumentJobRequest, System.Threading.CancellationToken cancellationToken = default);
+        Task<ISubmitDocumentJobApiResponse> SubmitDocumentJobAsync(SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Submit an asynchronous document job
         /// </summary>
         /// <remarks>
-        /// Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+        /// Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
         /// </remarks>
         /// <param name="submitDocumentJobRequest"></param>
+        /// <param name="idempotencyKey">Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="ISubmitDocumentJobApiResponse"/>?&gt;</returns>
-        Task<ISubmitDocumentJobApiResponse?> SubmitDocumentJobOrDefaultAsync(SubmitDocumentJobRequest submitDocumentJobRequest, System.Threading.CancellationToken cancellationToken = default);
+        Task<ISubmitDocumentJobApiResponse?> SubmitDocumentJobOrDefaultAsync(SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -296,7 +298,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="ISubmitDocumentJobApiResponse"/>
     /// </summary>
-    public interface ISubmitDocumentJobApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IAccepted<Cogneris.DocumentAI.Model.DocumentJobSubmissionEnvelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>
+    public interface ISubmitDocumentJobApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IAccepted<Cogneris.DocumentAI.Model.DocumentJobSubmissionEnvelope?>, IBadRequest<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>
     {
         /// <summary>
         /// Returns true if the response is 202 Accepted
@@ -2292,17 +2294,21 @@ namespace Cogneris.DocumentAI.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatSubmitDocumentJob(SubmitDocumentJobRequest submitDocumentJobRequest);
+        partial void FormatSubmitDocumentJob(SubmitDocumentJobRequest submitDocumentJobRequest, ref Option<string> idempotencyKey);
 
         /// <summary>
         /// Validates the request parameters
         /// </summary>
         /// <param name="submitDocumentJobRequest"></param>
+        /// <param name="idempotencyKey"></param>
         /// <returns></returns>
-        private void ValidateSubmitDocumentJob(SubmitDocumentJobRequest submitDocumentJobRequest)
+        private void ValidateSubmitDocumentJob(SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey)
         {
             if (submitDocumentJobRequest == null)
                 throw new ArgumentNullException(nameof(submitDocumentJobRequest));
+
+            if (idempotencyKey.IsSet && idempotencyKey.Value == null)
+                throw new ArgumentNullException(nameof(idempotencyKey));
         }
 
         /// <summary>
@@ -2310,10 +2316,11 @@ namespace Cogneris.DocumentAI.Api
         /// </summary>
         /// <param name="apiResponseLocalVar"></param>
         /// <param name="submitDocumentJobRequest"></param>
-        private void AfterSubmitDocumentJobDefaultImplementation(ISubmitDocumentJobApiResponse apiResponseLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest)
+        /// <param name="idempotencyKey"></param>
+        private void AfterSubmitDocumentJobDefaultImplementation(ISubmitDocumentJobApiResponse apiResponseLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey)
         {
             bool suppressDefaultLog = false;
-            AfterSubmitDocumentJob(ref suppressDefaultLog, apiResponseLocalVar, submitDocumentJobRequest);
+            AfterSubmitDocumentJob(ref suppressDefaultLog, apiResponseLocalVar, submitDocumentJobRequest, idempotencyKey);
             if (!suppressDefaultLog)
                 Logger.LogInformation(RestLogEvents.ApiRequestCompleted, "{0,-9} | {1} | {2}", (apiResponseLocalVar.DownloadedAt - apiResponseLocalVar.RequestedAt).TotalSeconds, apiResponseLocalVar.StatusCode, apiResponseLocalVar.Path);
         }
@@ -2324,7 +2331,8 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="suppressDefaultLog"></param>
         /// <param name="apiResponseLocalVar"></param>
         /// <param name="submitDocumentJobRequest"></param>
-        partial void AfterSubmitDocumentJob(ref bool suppressDefaultLog, ISubmitDocumentJobApiResponse apiResponseLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest);
+        /// <param name="idempotencyKey"></param>
+        partial void AfterSubmitDocumentJob(ref bool suppressDefaultLog, ISubmitDocumentJobApiResponse apiResponseLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -2333,10 +2341,11 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="pathFormatLocalVar"></param>
         /// <param name="pathLocalVar"></param>
         /// <param name="submitDocumentJobRequest"></param>
-        private void OnErrorSubmitDocumentJobDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest)
+        /// <param name="idempotencyKey"></param>
+        private void OnErrorSubmitDocumentJobDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey)
         {
             bool suppressDefaultLogLocalVar = false;
-            OnErrorSubmitDocumentJob(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, submitDocumentJobRequest);
+            OnErrorSubmitDocumentJob(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, submitDocumentJobRequest, idempotencyKey);
             if (!suppressDefaultLogLocalVar)
                 Logger.LogError(RestLogEvents.ApiRequestFailed, exceptionLocalVar, "An error occurred while sending the request to the server.");
         }
@@ -2349,19 +2358,21 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="pathFormatLocalVar"></param>
         /// <param name="pathLocalVar"></param>
         /// <param name="submitDocumentJobRequest"></param>
-        partial void OnErrorSubmitDocumentJob(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest);
+        /// <param name="idempotencyKey"></param>
+        partial void OnErrorSubmitDocumentJob(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey);
 
         /// <summary>
-        /// Submit an asynchronous document job Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+        /// Submit an asynchronous document job Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
         /// </summary>
         /// <param name="submitDocumentJobRequest"></param>
+        /// <param name="idempotencyKey">Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="ISubmitDocumentJobApiResponse"/>&gt;</returns>
-        public async Task<ISubmitDocumentJobApiResponse?> SubmitDocumentJobOrDefaultAsync(SubmitDocumentJobRequest submitDocumentJobRequest, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<ISubmitDocumentJobApiResponse?> SubmitDocumentJobOrDefaultAsync(SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
-                return await SubmitDocumentJobAsync(submitDocumentJobRequest, cancellationToken).ConfigureAwait(false);
+                return await SubmitDocumentJobAsync(submitDocumentJobRequest, idempotencyKey, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -2370,21 +2381,22 @@ namespace Cogneris.DocumentAI.Api
         }
 
         /// <summary>
-        /// Submit an asynchronous document job Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.
+        /// Submit an asynchronous document job Queues a long-running operation. Answers &#x60;202&#x60; with a &#x60;Location&#x60; header pointing at the job and a &#x60;Retry-After&#x60; hint. Poll that URL, or subscribe to webhooks and let the completion event come to you.  Send a stable &#x60;Idempotency-Key&#x60; to make retries safe. Within the job&#39;s 7-day retention, a repeat with the same key and the same body returns the **original** job instead of queuing a second one: the response is &#x60;202&#x60; with &#x60;data.replayed: true&#x60; and an &#x60;Idempotent-Replayed: true&#x60; header, and &#x60;data.status&#x60; is that job&#39;s current status. Keys are scoped to your tenant and environment. Reusing a key with a different body is rejected with &#x60;422&#x60;, and a repeat that arrives while the first request is still being accepted gets &#x60;409&#x60; and can be retried.
         /// </summary>
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="submitDocumentJobRequest"></param>
+        /// <param name="idempotencyKey">Stable caller-supplied key that makes a retried submit resolve to the job it first created. Use a new key for each distinct job.  (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="ISubmitDocumentJobApiResponse"/>&gt;</returns>
-        public async Task<ISubmitDocumentJobApiResponse> SubmitDocumentJobAsync(SubmitDocumentJobRequest submitDocumentJobRequest, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<ISubmitDocumentJobApiResponse> SubmitDocumentJobAsync(SubmitDocumentJobRequest submitDocumentJobRequest, Option<string> idempotencyKey = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
             try
             {
-                ValidateSubmitDocumentJob(submitDocumentJobRequest);
+                ValidateSubmitDocumentJob(submitDocumentJobRequest, idempotencyKey);
 
-                FormatSubmitDocumentJob(submitDocumentJobRequest);
+                FormatSubmitDocumentJob(submitDocumentJobRequest, ref idempotencyKey);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -2398,6 +2410,19 @@ namespace Cogneris.DocumentAI.Api
                     httpRequestMessageLocalVar.Content = (submitDocumentJobRequest as object) is Cogneris.DocumentAI.Client.FileParameter fileParameterLocalVar
                         ? httpRequestMessageLocalVar.Content = new StreamContent(fileParameterLocalVar.Content)
                         : httpRequestMessageLocalVar.Content = new StringContent(JsonSerializer.Serialize(submitDocumentJobRequest, _jsonSerializerOptions));
+
+                    if (idempotencyKey.IsSet)
+                    {
+                      // Set client side default value of Header Param "Idempotency-Key".
+                      if (ClientUtils.IsContentHeader("Idempotency-Key"))
+                      {
+                          httpRequestMessageLocalVar.Content?.Headers.Add("Idempotency-Key", ClientUtils.ParameterToString(idempotencyKey.Value));
+                      }
+                      else
+                      {
+                          httpRequestMessageLocalVar.Headers.Add("Idempotency-Key", ClientUtils.ParameterToString(idempotencyKey.Value));
+                      }
+                    }
 
                     List<TokenBase> tokenBaseLocalVars = new List<TokenBase>();
                     httpRequestMessageLocalVar.RequestUri = uriBuilderLocalVar.Uri;
@@ -2444,7 +2469,7 @@ namespace Cogneris.DocumentAI.Api
                             }
                         }
 
-                        AfterSubmitDocumentJobDefaultImplementation(apiResponseLocalVar, submitDocumentJobRequest);
+                        AfterSubmitDocumentJobDefaultImplementation(apiResponseLocalVar, submitDocumentJobRequest, idempotencyKey);
 
                         Events.ExecuteOnSubmitDocumentJob(apiResponseLocalVar);
 
@@ -2458,7 +2483,7 @@ namespace Cogneris.DocumentAI.Api
             }
             catch(Exception e)
             {
-                OnErrorSubmitDocumentJobDefaultImplementation(e, "/api/v1/document-jobs", uriBuilderLocalVar.Path, submitDocumentJobRequest);
+                OnErrorSubmitDocumentJobDefaultImplementation(e, "/api/v1/document-jobs", uriBuilderLocalVar.Path, submitDocumentJobRequest, idempotencyKey);
                 Events.ExecuteOnErrorSubmitDocumentJob(e);
                 throw;
             }
@@ -2568,32 +2593,32 @@ namespace Cogneris.DocumentAI.Api
             /// Deserializes the response if the response is 400 BadRequest
             /// </summary>
             /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ProblemDetails? BadRequest()
+            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? BadRequest()
             {
                 bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
                 OnBadRequest(ref suppressDefault, ref result);
                 if (!suppressDefault)
                     result = DefaultBadRequest();
                 return result;
             }
 
-            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultBadRequest()
+            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultBadRequest()
             {
                 // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
                 return IsBadRequest
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
                     : null;
             }
 
-            partial void OnBadRequest(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+            partial void OnBadRequest(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
 
             /// <summary>
             /// Returns true if the response is 400 BadRequest and the deserialized response is not null
             /// </summary>
             /// <param name="result"></param>
             /// <returns></returns>
-            public bool TryBadRequest([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            public bool TryBadRequest([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
             {
                 result = null;
 
@@ -2768,32 +2793,32 @@ namespace Cogneris.DocumentAI.Api
             /// Deserializes the response if the response is 409 Conflict
             /// </summary>
             /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ProblemDetails? Conflict()
+            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? Conflict()
             {
                 bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ProblemDetails? result = null;
+                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
                 OnConflict(ref suppressDefault, ref result);
                 if (!suppressDefault)
                     result = DefaultConflict();
                 return result;
             }
 
-            private Cogneris.DocumentAI.Model.ProblemDetails? DefaultConflict()
+            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultConflict()
             {
                 // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
                 return IsConflict
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ProblemDetails>(RawContent, _jsonSerializerOptions)
+                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
                     : null;
             }
 
-            partial void OnConflict(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ProblemDetails? result);
+            partial void OnConflict(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
 
             /// <summary>
             /// Returns true if the response is 409 Conflict and the deserialized response is not null
             /// </summary>
             /// <param name="result"></param>
             /// <returns></returns>
-            public bool TryConflict([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ProblemDetails? result)
+            public bool TryConflict([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
             {
                 result = null;
 

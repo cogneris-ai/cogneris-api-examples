@@ -49,7 +49,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="cursor">The &#x60;nextCursor&#x60; returned by the preceding page. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListTemplatesApiResponse"/>&gt;</returns>
-        Task<IListTemplatesApiResponse> ListTemplatesAsync(Option<int> limit = default, Option<string> cursor = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListTemplatesApiResponse> ListTemplatesAsync(Option<int> limit = default, Option<string?> cursor = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List finished templates
@@ -61,7 +61,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="cursor">The &#x60;nextCursor&#x60; returned by the preceding page. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListTemplatesApiResponse"/>?&gt;</returns>
-        Task<IListTemplatesApiResponse?> ListTemplatesOrDefaultAsync(Option<int> limit = default, Option<string> cursor = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListTemplatesApiResponse?> ListTemplatesOrDefaultAsync(Option<int> limit = default, Option<string?> cursor = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -185,18 +185,7 @@ namespace Cogneris.DocumentAI.Api
             BearerTokenProvider = bearerTokenProvider;
         }
 
-        partial void FormatListTemplates(ref Option<int> limit, ref Option<string> cursor);
-
-        /// <summary>
-        /// Validates the request parameters
-        /// </summary>
-        /// <param name="cursor"></param>
-        /// <returns></returns>
-        private void ValidateListTemplates(Option<string> cursor)
-        {
-            if (cursor.IsSet && cursor.Value == null)
-                throw new ArgumentNullException(nameof(cursor));
-        }
+        partial void FormatListTemplates(ref Option<int> limit, ref Option<string?> cursor);
 
         /// <summary>
         /// Processes the server response
@@ -204,7 +193,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="apiResponseLocalVar"></param>
         /// <param name="limit"></param>
         /// <param name="cursor"></param>
-        private void AfterListTemplatesDefaultImplementation(IListTemplatesApiResponse apiResponseLocalVar, Option<int> limit, Option<string> cursor)
+        private void AfterListTemplatesDefaultImplementation(IListTemplatesApiResponse apiResponseLocalVar, Option<int> limit, Option<string?> cursor)
         {
             bool suppressDefaultLog = false;
             AfterListTemplates(ref suppressDefaultLog, apiResponseLocalVar, limit, cursor);
@@ -219,7 +208,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="apiResponseLocalVar"></param>
         /// <param name="limit"></param>
         /// <param name="cursor"></param>
-        partial void AfterListTemplates(ref bool suppressDefaultLog, IListTemplatesApiResponse apiResponseLocalVar, Option<int> limit, Option<string> cursor);
+        partial void AfterListTemplates(ref bool suppressDefaultLog, IListTemplatesApiResponse apiResponseLocalVar, Option<int> limit, Option<string?> cursor);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -229,7 +218,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="pathLocalVar"></param>
         /// <param name="limit"></param>
         /// <param name="cursor"></param>
-        private void OnErrorListTemplatesDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, Option<int> limit, Option<string> cursor)
+        private void OnErrorListTemplatesDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, Option<int> limit, Option<string?> cursor)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListTemplates(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, limit, cursor);
@@ -246,7 +235,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="pathLocalVar"></param>
         /// <param name="limit"></param>
         /// <param name="cursor"></param>
-        partial void OnErrorListTemplates(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, Option<int> limit, Option<string> cursor);
+        partial void OnErrorListTemplates(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, Option<int> limit, Option<string?> cursor);
 
         /// <summary>
         /// List finished templates Returns only finished templates belonging to the API key&#39;s tenant. Use an id from this list as &#x60;templateId&#x60; when submitting an asynchronous Extraction job.
@@ -255,7 +244,7 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="cursor">The &#x60;nextCursor&#x60; returned by the preceding page. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListTemplatesApiResponse"/>&gt;</returns>
-        public async Task<IListTemplatesApiResponse?> ListTemplatesOrDefaultAsync(Option<int> limit = default, Option<string> cursor = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListTemplatesApiResponse?> ListTemplatesOrDefaultAsync(Option<int> limit = default, Option<string?> cursor = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -275,14 +264,12 @@ namespace Cogneris.DocumentAI.Api
         /// <param name="cursor">The &#x60;nextCursor&#x60; returned by the preceding page. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListTemplatesApiResponse"/>&gt;</returns>
-        public async Task<IListTemplatesApiResponse> ListTemplatesAsync(Option<int> limit = default, Option<string> cursor = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListTemplatesApiResponse> ListTemplatesAsync(Option<int> limit = default, Option<string?> cursor = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
             try
             {
-                ValidateListTemplates(cursor);
-
                 FormatListTemplates(ref limit, ref cursor);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())

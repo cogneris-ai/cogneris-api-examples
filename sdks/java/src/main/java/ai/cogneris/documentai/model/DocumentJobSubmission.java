@@ -19,7 +19,7 @@ import java.util.StringJoiner;
 import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
-import ai.cogneris.documentai.model.DocumentJobSubmitStatus;
+import ai.cogneris.documentai.model.DocumentJobStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -38,7 +38,8 @@ import ai.cogneris.documentai.ApiClient;
   DocumentJobSubmission.JSON_PROPERTY_JOB_ID,
   DocumentJobSubmission.JSON_PROPERTY_STATUS,
   DocumentJobSubmission.JSON_PROPERTY_STATUS_URL,
-  DocumentJobSubmission.JSON_PROPERTY_RETRY_AFTER_SECONDS
+  DocumentJobSubmission.JSON_PROPERTY_RETRY_AFTER_SECONDS,
+  DocumentJobSubmission.JSON_PROPERTY_REPLAYED
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class DocumentJobSubmission {
@@ -48,7 +49,7 @@ public class DocumentJobSubmission {
 
   public static final String JSON_PROPERTY_STATUS = "status";
   @javax.annotation.Nonnull
-  private DocumentJobSubmitStatus status;
+  private DocumentJobStatus status;
 
   public static final String JSON_PROPERTY_STATUS_URL = "statusUrl";
   @javax.annotation.Nonnull
@@ -57,6 +58,10 @@ public class DocumentJobSubmission {
   public static final String JSON_PROPERTY_RETRY_AFTER_SECONDS = "retryAfterSeconds";
   @javax.annotation.Nonnull
   private Integer retryAfterSeconds;
+
+  public static final String JSON_PROPERTY_REPLAYED = "replayed";
+  @javax.annotation.Nonnull
+  private Boolean replayed;
 
   public DocumentJobSubmission() {
   }
@@ -85,26 +90,26 @@ public class DocumentJobSubmission {
   }
 
 
-  public DocumentJobSubmission status(@javax.annotation.Nonnull DocumentJobSubmitStatus status) {
+  public DocumentJobSubmission status(@javax.annotation.Nonnull DocumentJobStatus status) {
     this.status = status;
     return this;
   }
 
   /**
-   * Get status
+   * &#x60;Queued&#x60; for a newly accepted job. On an idempotent replay (&#x60;replayed: true&#x60;) it is the original job&#39;s current status.
    * @return status
    */
   @javax.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_STATUS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public DocumentJobSubmitStatus getStatus() {
+  public DocumentJobStatus getStatus() {
     return status;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_STATUS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(@javax.annotation.Nonnull DocumentJobSubmitStatus status) {
+  public void setStatus(@javax.annotation.Nonnull DocumentJobStatus status) {
     this.status = status;
   }
 
@@ -157,6 +162,30 @@ public class DocumentJobSubmission {
   }
 
 
+  public DocumentJobSubmission replayed(@javax.annotation.Nonnull Boolean replayed) {
+    this.replayed = replayed;
+    return this;
+  }
+
+  /**
+   * True when an &#x60;Idempotency-Key&#x60; matched an earlier submit and this is that job.
+   * @return replayed
+   */
+  @javax.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_REPLAYED, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public Boolean getReplayed() {
+    return replayed;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_REPLAYED, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setReplayed(@javax.annotation.Nonnull Boolean replayed) {
+    this.replayed = replayed;
+  }
+
+
   /**
    * Return true if this DocumentJobSubmission object is equal to o.
    */
@@ -172,12 +201,13 @@ public class DocumentJobSubmission {
     return Objects.equals(this.jobId, documentJobSubmission.jobId) &&
         Objects.equals(this.status, documentJobSubmission.status) &&
         Objects.equals(this.statusUrl, documentJobSubmission.statusUrl) &&
-        Objects.equals(this.retryAfterSeconds, documentJobSubmission.retryAfterSeconds);
+        Objects.equals(this.retryAfterSeconds, documentJobSubmission.retryAfterSeconds) &&
+        Objects.equals(this.replayed, documentJobSubmission.replayed);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobId, status, statusUrl, retryAfterSeconds);
+    return Objects.hash(jobId, status, statusUrl, retryAfterSeconds, replayed);
   }
 
   @Override
@@ -188,6 +218,7 @@ public class DocumentJobSubmission {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    statusUrl: ").append(toIndentedString(statusUrl)).append("\n");
     sb.append("    retryAfterSeconds: ").append(toIndentedString(retryAfterSeconds)).append("\n");
+    sb.append("    replayed: ").append(toIndentedString(replayed)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -250,6 +281,11 @@ public class DocumentJobSubmission {
     // add `retryAfterSeconds` to the URL query string
     if (getRetryAfterSeconds() != null) {
       joiner.add(String.format(java.util.Locale.ROOT, "%sretryAfterSeconds%s=%s", prefix, suffix, ApiClient.urlEncode(ApiClient.valueToString(getRetryAfterSeconds()))));
+    }
+
+    // add `replayed` to the URL query string
+    if (getReplayed() != null) {
+      joiner.add(String.format(java.util.Locale.ROOT, "%sreplayed%s=%s", prefix, suffix, ApiClient.urlEncode(ApiClient.valueToString(getReplayed()))));
     }
 
     return joiner.toString();

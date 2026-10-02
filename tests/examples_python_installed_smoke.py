@@ -93,6 +93,7 @@ class Handler(BaseHTTPRequestHandler):
                     "status": "Queued",
                     "statusUrl": f"/api/v1/document-jobs/{JOB_ID}",
                     "retryAfterSeconds": 0,
+                    "replayed": False,
                 },
                 {"Retry-After": "0"},
             )

@@ -451,6 +451,7 @@ test("installed CLI uses the SDK loopback seam for multipart and job requests", 
         status: "Queued",
         statusUrl: "/api/v1/document-jobs/submitted-job",
         retryAfterSeconds: 0,
+        replayed: false,
       }), { "Retry-After": "0" });
     } else if (request.method === "POST" && request.url === "/api/v1/document-jobs/cancel-job/cancel") {
       json(response, 202, serviceEnvelope(202, { jobId: "cancel-job", cancellationRequested: true }));

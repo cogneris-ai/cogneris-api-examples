@@ -49,7 +49,7 @@ static class Smoke
         completedAt = "2026-09-17T12:00:01Z", cancellationRequestedAt = (string?)null,
         expiresAt = "2026-09-18T12:00:00Z" });
     static string Submission(int hint = 0) => Envelope(new {
-        jobId = JobId, status = "Queued", statusUrl = $"/api/v1/document-jobs/{JobId}", retryAfterSeconds = hint });
+        jobId = JobId, status = "Queued", statusUrl = $"/api/v1/document-jobs/{JobId}", retryAfterSeconds = hint, replayed = false });
 
     static Task PortalConsent()
     {
