@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.4",
     "typescript": "6.0.3"
   },
   "overrides": {
