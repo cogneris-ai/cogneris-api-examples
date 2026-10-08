@@ -41,11 +41,11 @@
   "packages": {
     "csharp": {
       "name": "Cogneris.DocumentAI",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "files": {
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
-        "README.md": "89445e07a64b4203cab79eeaa03a8920215dff558e9687de59b1068ef4c37e77",
+        "README.md": "4371404e1ff44945fc68a0a8a17632d7ac8da6cc54ef78240e659234acbfc477",
         "src/Cogneris.DocumentAI/Api/ArtifactsApi.cs": "084e9880288269df89f7eac644799975128871af126caf442614677560b5ed82",
         "src/Cogneris.DocumentAI/Api/DocumentsApi.cs": "2bdf608eabe483925cfaa58cada7b9e6036ae89747148e9394ed88257f453696",
         "src/Cogneris.DocumentAI/Api/IApi.cs": "3f35093d124a34649d01e7b166081746a87567de29942949640b302470826400",
@@ -73,7 +73,7 @@
         "src/Cogneris.DocumentAI/Client/TokenBase.cs": "bad5a1e073c00a52f7938f6418090b02f3fdd84a6bd5225fcb5f5416b297d31c",
         "src/Cogneris.DocumentAI/Client/TokenContainer`1.cs": "2bb3dbf55a401170bf62713708c3cbea8f2a531323753ada507606ae73d6d8ce",
         "src/Cogneris.DocumentAI/Client/TokenProvider`1.cs": "41f1449d9ddb24ec5b2e803d0b3c9e3a76a82901088fc65958e0f1cb9c6c90f7",
-        "src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj": "2d7276aee56ae7eb75c4f387e9694e51d1a8b06402397f15512a0a561127bcea",
+        "src/Cogneris.DocumentAI/Cogneris.DocumentAI.csproj": "ba8a475d5673db79694324255c33a9c6eda84dd9c2f3dc677c9d7b162cc7aae3",
         "src/Cogneris.DocumentAI/CognerisClient.cs": "2305636739d29c9be59918fb9971936cb540b32fd8061982e7c8b39b689c03c2",
         "src/Cogneris.DocumentAI/CognerisExceptions.cs": "4f1b9c8ec907ea960dd5d059e5277b620157f312c24abe04d9ab6dc30d82b285",
         "src/Cogneris.DocumentAI/Extensions/IHostBuilderExtensions.cs": "e93284a7535bcd62de97cc3655c7a78046d17b8dd0649f2ea153e7b418fe5cea",
@@ -133,9 +133,9 @@
     },
     "java": {
       "name": "ai.cogneris:cogneris-document-ai-sdk",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "files": {
-        "build.gradle": "8dc403c09f6fb52cb296ad039cb379255f447edbbdd3a9947b7a82df03d5daa0",
+        "build.gradle": "a310d41a09d5679df0c7663a7f38985ab657b737ae33c628fb6c82c7f0b075c9",
         "gradle/wrapper/gradle-wrapper.jar": "cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8",
         "gradle/wrapper/gradle-wrapper.properties": "5f23b090b2d8ba9b2affdacb735a892fe95e906ed05669a562d390fa6c3c67a7",
         "gradle.properties": "5b1ba6ab64d9629afbbf2a851ff460cd43acba63f1ab32f36822bb3dfbaef374",
@@ -143,8 +143,8 @@
         "gradlew.bat": "95e8ae8e8a256a2f066cdd745d56f7a3fc87aa058a2e4beb483300db7171bd1f",
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
-        "pom.xml": "13291424bfee3aa7a56e80b82aecb383534909186394765c34c2695fa62e525a",
-        "README.md": "079bc6bc13fe8282e7c1e5ededc803d1dbc98dfde87839105106da244e8cdbcf",
+        "pom.xml": "967abc6fbf20bf4678b2b235661a3cf4fb59ddcc83a5d71cfbf55e5c2245c9c3",
+        "README.md": "95def3207926535aeee0a14faafae4f3165832ac22af3f694c14570c799cde18",
         "settings.gradle": "ae626ed1e338312b81ddfc5efc61570e109ffb1c1f71b864b7c4f56b62f8e365",
         "src/main/AndroidManifest.xml": "d69604f63dc342c761749def4fea6544c2a31e3338fe95b46ee86851f036b6b5",
         "src/main/java/ai/cogneris/documentai/api/ArtifactsApi.java": "23c4d53ef403ca10ae28fa4d90c387b82b7ae2a223919fa34306fbaa368a4daa",
@@ -163,7 +163,7 @@
         "src/main/java/ai/cogneris/documentai/CognerisMaxAttemptsException.java": "f9f9c9e739967bab88baad452478b1e949d5dc27d071826429285fbf5f35ca52",
         "src/main/java/ai/cogneris/documentai/CognerisResponseException.java": "cb5b5e0ad6cb837a6c5a3c588939f826ff7a4f4bf0cdbf61d1f034b292ff4046",
         "src/main/java/ai/cogneris/documentai/CognerisTransportException.java": "6a4ea484a106d519c498c8366dc916473fe10cc42d7fa8dcae37e17743105bdd",
-        "src/main/java/ai/cogneris/documentai/Configuration.java": "ca110e5be8eb0db85936ee5f509f834b3b3295fa6c8c1da303a5164aa725eaf1",
+        "src/main/java/ai/cogneris/documentai/Configuration.java": "b9591b68205121ae17bf2749dd1f8740ba93da008ef00b853e7d1464aece0a1d",
         "src/main/java/ai/cogneris/documentai/JSON.java": "11157d29f56acb5a6c6986c6e97fdd7d65e4a913c73061baa40f045ac764bc7a",
         "src/main/java/ai/cogneris/documentai/model/AbstractOpenApiSchema.java": "efb4b1270446054a771253ee08602dfabde390a756b8e1d5aad192d8712ff7fe",
         "src/main/java/ai/cogneris/documentai/model/ApiError.java": "491eb8c9f85cb07331f8e7b3e5caccbbd5db10b678033915bb41b220328e2ddc",
@@ -227,10 +227,10 @@
     },
     "python": {
       "name": "cogneris-document-ai-sdk",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
-        "CHANGELOG.md": "0842f992a7974a0ebdd1aba27a849c03a5fabc81d9cecb9e42257144e98d2927",
+        "CHANGELOG.md": "7b7dc11bb013918f112f2f16ef7cd2e99a39d65cd7dc3f560cf3340301802327",
         "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/artifacts/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
@@ -333,17 +333,17 @@
         "cogneris_document_ai_sdk/types.py": "017e28af14194096addef66b82327e4d86f6b0d04bf24368f72a980d3fa7f32f",
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
-        "pyproject.toml": "a32bff821410011ac4d9ae43a0ea9c2d3a4d4911ab1ab452359d9a7da0121b87",
-        "README.md": "e016ce3c201f354d82d8eb297ae5940266c147026c6389b5ec47bf6aa4294751"
+        "pyproject.toml": "6a251eda38051e9f5b427b775da89e4c16ae0c9f0a1c866ad0886e290a8b5d74",
+        "README.md": "c899e5eda06e327164cdf2efdd25fdbc82653d56d866b22e81420254ed2e0845"
       }
     },
     "typescript": {
       "name": "@cogneris-ai/document-ai-sdk",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "files": {
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
-        "package.json": "edd2bae66a17078dcd99a46c38fa16d5474ad24e25eff7e1ce891454e16e903b",
+        "package.json": "25d489ad1c94c77557c4ab4d1acf97a91d23cdb15be8d771318f79f9e47b0d5d",
         "src/client/client.gen.ts": "8a17b0bf1540258734a128f176f6cb915c849b97d8064a613dba5ef8390e58d9",
         "src/client/index.ts": "949cc7333527c91928c32410c4a4a2dd2b90b99fe080eb8ce4505647852fbe1b",
         "src/client/types.gen.ts": "1a182888235bc21fa2efeb0409589ddf833317b8dd7db4855f198dfc1c47bb4a",

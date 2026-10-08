@@ -1,8 +1,41 @@
 # Changelog
 
-## 0.2.0
+## 1.0.0
 
-Generated from OpenAPI contract `2026-09-28` (was `2026-08-07`). Compatibility: additive, with two nullable widenings. No operation, model, or field from 0.1.0 was removed or renamed. `ProblemDetailsErrorsItem.field` is now `Union[None, Unset, str]`, because the service sends `null` there, and `SubmitDocumentJobBody.template_id` is now `Union[None, UUID, Unset]`.
+Generated from OpenAPI contract `2026-09-28`. Compatibility impact: **major**.
+The public `DocumentJobSubmitStatus` type, which only represented `Queued`, was
+removed and replaced in `DocumentJobSubmission.status` by the existing broader
+`DocumentJobStatus` type. Source code that names `DocumentJobSubmitStatus` must
+use `DocumentJobStatus` and account for all documented job states. This removal
+is a breaking source change even though accepted submissions still report
+`Queued` when newly created. On an idempotent replay, `status` reports the
+original job's current state and `replayed` indicates that the request returned
+that existing job. The TypeScript SDK, Python SDK, C# SDK, Java SDK, and CLI all
+use the coordinated source version `1.0.0` across all five families. These
+artifacts are source outputs only; publication is a separate release action.
+
+- Replace `DocumentJobSubmitStatus` with `DocumentJobStatus` on job submission
+  responses in the generated TypeScript, Python, C# and Java SDKs. The shared
+  status type includes `Queued`, `Processing`, `Succeeded`, `Failed` and
+  `Cancelled`; idempotent submit replay returns the original job's current
+  status and reports `replayed`.
+- Set the TypeScript SDK, Python SDK, C# SDK, Java SDK and TypeScript CLI source
+  versions to `1.0.0`. The CLI depends on the exact SDK version `1.0.0`.
+
+## 0.2.0 (compatibility summary corrected)
+
+Generated from OpenAPI contract `2026-09-28`. Its original compatibility summary was incomplete: it removed a public type
+while carrying minor version `0.2.0`. The current coordinated source version is
+`1.0.0`. Other generated changes included two nullable widenings. The field
+`ProblemDetailsErrorsItem.field` is nullable (`Union[None, Unset, str]`) because
+the service sends `null`, and `SubmitDocumentJobBody.template_id` is now
+`Union[None, UUID, Unset]`.
+
+Compatibility impact: **major**. `DocumentJobSubmitStatus` was removed and
+`DocumentJobSubmission.status` now uses the broader `DocumentJobStatus` type.
+Consumers that named the removed type must migrate and handle all documented job
+states. New submissions still begin as `Queued`; an idempotent replay returns
+the original job's current status and reports `replayed`.
 
 - Add the `artifacts` API: `upload_artifact` (`POST /api/v1/artifacts`) stores a job's input document and returns an `ArtifactUploadEnvelope` whose `Artifact.reference` is the `artifact://` value `submit_job` takes; `download_artifact` (`GET /api/v1/artifacts/content`) reads back the bytes of an upload or of a finished job's `output_reference`. New models: `Artifact`, `ArtifactUploadEnvelope`, `UploadArtifactBody` (XTRAK-1742, #33).
 - Add the `ExtractedField` model, which documents what each entry of `EnvelopeData.metadata` holds: `value`, `confidence` (0–100), and, when the value was located on the page, `page`, `bbox`, and `bbox_confidence` (0–100). `EnvelopeData.metadata` keeps its open `EnvelopeDataMetadata` type, whose entries still arrive in `additional_properties` exactly as before; `ExtractedField` and the docstrings describe them rather than retyping them (XTRAK-1744, #33).

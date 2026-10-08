@@ -349,7 +349,7 @@ async function validatePackages(stagedOutput, generators) {
   );
   if (
     typescriptPackage.name !== "@cogneris-ai/document-ai-sdk" ||
-    typescriptPackage.version !== "0.2.0" ||
+    typescriptPackage.version !== "1.0.0" ||
     typescriptPackage.private === true
   ) {
     throw new Error("generated TypeScript package identity is invalid");
@@ -361,7 +361,7 @@ async function validatePackages(stagedOutput, generators) {
   );
   const requiredPythonMetadata = [
     'name = "cogneris-document-ai-sdk"',
-    'version = "0.2.0"',
+    'version = "1.0.0"',
     'requires-python = ">=3.9,<4.0"',
     'license = "Apache-2.0"',
     'license-files = ["LICENSE", "NOTICE"]',
@@ -385,7 +385,7 @@ async function validatePackages(stagedOutput, generators) {
     "<PackageId>Cogneris.DocumentAI</PackageId>",
     "<AssemblyName>Cogneris.DocumentAI</AssemblyName>",
     "<RootNamespace>Cogneris.DocumentAI</RootNamespace>",
-    "<Version>0.2.0</Version>",
+    "<Version>1.0.0</Version>",
     "<TargetFramework>net8.0</TargetFramework>",
     "<Nullable>enable</Nullable>",
     "<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>",
@@ -399,7 +399,7 @@ async function validatePackages(stagedOutput, generators) {
   for (const metadata of [
     "<groupId>ai.cogneris</groupId>",
     "<artifactId>cogneris-document-ai-sdk</artifactId>",
-    "<version>0.2.0</version>",
+    "<version>1.0.0</version>",
     "<packaging>jar</packaging>",
     "<maven.compiler.source>17</maven.compiler.source>",
     "<maven.compiler.target>17</maven.compiler.target>",
@@ -596,22 +596,22 @@ async function main() {
       packages: {
         csharp: {
           name: "Cogneris.DocumentAI",
-          version: "0.2.0",
+          version: "1.0.0",
           files: await hashFiles(csharpOutput),
         },
         java: {
           name: "ai.cogneris:cogneris-document-ai-sdk",
-          version: "0.2.0",
+          version: "1.0.0",
           files: await hashFiles(javaOutput),
         },
         python: {
           name: "cogneris-document-ai-sdk",
-          version: "0.2.0",
+          version: "1.0.0",
           files: await hashFiles(pythonOutput),
         },
         typescript: {
           name: "@cogneris-ai/document-ai-sdk",
-          version: "0.2.0",
+          version: "1.0.0",
           files: await hashFiles(typescriptOutput),
         },
       },

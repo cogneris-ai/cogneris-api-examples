@@ -21,15 +21,15 @@ tag; it does not imply that the same version has been published to that registry
 
 | Artifact | Source version | Latest public registry version |
 | --- | --- | --- |
-| TypeScript SDK, `@cogneris-ai/document-ai-sdk` | `0.2.0` | [npm `0.2.0`](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.2.0) |
-| TypeScript CLI, `@cogneris-ai/document-ai-cli` | `0.2.0` | [npm `0.2.0`](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.2.0) |
-| Python SDK, `cogneris-document-ai-sdk` | `0.2.0` | [PyPI `0.2.0`](https://pypi.org/project/cogneris-document-ai-sdk/0.2.0/) |
-| C# SDK, `Cogneris.DocumentAI` | `0.2.0` | [NuGet.org `0.1.0`](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0) |
-| Java SDK, `ai.cogneris:cogneris-document-ai-sdk` | `0.2.0` | [Maven Central `0.1.0`](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/) |
+| TypeScript SDK, `@cogneris-ai/document-ai-sdk` | `1.0.0` | [npm `0.2.0`](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.2.0) |
+| TypeScript CLI, `@cogneris-ai/document-ai-cli` | `1.0.0` | [npm `0.2.0`](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.2.0) |
+| Python SDK, `cogneris-document-ai-sdk` | `1.0.0` | [PyPI `0.2.0`](https://pypi.org/project/cogneris-document-ai-sdk/0.2.0/) |
+| C# SDK, `Cogneris.DocumentAI` | `1.0.0` | [NuGet.org `0.1.0`](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0) |
+| Java SDK, `ai.cogneris:cogneris-document-ai-sdk` | `1.0.0` | [Maven Central `0.1.0`](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/) |
 | Flutter SDK, `cogneris_sdk` | `0.2.1`, tag `sdk-v0.2.1` | No pub.dev package (`publish_to: none`) |
 
 The C# and Java source versions are newer than their current public registry
-versions. Do not use `0.2.0` as a NuGet or Maven Central install version; use
+versions. Do not use `1.0.0` as a NuGet or Maven Central install version; use
 the versions linked above unless you are building the repository source locally.
 
 ## Artifact upload and download helpers
@@ -57,10 +57,10 @@ available from its public registry.
 
 For C#, state whether you installed the verified public
 [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
-release from NuGet.org or a local `Cogneris.DocumentAI.0.2.0.nupkg` built from source.
+release from NuGet.org or a local `Cogneris.DocumentAI.1.0.0.nupkg` built from source.
 For Java, state whether you installed the verified public
 [ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
-release from Maven Central or a local `cogneris-document-ai-sdk-0.2.0.jar`
+release from Maven Central or a local `cogneris-document-ai-sdk-1.0.0.jar`
 and `.pom` built from source. Include the Java runtime version and dependency
 resolution details.
 

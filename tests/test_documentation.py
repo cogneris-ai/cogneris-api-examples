@@ -55,8 +55,8 @@ def assert_no_unbound_package_install_guidance(test_case, document):
             section,
             "Every Cogneris Maven dependency must be bound to the explicit local repository",
         )
-        test_case.assertIn("cogneris-document-ai-sdk-0.2.0.jar", section)
-        test_case.assertIn("cogneris-document-ai-sdk-0.2.0.pom", section)
+        test_case.assertIn("cogneris-document-ai-sdk-1.0.0.jar", section)
+        test_case.assertIn("cogneris-document-ai-sdk-1.0.0.pom", section)
 
 
 def assert_documented_local_package_sources(test_case, readme):
@@ -78,8 +78,8 @@ def assert_documented_local_package_sources(test_case, readme):
     test_case.assertIsNotNone(java, "README must have a Java 17 section")
     for term in (
         "COGNERIS_MAVEN_REPOSITORY",
-        "cogneris-document-ai-sdk-0.2.0.jar",
-        "cogneris-document-ai-sdk-0.2.0.pom",
+        "cogneris-document-ai-sdk-1.0.0.jar",
+        "cogneris-document-ai-sdk-1.0.0.pom",
         "<dependency>",
         "<repository>",
         "file://${env.COGNERIS_MAVEN_REPOSITORY}",
@@ -126,9 +126,9 @@ class DocumentationContractTests(unittest.TestCase):
         self.assertIn("security/advisories/new", support)
         self.assertIn("privately report", support)
         self.assertNotIn("does not yet", support)
-        for term in ("semantic versioning", "2026-09-24", "deprecation", "openapi"):
+        for term in ("semantic versioning", "2026-09-28", "deprecation", "openapi"):
             self.assertIn(term, versioning)
-        for term in ("published on maven central", "public artifact integrity", "0.2.0", "unpublished"):
+        for term in ("published on maven central", "public artifact integrity", "1.0.0", "unpublished"):
             self.assertIn(term, versioning)
 
     def test_readme_documents_csharp_and_java_from_explicit_local_sources(self):
@@ -137,11 +137,11 @@ class DocumentationContractTests(unittest.TestCase):
             "Cogneris.DocumentAI",
             "net8.0",
             ".NET 8",
-            "Cogneris.DocumentAI.0.2.0.nupkg",
+            "Cogneris.DocumentAI.1.0.0.nupkg",
             "ai.cogneris:cogneris-document-ai-sdk",
             "Java 17",
-            "cogneris-document-ai-sdk-0.2.0.jar",
-            "cogneris-document-ai-sdk-0.2.0.pom",
+            "cogneris-document-ai-sdk-1.0.0.jar",
+            "cogneris-document-ai-sdk-1.0.0.pom",
             "is available on Maven Central",
         ):
             self.assertIn(term, readme, f"README is missing C#/Java term: {term}")
@@ -157,7 +157,7 @@ class DocumentationContractTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text()
         mutations = {
             "public Maven dependency uses an unverified version": readme.replace(
-                "<version>0.1.0</version>", "<version>0.2.0</version>", 1,
+                "<version>0.1.0</version>", "<version>1.0.0</version>", 1,
             ),
             "public Maven dependency lacks the verified registry link": readme.replace(
                 "https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/",
@@ -173,7 +173,7 @@ class DocumentationContractTests(unittest.TestCase):
 ## Accidental C# appendix
 
 ```bash
-dotnet add package Cogneris.DocumentAI --version 0.2.0
+dotnet add package Cogneris.DocumentAI --version 1.0.0
 ```
 """,
             "unbound Maven dependency outside the named section": readme + """
@@ -184,7 +184,7 @@ dotnet add package Cogneris.DocumentAI --version 0.2.0
 <dependency>
   <groupId>ai.cogneris</groupId>
   <artifactId>cogneris-document-ai-sdk</artifactId>
-  <version>0.2.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 """,
@@ -214,12 +214,12 @@ dotnet add package Cogneris.DocumentAI --version 0.2.0
         for term in (
             "five package families",
             "six package files",
-            "cogneris-ai-document-ai-sdk-0.2.0.tgz",
-            "cogneris-ai-document-ai-cli-0.2.0.tgz",
-            "cogneris_document_ai_sdk-0.2.0-py3-none-any.whl",
-            "Cogneris.DocumentAI.0.2.0.nupkg",
-            "cogneris-document-ai-sdk-0.2.0.jar",
-            "cogneris-document-ai-sdk-0.2.0.pom",
+            "cogneris-ai-document-ai-sdk-1.0.0.tgz",
+            "cogneris-ai-document-ai-cli-1.0.0.tgz",
+            "cogneris_document_ai_sdk-1.0.0-py3-none-any.whl",
+            "Cogneris.DocumentAI.1.0.0.nupkg",
+            "cogneris-document-ai-sdk-1.0.0.jar",
+            "cogneris-document-ai-sdk-1.0.0.pom",
             "full JDK 17 with `javac`",
             "not a full compiler JDK",
             "No repository workflow publishes to NuGet or Maven Central",

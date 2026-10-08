@@ -100,12 +100,12 @@ a .NET 10 consumer because this host has only the .NET 10 SDK. The Java 17
 consumer result above remains the latest Java install evidence; a Java runtime
 was unavailable for a repeat install on this host.
 
-The committed source is version `0.2.0`, generated from OpenAPI contract
-`2026-09-24`. The registry releases linked above are `0.1.0`, generated from
-`2026-08-07`; `0.2.0` is not yet published to any registry. The change is
-additive apart from one nullable widening: see the release notes in
-[VERSIONING.md](VERSIONING.md). The local
-release artifacts below build `0.2.0`.
+The committed source for all five SDK/CLI package families is version
+`1.0.0`, generated from OpenAPI contract `2026-09-28`. Source metadata does not
+mean the version has been published. This coordinated major release removes the
+public `DocumentJobSubmitStatus` type and uses `DocumentJobStatus` for job
+submission status; see [VERSIONING.md](VERSIONING.md) for the migration and
+compatibility details. The local release instructions below build `1.0.0`.
 
 ## Install local release artifacts
 
@@ -134,7 +134,7 @@ npm pack ./cli --pack-destination "$COGNERIS_RELEASE"
 ```
 
 Set up the separate consumer project. This block installs both npm tarballs in
-one operation so the CLI's exact `0.2.0` SDK dependency is satisfied locally,
+one operation so the CLI's exact `1.0.0` SDK dependency is satisfied locally,
 installs the wheel into a consumer-local virtual environment, and copies the
 runnable examples to paths that exist in the consumer:
 
@@ -148,9 +148,9 @@ cp "$COGNERIS_CHECKOUT/examples/typescript/quickstart.mjs" "$COGNERIS_CONSUMER/e
 cp "$COGNERIS_CHECKOUT/examples/python/quickstart.py" "$COGNERIS_CONSUMER/examples/python/"
 cd "$COGNERIS_CONSUMER"
 test -f package.json || npm init --yes
-npm install "$COGNERIS_RELEASE/cogneris-ai-document-ai-sdk-0.2.0.tgz" "$COGNERIS_RELEASE/cogneris-ai-document-ai-cli-0.2.0.tgz"
+npm install "$COGNERIS_RELEASE/cogneris-ai-document-ai-sdk-1.0.0.tgz" "$COGNERIS_RELEASE/cogneris-ai-document-ai-cli-1.0.0.tgz"
 uv venv --python "${PYTHON_BIN:-python3}" .venv
-uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-0.2.0-py3-none-any.whl"
+uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai_sdk-1.0.0-py3-none-any.whl"
 ```
 <!-- consumer-setup:end -->
 
@@ -210,7 +210,7 @@ client.close()
 
 ## .NET 8: local NuGet package
 
-`Cogneris.DocumentAI.0.2.0.nupkg` is an owner-provided local artifact targeting
+`Cogneris.DocumentAI.1.0.0.nupkg` is an owner-provided local artifact targeting
 `net8.0`. For the verified public release, see the NuGet.org link above. To
 use a local artifact instead, create a separate .NET 8
 consumer, copy the runnable example, add the package with the explicit local
@@ -221,7 +221,7 @@ mkdir -p "$COGNERIS_CONSUMER/dotnet"
 cd "$COGNERIS_CONSUMER/dotnet"
 dotnet new console --framework net8.0
 cp "$COGNERIS_CHECKOUT/examples/dotnet/Quickstart.cs" Program.cs
-dotnet add package Cogneris.DocumentAI --version 0.2.0 --source "$COGNERIS_RELEASE" --no-restore
+dotnet add package Cogneris.DocumentAI --version 1.0.0 --source "$COGNERIS_RELEASE" --no-restore
 dotnet restore --source "$COGNERIS_RELEASE" --source https://api.nuget.org/v3/index.json
 dotnet run -- extract /path/to/document.pdf
 ```
@@ -237,17 +237,17 @@ sanitized `CognerisApiException`, `CognerisTransportException`,
 
 ## Java 17: local Maven artifact
 
-Stage the exact `cogneris-document-ai-sdk-0.2.0.jar` and
-`cogneris-document-ai-sdk-0.2.0.pom` as one local Maven artifact. A full JDK 17
+Stage the exact `cogneris-document-ai-sdk-1.0.0.jar` and
+`cogneris-document-ai-sdk-1.0.0.pom` as one local Maven artifact. A full JDK 17
 with `javac` and Apache Maven 3.9 or newer are required; `jdk4py` is not a full
 compiler JDK on this host.
 
 ```bash
 export COGNERIS_MAVEN_REPOSITORY="$COGNERIS_CONSUMER/java/maven-repository"
-export COGNERIS_MAVEN_COORDINATES="$COGNERIS_MAVEN_REPOSITORY/ai/cogneris/cogneris-document-ai-sdk/0.2.0"
+export COGNERIS_MAVEN_COORDINATES="$COGNERIS_MAVEN_REPOSITORY/ai/cogneris/cogneris-document-ai-sdk/1.0.0"
 mkdir -p "$COGNERIS_MAVEN_COORDINATES"
-cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.2.0.jar" "$COGNERIS_MAVEN_COORDINATES/"
-cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-0.2.0.pom" "$COGNERIS_MAVEN_COORDINATES/"
+cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-1.0.0.jar" "$COGNERIS_MAVEN_COORDINATES/"
+cp "$COGNERIS_RELEASE/cogneris-document-ai-sdk-1.0.0.pom" "$COGNERIS_MAVEN_COORDINATES/"
 ```
 
 Create `$COGNERIS_CONSUMER/java/pom.xml` with the dependency bound to that
@@ -277,7 +277,7 @@ resolves from `COGNERIS_MAVEN_REPOSITORY`:
     <dependency>
       <groupId>ai.cogneris</groupId>
       <artifactId>cogneris-document-ai-sdk</artifactId>
-      <version>0.2.0</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 </project>
