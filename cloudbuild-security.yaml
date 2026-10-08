@@ -11,6 +11,8 @@ steps:
   - id: secret-scan
     name: gcr.io/cloud-builders/git
     entrypoint: bash
+    env:
+      - 'SERVICE_NAME=${_SERVICE_NAME}'
     args:
       - -c
       - |
@@ -40,7 +42,7 @@ steps:
         {
           echo "Cogneris secret pattern scan (Cloud Build)"
           echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          echo "Service: ${_SERVICE_NAME}"
+          echo "Service: $${SERVICE_NAME}"
           echo "Commit: $COMMIT_SHA"
           echo "secret_scan_status=$$scan_status"
           echo "matched_line_count=$$matched_line_count"
@@ -51,6 +53,8 @@ steps:
   - id: npm-audit
     name: node:24-alpine
     entrypoint: sh
+    env:
+      - 'SERVICE_NAME=${_SERVICE_NAME}'
     args:
       - -c
       - |
@@ -61,7 +65,7 @@ steps:
         {
           echo "xTrakt npm audit evidence (Cloud Build)"
           echo "Generated at: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          echo "Service: ${_SERVICE_NAME}"
+          echo "Service: $${SERVICE_NAME}"
           echo "Commit: $COMMIT_SHA"
         } > .compliance-evidence/npm-audit.txt
         find . -path '*/package-lock.json' -not -path '*/node_modules/*' | sort > /tmp/locks.txt
@@ -125,17 +129,22 @@ steps:
   - id: upload-evidence
     name: gcr.io/cloud-builders/gcloud
     entrypoint: bash
+    env:
+      - 'EVIDENCE_BUCKET=${_EVIDENCE_BUCKET}'
+      - 'SERVICE_NAME=${_SERVICE_NAME}'
     args:
       - -c
       - |
         gsutil -m cp -r \
           .compliance-evidence/* \
           .compliance-evidence/.[!.]* \
-          "gs://${_EVIDENCE_BUCKET}/${_SERVICE_NAME}/$SHORT_SHA/$BUILD_ID/"
+          "gs://$${EVIDENCE_BUCKET}/$${SERVICE_NAME}/$SHORT_SHA/$BUILD_ID/"
 
   - id: hard-gate
     name: gcr.io/cloud-builders/gcloud
     entrypoint: bash
+    env:
+      - 'ENFORCE_SCA=${_ENFORCE_SCA}'
     args:
       - -c
       - |
@@ -143,7 +152,7 @@ steps:
           echo "ERROR: secret-pattern scan failed; evidence was uploaded."
           exit 1
         fi
-        if [ "${_ENFORCE_SCA}" = "true" ]; then
+        if [ "$${ENFORCE_SCA}" = "true" ]; then
           sca_failed=0
           check_sca() {
             if ! "$$@"; then
