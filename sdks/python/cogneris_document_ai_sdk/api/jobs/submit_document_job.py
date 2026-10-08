@@ -121,6 +121,11 @@ def sync_detailed(
     that arrives while the first request is still being accepted gets `409`
     and can be retried.
 
+    With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+    `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+    operation, or any `templateId`, answers `403` with `code`
+    `environment.sandbox_route_unavailable`. See **Sandbox** above.
+
     Args:
         idempotency_key (Union[Unset, str]):
         body (SubmitDocumentJobBody):
@@ -167,6 +172,11 @@ def sync(
     that arrives while the first request is still being accepted gets `409`
     and can be retried.
 
+    With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+    `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+    operation, or any `templateId`, answers `403` with `code`
+    `environment.sandbox_route_unavailable`. See **Sandbox** above.
+
     Args:
         idempotency_key (Union[Unset, str]):
         body (SubmitDocumentJobBody):
@@ -207,6 +217,11 @@ async def asyncio_detailed(
     Reusing a key with a different body is rejected with `422`, and a repeat
     that arrives while the first request is still being accepted gets `409`
     and can be retried.
+
+    With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+    `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+    operation, or any `templateId`, answers `403` with `code`
+    `environment.sandbox_route_unavailable`. See **Sandbox** above.
 
     Args:
         idempotency_key (Union[Unset, str]):
@@ -251,6 +266,11 @@ async def asyncio(
     Reusing a key with a different body is rejected with `422`, and a repeat
     that arrives while the first request is still being accepted gets `409`
     and can be retried.
+
+    With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+    `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+    operation, or any `templateId`, answers `403` with `code`
+    `environment.sandbox_route_unavailable`. See **Sandbox** above.
 
     Args:
         idempotency_key (Union[Unset, str]):

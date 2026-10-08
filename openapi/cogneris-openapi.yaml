@@ -21,6 +21,25 @@ info:
     tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard
     under **Settings → API keys**.
 
+    ## Sandbox
+
+    A `xtkt_test_` (sandbox) key is accepted for authentication, but sandbox covers
+    only the asynchronous job flow. Everything else refuses it.
+
+    - **Available routes.** `POST /api/v1/artifacts`, `GET /api/v1/artifacts/content`,
+      `POST /api/v1/document-jobs`, `GET /api/v1/document-jobs`,
+      `GET /api/v1/document-jobs/{jobId}` and `POST /api/v1/document-jobs/{jobId}/cancel`.
+    - **Every other route refuses a sandbox key** — the synchronous `/Document/*`
+      endpoints, `/api/v1/templates`, `/api/v1/portal/*` and
+      `/api/v1/webhook-endpoints*` — with `403`, `application/problem+json` and
+      `code` `environment.sandbox_route_unavailable`.
+    - **Job submit is narrower.** On `POST /api/v1/document-jobs` a sandbox key may
+      run only `Extraction` without a `templateId`, `Classification`, `ZeroShot`,
+      `Crop` and `Split`. Any other operation (for example `Facematch`), or any
+      `templateId`, is refused with the same `403` and `code`.
+    - **No credits.** A sandbox job does not debit credits or production quota, so
+      `creditsConsumed` is always `null` for a sandbox key.
+
     ## Uploads
 
     The synchronous document endpoints take `multipart/form-data`. There is no
@@ -525,6 +544,11 @@ paths:
         Reusing a key with a different body is rejected with `422`, and a repeat
         that arrives while the first request is still being accepted gets `409`
         and can be retried.
+
+        With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+        `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+        operation, or any `templateId`, answers `403` with `code`
+        `environment.sandbox_route_unavailable`. See **Sandbox** above.
       operationId: submitDocumentJob
       parameters:
         - name: Idempotency-Key
@@ -1044,7 +1068,12 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
     Forbidden:
-      description: The key is valid but not allowed to make this request.
+      description: |
+        The key is valid but not allowed to make this request. A sandbox key
+        (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+        on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+        for an unsupported operation or any `templateId`. See **Sandbox** in the
+        API description.
       content:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
@@ -1638,7 +1667,8 @@ components:
             unknown: a job still queued or running, an operation that is not metered,
             or one billing could not price. `0` is a real value meaning the job was
             free. It is a property of the job, so polling a finished job twice reports
-            the same figure; it is not a charge per read.
+            the same figure; it is not a charge per read. Always `null` for a sandbox
+            key (`xtkt_test_`): sandbox jobs debit no credits and no production quota.
 
     WebhookEvent:
       type: string
