@@ -57,7 +57,8 @@ class DocumentJob:
             unknown: a job still queued or running, an operation that is not metered,
             or one billing could not price. `0` is a real value meaning the job was
             free. It is a property of the job, so polling a finished job twice reports
-            the same figure; it is not a charge per read.
+            the same figure; it is not a charge per read. Always `null` for a sandbox
+            key (`xtkt_test_`): sandbox jobs debit no credits and no production quota.
     """
 
     job_id: Union[Unset, UUID] = UNSET

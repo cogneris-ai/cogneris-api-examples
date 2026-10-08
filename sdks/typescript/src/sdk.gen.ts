@@ -196,6 +196,11 @@ export const listDocumentJobs = <ThrowOnError extends boolean = false>(options?:
  * that arrives while the first request is still being accepted gets `409`
  * and can be retried.
  *
+ * With a sandbox key (`xtkt_test_`) only `Extraction` without `templateId`,
+ * `Classification`, `ZeroShot`, `Crop` and `Split` are accepted. Any other
+ * operation, or any `templateId`, answers `403` with `code`
+ * `environment.sandbox_route_unavailable`. See **Sandbox** above.
+ *
  */
 export const submitDocumentJob = <ThrowOnError extends boolean = false>(options: Options<SubmitDocumentJobData, ThrowOnError>): RequestResult<SubmitDocumentJobResponses, SubmitDocumentJobErrors, ThrowOnError> => (options.client ?? client).post<SubmitDocumentJobResponses, SubmitDocumentJobErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
