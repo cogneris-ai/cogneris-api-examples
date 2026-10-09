@@ -20,7 +20,7 @@ artifacts are source outputs only; publication is a separate release action.
   responses in the generated TypeScript, Python, C# and Java SDKs. The shared
   status type includes `Queued`, `Processing`, `Succeeded`, `Failed` and
   `Cancelled`; idempotent submit replay returns the original job's current
-  status and reports `replayed`.
+  status and reports `replayed` (XTRAK-2337, #55).
 - `submit_document_job` takes an optional `idempotency_key`, sent as the
   `Idempotency-Key` header. Within the job's 7-day retention, a repeat with the
   same key and body returns the original job (`202`, `data.replayed: true`,
@@ -37,7 +37,7 @@ artifacts are source outputs only; publication is a separate release action.
   (`Union[None, Unset, str]`), a widening that existing calls do not notice
   (XTRAK-1830, #50).
 - Set the TypeScript SDK, Python SDK, C# SDK, Java SDK and TypeScript CLI source
-  versions to `1.0.0`. The CLI depends on the exact SDK version `1.0.0`.
+  versions to `1.0.0`. The CLI depends on the exact SDK version `1.0.0` (XTRAK-2337, #55).
 
 ## 0.2.0 (compatibility summary corrected)
 
