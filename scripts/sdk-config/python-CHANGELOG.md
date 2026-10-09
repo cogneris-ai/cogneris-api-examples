@@ -19,6 +19,21 @@ artifacts are source outputs only; publication is a separate release action.
   status type includes `Queued`, `Processing`, `Succeeded`, `Failed` and
   `Cancelled`; idempotent submit replay returns the original job's current
   status and reports `replayed`.
+- `submit_document_job` takes an optional `idempotency_key`, sent as the
+  `Idempotency-Key` header. Within the job's 7-day retention, a repeat with the
+  same key and body returns the original job (`202`, `data.replayed: true`,
+  `Idempotent-Replayed: true` header); the same key with a different body is
+  rejected with `422`, and a repeat that arrives while the first request is
+  still being accepted gets a retryable `409` (XTRAK-1830, #50).
+- `DocumentJobSubmission` gains the required field `replayed`. Code that builds
+  a `DocumentJobSubmission` itself, such as a test double, must now supply it
+  (XTRAK-1830, #50).
+- `submit_document_job` parses `400` and `409` as `ServiceErrorEnvelope`
+  instead of `ProblemDetails`. Callers that inspected the `ProblemDetails` body
+  of those statuses must read `ServiceErrorEnvelope` instead (XTRAK-1830, #50).
+- The `cursor` argument of `list_templates` accepts `None`
+  (`Union[None, Unset, str]`), a widening that existing calls do not notice
+  (XTRAK-1830, #50).
 - Set the TypeScript SDK, Python SDK, C# SDK, Java SDK and TypeScript CLI source
   versions to `1.0.0`. The CLI depends on the exact SDK version `1.0.0`.
 
