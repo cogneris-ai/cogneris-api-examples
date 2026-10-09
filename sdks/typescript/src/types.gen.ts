@@ -434,7 +434,8 @@ export type DocumentJob = {
      * unknown: a job still queued or running, an operation that is not metered,
      * or one billing could not price. `0` is a real value meaning the job was
      * free. It is a property of the job, so polling a finished job twice reports
-     * the same figure; it is not a charge per read.
+     * the same figure; it is not a charge per read. Always `null` for a sandbox
+     * key (`xtkt_test_`): sandbox jobs debit no credits and no production quota.
      *
      */
     creditsConsumed?: number | null;
@@ -759,7 +760,12 @@ export type ExtractDocumentErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -859,7 +865,12 @@ export type ClassifyDocumentsErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -954,7 +965,12 @@ export type ZeroShotDocumentErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1049,7 +1065,12 @@ export type CropDocumentErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1144,7 +1165,12 @@ export type SplitDocumentErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1248,7 +1274,12 @@ export type FaceMatchDocumentErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1350,7 +1381,12 @@ export type UploadArtifactErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1454,7 +1490,12 @@ export type DownloadArtifactErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1520,7 +1561,12 @@ export type ListDocumentJobsErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1614,7 +1660,12 @@ export type SubmitDocumentJobErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1691,7 +1742,12 @@ export type ListTemplatesErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1749,7 +1805,12 @@ export type GetDocumentJobErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
@@ -1807,7 +1868,12 @@ export type CancelDocumentJobErrors = {
      */
     401: ProblemDetails;
     /**
-     * The key is valid but not allowed to make this request.
+     * The key is valid but not allowed to make this request. A sandbox key
+     * (`xtkt_test_`) is refused with `code` `environment.sandbox_route_unavailable`
+     * on every route outside the sandbox set, and on `POST /api/v1/document-jobs`
+     * for an unsupported operation or any `templateId`. See **Sandbox** in the
+     * API description.
+     *
      */
     403: ProblemDetails;
     /**
