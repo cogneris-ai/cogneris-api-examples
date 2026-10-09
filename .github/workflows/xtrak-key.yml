@@ -1,8 +1,13 @@
 name: xtrak-key
 
 # XTRAK-2234: the PR title must reference its Jira ticket as XTRAK-<n>
-# (dependabot[bot]/renovate[bot] exempt). Logic lives in the reusable workflow
-# hosted in cogneris-workspace; bump the pinned SHA there, not here.
+# (dependabot[bot]/renovate[bot] exempt by exact author login).
+#
+# This repository is PUBLIC, and a public repository cannot call a reusable
+# workflow hosted in a private one, so this is a verbatim copy of the job in
+# cogneris-ai/cogneris-workspace/.github/workflows/require-xtrak-key.yml
+# @ebc3350305aac2b29f9e6cf605f6dfcd8a71cbcd (tested there). Keep them in sync.
+# The title reaches bash only through env and is never echoed.
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize, ready_for_review]
@@ -11,4 +16,26 @@ permissions: {}
 
 jobs:
   xtrak-key:
-    uses: cogneris-ai/cogneris-workspace/.github/workflows/require-xtrak-key.yml@ebc3350305aac2b29f9e6cf605f6dfcd8a71cbcd
+    name: xtrak-key
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: PR title references a XTRAK ticket
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+          case "$AUTHOR" in
+            "dependabot[bot]"|"renovate[bot]")
+              echo "Dependency update opened by $AUTHOR: exempt."
+              exit 0
+              ;;
+          esac
+          KEY=$(printf '%s' "$TITLE" | grep -Eo '(^|[^A-Za-z0-9])XTRAK-[1-9][0-9]*([^0-9A-Za-z]|$)' | grep -Eo 'XTRAK-[1-9][0-9]*' | head -n1 || true)
+          if [ -n "$KEY" ]; then
+            echo "OK: title references $KEY."
+            exit 0
+          fi
+          echo "::error title=Missing XTRAK key::The pull request title must reference the Jira ticket as XTRAK-<n> (uppercase), e.g. 'fix(XTRAK-1234): ...'. Edit the title; this check re-runs on edit."
+          exit 1
