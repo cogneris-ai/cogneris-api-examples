@@ -1,6 +1,6 @@
 {
   "packageName": "Cogneris.DocumentAI",
-  "packageVersion": "0.2.0",
+  "packageVersion": "1.0.0",
   "targetFramework": "net8.0",
   "library": "generichost",
   "nullableReferenceTypes": true,

@@ -47,17 +47,17 @@ without regenerating and checking the committed SDK output.
 
 `.github/workflows/release-sdks.yml` accepts only a manual `workflow_dispatch`.
 Supply the exact SemVer already committed in all five package families (currently
-`0.2.0`, without a `v` prefix). The default `dry_run: true` executes public
+`1.0.0`, without a `v` prefix). The default `dry_run: true` executes public
 validation scripts, builds the six package files below, installs those exact
 artifacts in fresh package-only consumers, and uploads them with a SHA-256
 manifest for 14 days:
 
-- `cogneris-ai-document-ai-sdk-0.2.0.tgz`
-- `cogneris-ai-document-ai-cli-0.2.0.tgz`
-- `cogneris_document_ai_sdk-0.2.0-py3-none-any.whl`
-- `Cogneris.DocumentAI.0.2.0.nupkg`
-- `cogneris-document-ai-sdk-0.2.0.jar`
-- `cogneris-document-ai-sdk-0.2.0.pom`
+- `cogneris-ai-document-ai-sdk-1.0.0.tgz`
+- `cogneris-ai-document-ai-cli-1.0.0.tgz`
+- `cogneris_document_ai_sdk-1.0.0-py3-none-any.whl`
+- `Cogneris.DocumentAI.1.0.0.nupkg`
+- `cogneris-document-ai-sdk-1.0.0.jar`
+- `cogneris-document-ai-sdk-1.0.0.pom`
 
 The Java JAR and its POM metadata sidecar are one package family, so the dry run
 produces exactly five package families and six package files.
@@ -107,9 +107,9 @@ An owner must complete these steps outside this workflow:
 
 The `registry` input selects `all` (default), `npm`, or `pypi`. Select only a
 registry where the exact release version is not yet published and its prerequisites
-are complete. Version `0.2.0` (OpenAPI contract `2026-09-24`) is committed and
+are complete. Version `1.0.0` (OpenAPI contract `2026-09-28`) is committed and
 not yet published to any registry; the owner gates below, including confirming
-that the Apache-2.0 release authorization covers the `0.2.0` source commit,
+that the Apache-2.0 release authorization covers the `1.0.0` source commit,
 apply before a real release. Both npm packages and PyPI `0.1.0` are already published: do not
 dispatch a real release (`dry_run: false`) for that version with any registry
 selection. Dry-run validation remains supported. Use a single-registry
@@ -137,9 +137,9 @@ Local artifact checks (no registry publication):
 
 ```bash
 release_root=$(mktemp -d)
-npm run pack:sdks -- --version 0.2.0 --output "$release_root/artifacts"
+npm run pack:sdks -- --version 1.0.0 --output "$release_root/artifacts"
 manifest_sha=$(shasum -a 256 "$release_root/artifacts/manifest.json" | cut -d ' ' -f 1)
-npm run verify:artifacts -- --version 0.2.0 --artifacts "$release_root/artifacts" \
+npm run verify:artifacts -- --version 1.0.0 --artifacts "$release_root/artifacts" \
   --manifest-sha256 "$manifest_sha" --source "$(git rev-parse HEAD)"
 npm run test:workflows
 ```
