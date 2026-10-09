@@ -1,0 +1,14 @@
+name: xtrak-key
+
+# XTRAK-2234: the PR title must reference its Jira ticket as XTRAK-<n>
+# (dependabot[bot]/renovate[bot] exempt). Logic lives in the reusable workflow
+# hosted in cogneris-workspace; bump the pinned SHA there, not here.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+jobs:
+  xtrak-key:
+    uses: cogneris-ai/cogneris-workspace/.github/workflows/require-xtrak-key.yml@ebc3350305aac2b29f9e6cf605f6dfcd8a71cbcd
