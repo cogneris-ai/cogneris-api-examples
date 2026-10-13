@@ -1,6 +1,7 @@
 name: xtrak-key
 
-# XTRAK-2234: the PR title must reference its Jira ticket as XTRAK-<n>
+# XTRAK-2234: the PR title must reference its Jira ticket as XTRAK-<n> or
+# WOR-<n> (WOR-42)
 # (dependabot[bot]/renovate[bot] exempt by exact author login).
 #
 # This repository is PUBLIC, and a public repository cannot call a reusable
@@ -20,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: PR title references a XTRAK ticket
+      - name: PR title references a Jira ticket
         env:
           TITLE: ${{ github.event.pull_request.title }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
@@ -32,10 +33,12 @@ jobs:
               exit 0
               ;;
           esac
-          KEY=$(printf '%s' "$TITLE" | grep -Eo '(^|[^A-Za-z0-9])XTRAK-[1-9][0-9]*([^0-9A-Za-z]|$)' | grep -Eo 'XTRAK-[1-9][0-9]*' | head -n1 || true)
+          # Accepted Jira project keys, as an ERE alternation. Add a project here.
+          JIRA_PROJECTS='XTRAK|WOR'
+          KEY=$(printf '%s' "$TITLE" | grep -Eo "(^|[^A-Za-z0-9])($JIRA_PROJECTS)-[1-9][0-9]*([^0-9A-Za-z]|$)" | grep -Eo "($JIRA_PROJECTS)-[1-9][0-9]*" | head -n1 || true)
           if [ -n "$KEY" ]; then
             echo "OK: title references $KEY."
             exit 0
           fi
-          echo "::error title=Missing XTRAK key::The pull request title must reference the Jira ticket as XTRAK-<n> (uppercase), e.g. 'fix(XTRAK-1234): ...'. Edit the title; this check re-runs on edit."
+          echo "::error title=Missing Jira key::The pull request title must reference the Jira ticket as XTRAK-<n> or WOR-<n> (uppercase), e.g. 'fix(XTRAK-1234): ...' or 'feat(WOR-19): ...'. Edit the title; this check re-runs on edit."
           exit 1
