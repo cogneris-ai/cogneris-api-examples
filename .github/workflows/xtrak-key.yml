@@ -6,7 +6,7 @@ name: xtrak-key
 # This repository is PUBLIC, and a public repository cannot call a reusable
 # workflow hosted in a private one, so this is a verbatim copy of the job in
 # cogneris-ai/cogneris-workspace/.github/workflows/require-xtrak-key.yml
-# @ebc3350305aac2b29f9e6cf605f6dfcd8a71cbcd (tested there). Keep them in sync.
+# @74cdf977161bf512df460cdee41ce742b851fe95 (tested there). Keep them in sync.
 # The title reaches bash only through env and is never echoed.
 on:
   pull_request:
