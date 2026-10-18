@@ -25,6 +25,11 @@ class DocumentJob:
             submitted. Null when the job did not use a template. Obtain available ids
             from `GET /api/v1/templates`; synchronous `/Document/*` endpoints always
             select a tenant template from the document and do not take this parameter.
+        template_version (Union[None, Unset, int]): The version of `templateId` this job runs on, resolved when the
+            submit was
+            accepted. A template published again later does not change it. Null when the
+            job did not use a template, and for jobs accepted before template versions were
+            recorded, which run on the template's current definition.
         output_reference (Union[None, Unset, str]): Where the finished result is stored, as an `artifact://` reference.
             Read it
             with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
@@ -65,6 +70,7 @@ class DocumentJob:
     operation: Union[Unset, DocumentJobOperation] = UNSET
     status: Union[Unset, DocumentJobStatus] = UNSET
     template_id: Union[None, UUID, Unset] = UNSET
+    template_version: Union[None, Unset, int] = UNSET
     output_reference: Union[None, Unset, str] = UNSET
     stage: Union[None, Unset, str] = UNSET
     processed_pages: Union[None, Unset, int] = UNSET
@@ -99,6 +105,12 @@ class DocumentJob:
             template_id = str(self.template_id)
         else:
             template_id = self.template_id
+
+        template_version: Union[None, Unset, int]
+        if isinstance(self.template_version, Unset):
+            template_version = UNSET
+        else:
+            template_version = self.template_version
 
         output_reference: Union[None, Unset, str]
         if isinstance(self.output_reference, Unset):
@@ -179,6 +191,8 @@ class DocumentJob:
             field_dict["status"] = status
         if template_id is not UNSET:
             field_dict["templateId"] = template_id
+        if template_version is not UNSET:
+            field_dict["templateVersion"] = template_version
         if output_reference is not UNSET:
             field_dict["outputReference"] = output_reference
         if stage is not UNSET:
@@ -246,6 +260,15 @@ class DocumentJob:
             return cast(Union[None, UUID, Unset], data)
 
         template_id = _parse_template_id(d.pop("templateId", UNSET))
+
+        def _parse_template_version(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        template_version = _parse_template_version(d.pop("templateVersion", UNSET))
 
         def _parse_output_reference(data: object) -> Union[None, Unset, str]:
             if data is None:
@@ -368,6 +391,7 @@ class DocumentJob:
             operation=operation,
             status=status,
             template_id=template_id,
+            template_version=template_version,
             output_reference=output_reference,
             stage=stage,
             processed_pages=processed_pages,

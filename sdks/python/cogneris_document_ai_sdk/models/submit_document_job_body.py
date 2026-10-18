@@ -21,11 +21,18 @@ class SubmitDocumentJobBody:
             until it expires.
              Example: artifact://uploads/9f2c1b7a4d8e4f06b1a25c3e7d9f0a11/invoice.pdf.
         template_id (Union[None, UUID, Unset]): Extraction only: the id of one of your tenant's finished templates,
-            whose schema drives the extraction. Templates are not versioned or
-            content-hashed. A template definition may change in place, so submits
-            with the same `templateId` can produce different results over time.
-            Deleting a finished template is allowed. A pending job may fail if its
-            selected template is deleted before processing can resolve it. Omit
+            whose schema drives the extraction. Send only the id: there is no
+            version parameter. Every publish or update of a template's definition
+            records a new numbered version in the template's history, and the
+            platform resolves the current version when it accepts the submit. The
+            job then runs on that version even if a newer one is published before
+            it is processed, and reports it as `templateVersion`. A later submit
+            with the same `templateId` and the same input uses whatever version is
+            current then, so it can produce a different result: repeating a call
+            across versions is not idempotent. Earlier versions are kept for audit
+            only and cannot be selected. Deleting a finished template is allowed.
+            A pending job may fail if its selected template is deleted before
+            processing can resolve it. Omit
             `templateId` and the platform picks the template from the document, as
             the synchronous endpoint does. A nonzero
             id sent with any other operation is refused with `422` and
