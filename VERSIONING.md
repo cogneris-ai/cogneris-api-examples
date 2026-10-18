@@ -37,6 +37,13 @@ regenerate/check all four SDKs.
 
 ### 1.0.0
 
+The unpublished source release also includes the optional nullable applied
+extraction `templateId` and asynchronous job `templateVersion` from the merged
+canonical contract (XTRAK-2569). Template history descriptions explain that a
+job retains the version resolved at submission. These additions do not remove
+existing fields or change the pending release version; registry publication
+remains a separately authorized action.
+
 Generated from OpenAPI contract `2026-09-28`. This coordinated major release
 retains the compatibility change introduced in the generated outputs for 0.2.0:
 `DocumentJobSubmitStatus` was removed and `DocumentJobSubmission.status` now uses

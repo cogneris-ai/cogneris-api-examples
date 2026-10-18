@@ -26,6 +26,11 @@ class EnvelopeData:
     """
     Attributes:
         id (Union[Unset, UUID]):
+        template_id (Union[None, UUID, Unset]): `/Document/extraction` only: the template whose schema was actually
+            applied. Null when the raw prompt was used, including when no template
+            was requested, the requested id was unknown or belonged to another
+            tenant, the template had no fields, or extraction fell back to the raw
+            prompt. Never echoes a requested template that was not applied.
         metadata (Union[Unset, EnvelopeDataMetadata]): Operation-specific payload, shaped by the template or operation
             that ran.
             The keys are your template's, so the object itself is left open here.
@@ -84,6 +89,7 @@ class EnvelopeData:
     """
 
     id: Union[Unset, UUID] = UNSET
+    template_id: Union[None, UUID, Unset] = UNSET
     metadata: Union[Unset, "EnvelopeDataMetadata"] = UNSET
     created_date: Union[Unset, datetime.datetime] = UNSET
     results: Union[Unset, list["ClassificationResult"]] = UNSET
@@ -106,6 +112,14 @@ class EnvelopeData:
         id: Union[Unset, str] = UNSET
         if not isinstance(self.id, Unset):
             id = str(self.id)
+
+        template_id: Union[None, Unset, str]
+        if isinstance(self.template_id, Unset):
+            template_id = UNSET
+        elif isinstance(self.template_id, UUID):
+            template_id = str(self.template_id)
+        else:
+            template_id = self.template_id
 
         metadata: Union[Unset, dict[str, Any]] = UNSET
         if not isinstance(self.metadata, Unset):
@@ -189,6 +203,8 @@ class EnvelopeData:
         field_dict.update({})
         if id is not UNSET:
             field_dict["id"] = id
+        if template_id is not UNSET:
+            field_dict["templateId"] = template_id
         if metadata is not UNSET:
             field_dict["metadata"] = metadata
         if created_date is not UNSET:
@@ -236,6 +252,23 @@ class EnvelopeData:
             id = UNSET
         else:
             id = UUID(_id)
+
+        def _parse_template_id(data: object) -> Union[None, UUID, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                template_id_type_0 = UUID(data)
+
+                return template_id_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, UUID, Unset], data)
+
+        template_id = _parse_template_id(d.pop("templateId", UNSET))
 
         _metadata = d.pop("metadata", UNSET)
         metadata: Union[Unset, EnvelopeDataMetadata]
@@ -354,6 +387,7 @@ class EnvelopeData:
 
         envelope_data = cls(
             id=id,
+            template_id=template_id,
             metadata=metadata,
             created_date=created_date,
             results=results,

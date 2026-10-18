@@ -8,6 +8,15 @@ export type Envelope = {
     data?: {
         id?: string;
         /**
+         * `/Document/extraction` only: the template whose schema was actually
+         * applied. Null when the raw prompt was used, including when no template
+         * was requested, the requested id was unknown or belonged to another
+         * tenant, the template had no fields, or extraction fell back to the raw
+         * prompt. Never echoes a requested template that was not applied.
+         *
+         */
+        templateId?: string | null;
+        /**
          * Operation-specific payload, shaped by the template or operation that ran.
          * The keys are your template's, so the object itself is left open here.
          *
@@ -400,6 +409,14 @@ export type DocumentJob = {
      *
      */
     templateId?: string | null;
+    /**
+     * The version of `templateId` this job runs on, resolved when the submit was
+     * accepted. A template published again later does not change it. Null when the
+     * job did not use a template, and for jobs accepted before template versions were
+     * recorded, which run on the template's current definition.
+     *
+     */
+    templateVersion?: number | null;
     /**
      * Where the finished result is stored, as an `artifact://` reference. Read it
      * with `GET /api/v1/artifacts/content`. Null until the job succeeds, and always
@@ -1615,11 +1632,18 @@ export type SubmitDocumentJobData = {
         inputReference: string;
         /**
          * Extraction only: the id of one of your tenant's finished templates,
-         * whose schema drives the extraction. Templates are not versioned or
-         * content-hashed. A template definition may change in place, so submits
-         * with the same `templateId` can produce different results over time.
-         * Deleting a finished template is allowed. A pending job may fail if its
-         * selected template is deleted before processing can resolve it. Omit
+         * whose schema drives the extraction. Send only the id: there is no
+         * version parameter. Every publish or update of a template's definition
+         * records a new numbered version in the template's history, and the
+         * platform resolves the current version when it accepts the submit. The
+         * job then runs on that version even if a newer one is published before
+         * it is processed, and reports it as `templateVersion`. A later submit
+         * with the same `templateId` and the same input uses whatever version is
+         * current then, so it can produce a different result: repeating a call
+         * across versions is not idempotent. Earlier versions are kept for audit
+         * only and cannot be selected. Deleting a finished template is allowed.
+         * A pending job may fail if its selected template is deleted before
+         * processing can resolve it. Omit
          * `templateId` and the platform picks the template from the document, as
          * the synchronous endpoint does. A nonzero
          * id sent with any other operation is refused with `422` and

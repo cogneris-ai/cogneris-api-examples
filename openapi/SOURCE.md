@@ -1,9 +1,9 @@
 # OpenAPI provenance
 
-`cogneris-openapi.yaml` was copied on 2026-10-08 from
-`cogneris-site/src/openapi.yaml` at commit `5a52751614af480bdd34179656751049408907d4`
+`cogneris-openapi.yaml` was copied on 2026-10-17 from
+`cogneris-site/src/openapi.yaml` at commit `e3807295095de98b638f808d8b20c2c05f033ac5`
 (OpenAPI contract dated `2026-09-28`; SHA-256
-`573f7cb4d7a4fa04d97fcce0109dacdaf4008ad0940fa5df70289e6873f3d81a`).
+`3fd3521394923357102467f2e602d6d3bbceb08d6a803e3c89368ea168c96408`).
 
 The published contract is also available at <https://cogneris.ai/openapi.yaml>.
 When the contract changes, replace the local copy, update this provenance

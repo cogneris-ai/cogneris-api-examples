@@ -14,6 +14,10 @@ that existing job. The TypeScript SDK, Python SDK, C# SDK, Java SDK, and CLI all
 use the coordinated source version `1.0.0` across all five families. These
 artifacts are source outputs only; publication is a separate release action.
 
+- The unpublished source release includes optional nullable extraction `template_id`
+  and job `template_version` from the canonical contract (XTRAK-2569). Jobs retain
+  the template version resolved at submission; registry publication remains separate.
+
 - Document sandbox key scope: only artifact and asynchronous job routes are available; job submission accepts `Extraction` without `templateId`, `Classification`, `ZeroShot`, `Crop` and `Split`. Sandbox jobs debit no credits or production quota; unsupported routes or operations return `403` with `environment.sandbox_route_unavailable`. Documentation only; no API behavior or SDK version change. XTRAK-2373. Main PR: [#54](https://github.com/cogneris-ai/cogneris-api-examples/pull/54).
 
 - Replace `DocumentJobSubmitStatus` with `DocumentJobStatus` on job submission
