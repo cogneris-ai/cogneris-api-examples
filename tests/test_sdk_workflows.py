@@ -131,7 +131,7 @@ def expected_jobs(release):
             "steps": main_steps,
         },
         "python-compatibility": {
-            "needs": [build], "runs-on": "ubuntu-latest", "permissions": READ_ONLY,
+            "needs": [build], "runs-on": "ubuntu-24.04", "permissions": READ_ONLY,
             "strategy": {"fail-fast": False, "matrix": {"python": ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]}},
             "env": dict(PYTHON_ENV, RELEASE_VERSION=version,
                         MANIFEST_SHA256="${{ needs." + build + ".outputs.manifest-sha256 }}"),

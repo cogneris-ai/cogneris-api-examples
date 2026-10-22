@@ -85,7 +85,9 @@ jobs:
 
   python-compatibility:
     needs: [build]
-    runs-on: ubuntu-latest
+    # setup-python does not provide Python 3.9 on ubuntu-26.04 (ubuntu-latest). Remove this pin
+    # when 3.9 leaves requires-python and the matrix.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     strategy:
