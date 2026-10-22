@@ -230,7 +230,7 @@
       "version": "1.0.0",
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
-        "CHANGELOG.md": "86b86c283d0eb45c80121fb51d6cc832c89a20e71f27931d4cd7a4c5474de57b",
+        "CHANGELOG.md": "c8d91be30b6d0adcd31849865bf2d38e71a07db77dbd47dffb540b33717a431a",
         "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/artifacts/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
