@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CreateWebhookEndpointData, CreateWebhookEndpointErrors, CreateWebhookEndpointResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, DeleteWebhookEndpointData, DeleteWebhookEndpointErrors, DeleteWebhookEndpointResponses, DownloadArtifactData, DownloadArtifactErrors, DownloadArtifactResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWebhookEndpointsData, ListWebhookEndpointsErrors, ListWebhookEndpointsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, UpdateWebhookEndpointData, UpdateWebhookEndpointErrors, UpdateWebhookEndpointResponses, UploadArtifactData, UploadArtifactErrors, UploadArtifactResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
+import type { CancelDocumentJobData, CancelDocumentJobErrors, CancelDocumentJobResponses, ClassifyDocumentsData, ClassifyDocumentsErrors, ClassifyDocumentsResponses, CreatePortalMagicLinkData, CreatePortalMagicLinkErrors, CreatePortalMagicLinkResponses, CreateWebhookEndpointData, CreateWebhookEndpointErrors, CreateWebhookEndpointResponses, CropDocumentData, CropDocumentErrors, CropDocumentResponses, DeleteWebhookEndpointData, DeleteWebhookEndpointErrors, DeleteWebhookEndpointResponses, DownloadArtifactData, DownloadArtifactErrors, DownloadArtifactResponses, ExtractDocumentData, ExtractDocumentErrors, ExtractDocumentResponses, FaceMatchDocumentData, FaceMatchDocumentErrors, FaceMatchDocumentResponses, GetDocumentFraudVerificationData, GetDocumentFraudVerificationErrors, GetDocumentFraudVerificationResponses, GetDocumentJobData, GetDocumentJobErrors, GetDocumentJobResponses, ListDocumentJobsData, ListDocumentJobsErrors, ListDocumentJobsResponses, ListPortalChannelsData, ListPortalChannelsErrors, ListPortalChannelsResponses, ListPortalFormsData, ListPortalFormsErrors, ListPortalFormsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWebhookEndpointsData, ListWebhookEndpointsErrors, ListWebhookEndpointsResponses, SplitDocumentData, SplitDocumentErrors, SplitDocumentResponses, SubmitDocumentJobData, SubmitDocumentJobErrors, SubmitDocumentJobResponses, UpdateWebhookEndpointData, UpdateWebhookEndpointErrors, UpdateWebhookEndpointResponses, UploadArtifactData, UploadArtifactErrors, UploadArtifactResponses, VerifyDocumentFraudData, VerifyDocumentFraudErrors, VerifyDocumentFraudResponses, ZeroShotDocumentData, ZeroShotDocumentErrors, ZeroShotDocumentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -366,4 +366,65 @@ export const createPortalMagicLink = <ThrowOnError extends boolean = false>(opti
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * Verify a document for fraud
+ *
+ * Checks one document — a PDF or an image — for signs that it was edited after it
+ * was issued, fabricated, or submitted before, and returns a verdict:
+ *
+ * - `trusted` — nothing worth a second look;
+ * - `review` — a person should look before relying on it;
+ * - `suspect` — strong signs; a person must look.
+ *
+ * A verdict never rejects a document by itself. It tells you whether to route the
+ * document to a person.
+ *
+ * **What is checked.** PDF edit history and metadata, compression inconsistencies
+ * between image regions, content credentials (C2PA), digital signatures, and whether
+ * the same file or the same layout was submitted to your tenant before. When you
+ * send `fields` — values already extracted from this document — tax ids, dates and
+ * totals are checked as well. `checks` lists every check that ran and what it
+ * answered; `failedCoverage` lists the ones that could not run. A check that did not
+ * run is not a clear result.
+ *
+ * **The file is analysed as you sent it.** Send the original file, not a re-saved or
+ * printed copy: re-saving erases the edit history several checks read.
+ *
+ * **Opt-in.** Fraud verification runs only for a tenant whose administrator enabled
+ * fraud detection. Otherwise the call is refused with `fraud.not_enabled` and nothing
+ * is charged.
+ *
+ * **Credits.** 8 credits per analysis, reported in `meta.creditsConsumed`. With
+ * `reuse` (the default), sending the same file again at the same sensitivity within
+ * 24 hours returns the earlier analysis with `reused: true`, free of charge. An
+ * analysis that could not complete (`fraud.unavailable`) is not charged.
+ *
+ * Production keys only. Requires the `fraud-verify.write` scope (a `*` key holds it).
+ *
+ */
+export const verifyDocumentFraud = <ThrowOnError extends boolean = false>(options: Options<VerifyDocumentFraudData, ThrowOnError>): RequestResult<VerifyDocumentFraudResponses, VerifyDocumentFraudErrors, ThrowOnError> => (options.client ?? client).post<VerifyDocumentFraudResponses, VerifyDocumentFraudErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/fraud-verify',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
+
+/**
+ * Get a fraud verification
+ *
+ * Reads an analysis back by the `requestId` the verification returned. It also reads
+ * the analysis of a document a workflow or an extraction checked, when fraud
+ * detection is enabled for them. Requires the `fraud-verify.read` scope.
+ *
+ */
+export const getDocumentFraudVerification = <ThrowOnError extends boolean = false>(options: Options<GetDocumentFraudVerificationData, ThrowOnError>): RequestResult<GetDocumentFraudVerificationResponses, GetDocumentFraudVerificationErrors, ThrowOnError> => (options.client ?? client).get<GetDocumentFraudVerificationResponses, GetDocumentFraudVerificationErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/fraud-verify/{requestId}',
+    ...options
 });

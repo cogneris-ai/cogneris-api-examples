@@ -27,6 +27,14 @@ from .extracted_field import ExtractedField
 from .face_extraction import FaceExtraction
 from .face_match import FaceMatch
 from .face_match_document_body import FaceMatchDocumentBody
+from .fraud_check import FraudCheck
+from .fraud_check_status import FraudCheckStatus
+from .fraud_signal import FraudSignal
+from .fraud_signal_severity import FraudSignalSeverity
+from .fraud_verification import FraudVerification
+from .fraud_verification_envelope import FraudVerificationEnvelope
+from .fraud_verification_policy_action import FraudVerificationPolicyAction
+from .fraud_verification_verdict import FraudVerificationVerdict
 from .portal_channels import PortalChannels
 from .portal_form import PortalForm
 from .portal_magic_link import PortalMagicLink
@@ -50,6 +58,8 @@ from .template_list import TemplateList
 from .template_list_envelope import TemplateListEnvelope
 from .template_status import TemplateStatus
 from .upload_artifact_body import UploadArtifactBody
+from .verify_document_fraud_body import VerifyDocumentFraudBody
+from .verify_document_fraud_body_sensitivity import VerifyDocumentFraudBodySensitivity
 from .webhook_endpoint import WebhookEndpoint
 from .webhook_endpoint_create_request import WebhookEndpointCreateRequest
 from .webhook_endpoint_create_request_headers_type_0 import WebhookEndpointCreateRequestHeadersType0
@@ -95,6 +105,14 @@ __all__ = (
     "FaceExtraction",
     "FaceMatch",
     "FaceMatchDocumentBody",
+    "FraudCheck",
+    "FraudCheckStatus",
+    "FraudSignal",
+    "FraudSignalSeverity",
+    "FraudVerification",
+    "FraudVerificationEnvelope",
+    "FraudVerificationPolicyAction",
+    "FraudVerificationVerdict",
     "PortalChannels",
     "PortalForm",
     "PortalMagicLink",
@@ -118,6 +136,8 @@ __all__ = (
     "TemplateListEnvelope",
     "TemplateStatus",
     "UploadArtifactBody",
+    "VerifyDocumentFraudBody",
+    "VerifyDocumentFraudBodySensitivity",
     "WebhookEndpoint",
     "WebhookEndpointCreated",
     "WebhookEndpointCreatedEnvelope",

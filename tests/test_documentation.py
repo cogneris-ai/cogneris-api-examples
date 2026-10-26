@@ -97,7 +97,7 @@ class DocumentationContractTests(unittest.TestCase):
             "cognerisclient",
             "cogneris_api_key",
             "cogneris_region",
-            "2026-09-24",
+            "2026-10-23",
             "postman",
             "multipart/form-data",
             "50 requests",
@@ -126,7 +126,7 @@ class DocumentationContractTests(unittest.TestCase):
         self.assertIn("security/advisories/new", support)
         self.assertIn("privately report", support)
         self.assertNotIn("does not yet", support)
-        for term in ("semantic versioning", "2026-09-28", "deprecation", "openapi"):
+        for term in ("semantic versioning", "2026-10-23", "deprecation", "openapi"):
             self.assertIn(term, versioning)
         for term in ("published on maven central", "public artifact integrity", "1.0.0", "unpublished"):
             self.assertIn(term, versioning)
