@@ -13242,6 +13242,2118 @@
                   ]
                 }
               ]
+            },
+            {
+              "name": "fraud-verify",
+              "description": "",
+              "item": [
+                {
+                  "name": "Verify a document for fraud",
+                  "request": {
+                    "name": "Verify a document for fraud",
+                    "description": {
+                      "content": "Checks one document — a PDF or an image — for signs that it was edited after it\nwas issued, fabricated, or submitted before, and returns a verdict:\n\n- `trusted` — nothing worth a second look;\n- `review` — a person should look before relying on it;\n- `suspect` — strong signs; a person must look.\n\nA verdict never rejects a document by itself. It tells you whether to route the\ndocument to a person.\n\n**What is checked.** PDF edit history and metadata, compression inconsistencies\nbetween image regions, content credentials (C2PA), digital signatures, and whether\nthe same file or the same layout was submitted to your tenant before. When you\nsend `fields` — values already extracted from this document — tax ids, dates and\ntotals are checked as well. `checks` lists every check that ran and what it\nanswered; `failedCoverage` lists the ones that could not run. A check that did not\nrun is not a clear result.\n\n**The file is analysed as you sent it.** Send the original file, not a re-saved or\nprinted copy: re-saving erases the edit history several checks read.\n\n**Opt-in.** Fraud verification runs only for a tenant whose administrator enabled\nfraud detection. Otherwise the call is refused with `fraud.not_enabled` and nothing\nis charged.\n\n**Credits.** 8 credits per analysis, reported in `meta.creditsConsumed`. With\n`reuse` (the default), sending the same file again at the same sensitivity within\n24 hours returns the earlier analysis with `reused: true`, free of charge. An\nanalysis that could not complete (`fraud.unavailable`) is not charged.\n\nProduction keys only. Requires the `fraud-verify.write` scope (a `*` key holds it).\n",
+                      "type": "text/plain"
+                    },
+                    "url": {
+                      "path": [
+                        "api",
+                        "v1",
+                        "fraud-verify"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "multipart/form-data"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "POST",
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "description": {
+                            "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                            "type": "text/plain"
+                          },
+                          "key": "file",
+                          "type": "file"
+                        },
+                        {
+                          "description": {
+                            "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "sensitivity",
+                          "value": "medium",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "description": {
+                            "content": "A template whose saved fraud settings supply the default sensitivity.",
+                            "type": "text/plain"
+                          },
+                          "key": "templateId",
+                          "value": "<uuid>",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "description": {
+                            "content": "Return an earlier analysis of the same file instead of running a new one.",
+                            "type": "text/plain"
+                          },
+                          "key": "reuse",
+                          "value": "true",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "description": {
+                            "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                            "type": "text/plain"
+                          },
+                          "key": "fields",
+                          "value": "<string>",
+                          "type": "text",
+                          "disabled": true
+                        }
+                      ]
+                    },
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "The analysis.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"requestId\": \"<uuid>\",\n    \"verdict\": \"trusted\",\n    \"riskScore\": \"<number>\",\n    \"policyAction\": \"flag\",\n    \"reused\": \"<boolean>\",\n    \"signals\": [\n      {\n        \"code\": \"<string>\",\n        \"label\": \"<string>\",\n        \"severity\": \"high\",\n        \"score\": \"<number>\",\n        \"evidence\": \"<string>\"\n      },\n      {\n        \"code\": \"<string>\",\n        \"label\": \"<string>\",\n        \"severity\": \"high\",\n        \"score\": \"<number>\",\n        \"evidence\": \"<string>\"\n      }\n    ],\n    \"checks\": [\n      {\n        \"name\": \"<string>\",\n        \"status\": \"clear\",\n        \"signals\": [\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"low\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          },\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"medium\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          }\n        ]\n      },\n      {\n        \"name\": \"<string>\",\n        \"status\": \"failed\",\n        \"signals\": [\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"high\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          },\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"high\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          }\n        ]\n      }\n    ],\n    \"failedCoverage\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"aiGeneratedLikelihood\": \"<number>\",\n    \"pipelineVersion\": \"<string>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "The request is invalid. Refused before processing — malformed or unsafe — it\nis a problem document; refused by processing itself, such as a missing file,\nit is the service envelope with the reason in `meta.errors`.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Refused before anything ran, nothing charged. `fraud.not_enabled`: your tenant has\nnot enabled fraud detection; an administrator turns it on. `fraud.scope_required`:\nthe key lacks `fraud-verify.write` (or `fraud-verify.read` to read back). A sandbox\nkey gets `environment.sandbox_route_unavailable`.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Nothing answers at this address for this tenant.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "The request conflicts with the current state of what it acts on.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Conflict",
+                      "code": 409,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Over the size limit — 10 MB, or 500 MB on `/Document/split`.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Request Entity Too Large",
+                      "code": 413,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    },
+                    {
+                      "name": "Extension outside the supported list.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unsupported Media Type",
+                      "code": 415,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    },
+                    {
+                      "name": "The document was rejected by the security policy, or could not be\nconverted safely. The `code` says which.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                      "code": 422,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds until the rate-limit window resets. Sent with the problem document.",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unexpected failure. `correlationId` identifies the request — quote it when\nyou contact support.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Internal Server Error",
+                      "code": 500,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Bad Gateway",
+                      "code": 502,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Service Unavailable",
+                      "code": 503,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "multipart/form-data"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": {
+                              "content": "Added as a part of security scheme: bearer",
+                              "type": "text/plain"
+                            },
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "method": "POST",
+                        "body": {
+                          "mode": "formdata",
+                          "formdata": [
+                            {
+                              "description": {
+                                "content": "(Required) The document, as received from its holder. PDF or image, up to 10 MB.",
+                                "type": "text/plain"
+                              },
+                              "key": "file",
+                              "type": "file"
+                            },
+                            {
+                              "description": {
+                                "content": "How readily signals turn into `review` and `suspect`. Default: the\nsensitivity saved on `templateId`, otherwise `medium`.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "sensitivity",
+                              "value": "medium",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A template whose saved fraud settings supply the default sensitivity.",
+                                "type": "text/plain"
+                              },
+                              "key": "templateId",
+                              "value": "<uuid>",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "Return an earlier analysis of the same file instead of running a new one.",
+                                "type": "text/plain"
+                              },
+                              "key": "reuse",
+                              "value": "true",
+                              "type": "text"
+                            },
+                            {
+                              "description": {
+                                "content": "A JSON object of values already extracted from this document, for\nexample `{\"cpf\":\"123.456.789-09\",\"issueDate\":\"2026-02-30\"}`. Enables the\nchecks on tax ids, dates and totals.\n",
+                                "type": "text/plain"
+                              },
+                              "key": "fields",
+                              "value": "<string>",
+                              "type": "text"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Gateway Timeout",
+                      "code": 504,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                },
+                {
+                  "name": "{requestId}",
+                  "description": "",
+                  "item": [
+                    {
+                      "name": "Get a fraud verification",
+                      "request": {
+                        "name": "Get a fraud verification",
+                        "description": {
+                          "content": "Reads an analysis back by the `requestId` the verification returned. It also reads\nthe analysis of a document a workflow or an extraction checked, when fraud\ndetection is enabled for them. Requires the `fraud-verify.read` scope.\n",
+                          "type": "text/plain"
+                        },
+                        "url": {
+                          "path": [
+                            "api",
+                            "v1",
+                            "fraud-verify",
+                            ":requestId"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": [
+                            {
+                              "type": "any",
+                              "value": "<uuid>",
+                              "key": "requestId",
+                              "disabled": false,
+                              "description": {
+                                "content": "(Required) ",
+                                "type": "text/plain"
+                              }
+                            }
+                          ]
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "The stored analysis. `reused` is always `false` here.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"requestId\": \"<uuid>\",\n    \"verdict\": \"trusted\",\n    \"riskScore\": \"<number>\",\n    \"policyAction\": \"flag\",\n    \"reused\": \"<boolean>\",\n    \"signals\": [\n      {\n        \"code\": \"<string>\",\n        \"label\": \"<string>\",\n        \"severity\": \"high\",\n        \"score\": \"<number>\",\n        \"evidence\": \"<string>\"\n      },\n      {\n        \"code\": \"<string>\",\n        \"label\": \"<string>\",\n        \"severity\": \"high\",\n        \"score\": \"<number>\",\n        \"evidence\": \"<string>\"\n      }\n    ],\n    \"checks\": [\n      {\n        \"name\": \"<string>\",\n        \"status\": \"clear\",\n        \"signals\": [\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"low\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          },\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"medium\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          }\n        ]\n      },\n      {\n        \"name\": \"<string>\",\n        \"status\": \"failed\",\n        \"signals\": [\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"high\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          },\n          {\n            \"code\": \"<string>\",\n            \"label\": \"<string>\",\n            \"severity\": \"high\",\n            \"score\": \"<number>\",\n            \"evidence\": \"<string>\"\n          }\n        ]\n      }\n    ],\n    \"failedCoverage\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"aiGeneratedLikelihood\": \"<number>\",\n    \"pipelineVersion\": \"<string>\"\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": null\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "The request is invalid. Refused before processing — malformed or unsafe — it\nis a problem document; refused by processing itself, such as a missing file,\nit is the service envelope with the reason in `meta.errors`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`\n(sandbox) prefixes are accepted, but the key must also be valid and active.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Refused before anything ran, nothing charged. `fraud.not_enabled`: your tenant has\nnot enabled fraud detection; an administrator turns it on. `fraud.scope_required`:\nthe key lacks `fraud-verify.write` (or `fraud-verify.read` to read back). A sandbox\nkey gets `environment.sandbox_route_unavailable`.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "No analysis with this `requestId` exists for your tenant (`fraud.not_found`, the\nservice envelope). Any other 404, such as an address nothing answers at, is a\nproblem document.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "The request conflicts with the current state of what it acts on.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Conflict",
+                          "code": 409,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Too Many Requests",
+                          "code": 429,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            },
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "Seconds until the rate-limit window resets. Sent with the problem document.",
+                                "type": "text/plain"
+                              },
+                              "key": "Retry-After",
+                              "value": "<integer>"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Unexpected failure. `correlationId` identifies the request — quote it when\nyou contact support.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Internal Server Error",
+                          "code": 500,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<string>\",\n  \"title\": \"<string>\",\n  \"status\": \"<integer>\",\n  \"detail\": \"<string,null>\",\n  \"instance\": \"<string>\",\n  \"code\": \"<string>\",\n  \"correlationId\": \"<string>\",\n  \"retryable\": \"<boolean>\",\n  \"field\": \"<string,null>\",\n  \"errors\": [\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    },\n    {\n      \"code\": \"<string>\",\n      \"message\": \"<string>\",\n      \"field\": \"<string,null>\",\n      \"retryable\": \"<boolean>\",\n      \"details\": null\n    }\n  ]\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Bad Gateway",
+                          "code": 502,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Service Unavailable",
+                          "code": 503,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Document processing could not complete because an upstream service or its\nadmission proof failed. The body is the service envelope. Read\n`meta.errors[].retryable` for the specific error; the HTTP status alone does\nnot mean the operation is safe to repeat.",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "v1",
+                                "fraud-verify",
+                                ":requestId"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [],
+                              "variable": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  },
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "requestId"
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": {
+                                  "content": "Added as a part of security scheme: bearer",
+                                  "type": "text/plain"
+                                },
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Gateway Timeout",
+                          "code": 504,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }

@@ -2,7 +2,7 @@
 
 ## 1.0.0
 
-Generated from OpenAPI contract `2026-09-28`. Compatibility impact: **major**.
+Generated from OpenAPI contract `2026-10-23`. Compatibility impact: **major**.
 The public `DocumentJobSubmitStatus` type, which only represented `Queued`, was
 removed and replaced in `DocumentJobSubmission.status` by the existing broader
 `DocumentJobStatus` type. Source code that names `DocumentJobSubmitStatus` must
@@ -18,6 +18,12 @@ artifacts are source outputs only; publication is a separate release action.
   and job `template_version` from the canonical contract (XTRAK-2569). Jobs retain
   the template version resolved at submission; registry publication remains separate
   (XTRAK-2569, #65).
+
+- Add fraud verification from contract `2026-10-23`: `api.fraud_verification.verify_document_fraud`
+  (`POST /api/v1/fraud-verify`, multipart) returns a `trusted`, `review` or `suspect` verdict with
+  the checks that ran, and `get_document_fraud_verification` (`GET /api/v1/fraud-verify/{requestId}`)
+  reads it back. Production keys with `fraud-verify.write` (`fraud-verify.read` to read back) only;
+  additive, no existing field changes (WOR-202).
 
 - Document sandbox key scope: only artifact and asynchronous job routes are available; job submission accepts `Extraction` without `templateId`, `Classification`, `ZeroShot`, `Crop` and `Split`. Sandbox jobs debit no credits or production quota; unsupported routes or operations return `403` with `environment.sandbox_route_unavailable`. Documentation only; no API behavior or SDK version change. XTRAK-2373. Main PR: [#54](https://github.com/cogneris-ai/cogneris-api-examples/pull/54).
 

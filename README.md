@@ -4,7 +4,13 @@ This repository is the canonical first-result path for the public Cogneris
 Document AI API: TypeScript, Python, C#/.NET, Java, the `cogneris` CLI, and
 Postman. All of them are built from
 [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
-OpenAPI contract version `2026-09-24`.
+OpenAPI contract version `2026-10-23`.
+
+The full documentation lives at [docs.cogneris.ai](https://docs.cogneris.ai/):
+start with [Build with Cogneris](https://docs.cogneris.ai/docs/developers) and
+the [API reference](https://docs.cogneris.ai/docs/api). To work from the AI
+assistant in your editor instead, see
+[Integrate from your editor with the MCP server](#integrate-from-your-editor-with-the-mcp-server).
 
 For WhatsApp consent and delivery outcomes on the generated Portal API, see
 [Portal magic links](docs/portal-magic-links.md).
@@ -101,7 +107,7 @@ consumer result above remains the latest Java install evidence; a Java runtime
 was unavailable for a repeat install on this host.
 
 The committed source for all five SDK/CLI package families is version
-`1.0.0`, generated from OpenAPI contract `2026-09-28`. Source metadata does not
+`1.0.0`, generated from OpenAPI contract `2026-10-23`. Source metadata does not
 mean the version has been published. This coordinated major release removes the
 public `DocumentJobSubmitStatus` type and uses `DocumentJobStatus` for job
 submission status; see [VERSIONING.md](VERSIONING.md) for the migration and
@@ -395,8 +401,13 @@ response, exception context, document, or credential.
   `data.metadata` is an `ExtractedField` carrying `value`, `confidence`, and,
   when the value was located on the page, `page`, `bbox`, and `bbox_confidence`.
   Separate evidence, cost, destination, and webhook-signature APIs are absent
-  from OpenAPI contract `2026-09-24`. Do not fabricate calls or infer private
+  from OpenAPI contract `2026-10-23`. Do not fabricate calls or infer private
   service behavior for those capabilities.
+- Fraud verification (`POST /api/v1/fraud-verify` and
+  `GET /api/v1/fraud-verify/{requestId}`) is a generated API operation in every
+  SDK (`verifyDocumentFraud`/`verify_document_fraud`). It needs a production key
+  with `fraud-verify.write` (`fraud-verify.read` to read back) and a tenant whose
+  administrator enabled fraud detection; it costs 8 credits per analysis.
 - `CognerisClient` is the maintained document/job helper. Portal,
   administrative, and internal APIs are not SDK helper features. Public Portal
   operations that exist in the generated contract have separate scopes and
@@ -429,6 +440,100 @@ legacy live-smoke command.
 
 This live-smoke compatibility path is separate from the SDK examples and CLI,
 which use only `COGNERIS_API_KEY` and `COGNERIS_REGION`.
+
+## Integrate from your editor with the MCP server
+
+The Cogneris MCP server puts the platform inside the AI assistant of your code
+editor (VS Code with Copilot, Visual Studio, Cursor, Claude Code, or any Model
+Context Protocol client). Once connected, the assistant searches the Cogneris
+documentation, reads the exact contract of any route, and writes integration
+code that reads the key from `COGNERIS_API_KEY`, like the examples here. It can
+also create sandbox API keys and webhook endpoints, and train classifiers on
+your tenant, with the same metering and audit trail as the REST API.
+
+Full guide: [Connect your editor to the MCP server](https://docs.cogneris.ai/docs/developers/mcp-server)
+· [Prompt cookbook](https://docs.cogneris.ai/docs/developers/mcp-prompts)
+· [Video tutorials](https://docs.cogneris.ai/docs/developers/videos).
+
+**1. Pick your region's server.** Use the region of the API host you call:
+
+| Region | MCP server URL |
+| --- | --- |
+| Europe | `https://mcp-eu.cogneris.ai/` |
+| United States | `https://mcp-us.cogneris.ai/` |
+
+The endpoint is the root path `/`. A URL with a `/mcp` sub-path answers `404`.
+
+**2. Generate a developer token.** In the Cogneris platform open
+**Vision → MCP**, name the token after where it is used, choose 30 or 90 days,
+and choose the scopes: `mcp.read` and `mcp.write` are ticked by default; add
+`apikeys.manage` and `webhooks.manage` only if the assistant should manage API
+keys and webhooks. The token is shown once. It connects your editor; it is
+**not** an API key, and your application code keeps calling the REST API with
+`COGNERIS_API_KEY`.
+
+**3. Add the server to your editor.** VS Code reads `.vscode/mcp.json`. The
+token is a password input kept in VS Code's secret storage, so this file is
+safe to commit:
+
+```json
+{
+  "inputs": [
+    {
+      "id": "cogneris-token",
+      "type": "promptString",
+      "password": true,
+      "description": "Cogneris developer token"
+    }
+  ],
+  "servers": {
+    "cogneris": {
+      "type": "http",
+      "url": "https://mcp-eu.cogneris.ai/",
+      "headers": { "Authorization": "Bearer ${input:cogneris-token}" }
+    }
+  }
+}
+```
+
+Claude Code registers it with one command:
+
+```bash
+claude mcp add --transport http Cogneris https://mcp-eu.cogneris.ai/ \
+  --header "Authorization: Bearer <YOUR_COGNERIS_TOKEN>"
+```
+
+Cursor (`~/.cursor/mcp.json`) and Visual Studio (`%USERPROFILE%\.mcp.json`)
+hold the token in plain text: keep those files in your user profile and out of
+any repository. Their snippets are in the
+[full guide](https://docs.cogneris.ai/docs/developers/mcp-server#add-the-server-to-your-editor).
+In VS Code and Visual Studio, use Copilot Chat in **Agent** mode with the
+Cogneris tools enabled.
+
+**4. Check the connection.** Ask the assistant *"Who am I connected as on
+Cogneris?"*. It calls `cogneris_whoami` and answers with your tenant, sandbox or
+production, the granted scopes, and the API base URL your code should call.
+
+Without a token, an MCP client can sign in through the browser (authorization
+code with PKCE). That session lasts one hour and grants only `mcp.read` and
+`mcp.write`; use a developer token to stay connected for days or to manage API
+keys and webhooks.
+
+Before you let an agent drive:
+
+- API keys created from the editor are sandbox (`xtkt_test_`) by default; a
+  production key needs your explicit confirmation.
+- A new API key or webhook signing secret appears in a single answer. Have the
+  assistant write it to your git-ignored `.env`, never into source.
+- Document processing and Build AI spend credits; an agent looping over a folder
+  spends real budget, so cap it in the prompt and in the tenant cost cap.
+- Create calls are not idempotent: a retried create makes a duplicate.
+
+The MCP server also reaches capabilities the API serves but the published
+contract in this repository does not yet describe: custom classifiers,
+workflows and workflow runs, and Build AI. They have no generated SDK
+operations here. Ask the assistant for them, or check
+[docs.cogneris.ai](https://docs.cogneris.ai/) before calling them directly.
 
 ## Regeneration, support, and versions
 

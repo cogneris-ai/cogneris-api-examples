@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Cogneris Document AI API
-  version: '2026-09-28'
+  version: '2026-10-23'
   summary: Turn documents into structured data.
   description: |
     The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —
@@ -209,6 +209,8 @@ tags:
     description: Endpoints that are told when an asynchronous job finishes.
   - name: Portal
     description: Magic links to intake forms — ask a recipient for documents.
+  - name: Fraud verification
+    description: Check a document for signs that it was edited, fabricated or reused.
 
 paths:
   /Document/extraction:
@@ -1011,6 +1013,132 @@ paths:
         '500': { $ref: '#/components/responses/ServerError' }
         '502': { $ref: '#/components/responses/PortalUnavailable' }
 
+  /api/v1/fraud-verify:
+    post:
+      tags: [Fraud verification]
+      summary: Verify a document for fraud
+      description: |
+        Checks one document — a PDF or an image — for signs that it was edited after it
+        was issued, fabricated, or submitted before, and returns a verdict:
+
+        - `trusted` — nothing worth a second look;
+        - `review` — a person should look before relying on it;
+        - `suspect` — strong signs; a person must look.
+
+        A verdict never rejects a document by itself. It tells you whether to route the
+        document to a person.
+
+        **What is checked.** PDF edit history and metadata, compression inconsistencies
+        between image regions, content credentials (C2PA), digital signatures, and whether
+        the same file or the same layout was submitted to your tenant before. When you
+        send `fields` — values already extracted from this document — tax ids, dates and
+        totals are checked as well. `checks` lists every check that ran and what it
+        answered; `failedCoverage` lists the ones that could not run. A check that did not
+        run is not a clear result.
+
+        **The file is analysed as you sent it.** Send the original file, not a re-saved or
+        printed copy: re-saving erases the edit history several checks read.
+
+        **Opt-in.** Fraud verification runs only for a tenant whose administrator enabled
+        fraud detection. Otherwise the call is refused with `fraud.not_enabled` and nothing
+        is charged.
+
+        **Credits.** 8 credits per analysis, reported in `meta.creditsConsumed`. With
+        `reuse` (the default), sending the same file again at the same sensitivity within
+        24 hours returns the earlier analysis with `reused: true`, free of charge. An
+        analysis that could not complete (`fraud.unavailable`) is not charged.
+
+        Production keys only. Requires the `fraud-verify.write` scope (a `*` key holds it).
+      operationId: verifyDocumentFraud
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document, as received from its holder. PDF or image, up to 10 MB.
+                sensitivity:
+                  type: string
+                  enum: [low, medium, high]
+                  description: |
+                    How readily signals turn into `review` and `suspect`. Default: the
+                    sensitivity saved on `templateId`, otherwise `medium`.
+                templateId:
+                  type: string
+                  format: uuid
+                  description: A template whose saved fraud settings supply the default sensitivity.
+                reuse:
+                  type: boolean
+                  default: true
+                  description: Return an earlier analysis of the same file instead of running a new one.
+                fields:
+                  type: string
+                  description: |
+                    A JSON object of values already extracted from this document, for
+                    example `{"cpf":"123.456.789-09","issueDate":"2026-02-30"}`. Enables the
+                    checks on tax ids, dates and totals.
+      responses:
+        '200':
+          description: The analysis.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FraudVerificationEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/FraudForbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '422':
+          description: |
+            The document was rejected by the security policy, or could not be
+            converted safely. The `code` says which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+        '502': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+        '503': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+        '504': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+
+  /api/v1/fraud-verify/{requestId}:
+    get:
+      tags: [Fraud verification]
+      summary: Get a fraud verification
+      description: |
+        Reads an analysis back by the `requestId` the verification returned. It also reads
+        the analysis of a document a workflow or an extraction checked, when fraud
+        detection is enabled for them. Requires the `fraud-verify.read` scope.
+      operationId: getDocumentFraudVerification
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: The stored analysis. `reused` is always `false` here.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FraudVerificationEnvelope' }
+        '400': { $ref: '#/components/responses/ProcessingBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/FraudForbidden' }
+        '404': { $ref: '#/components/responses/FraudNotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/ProcessingRateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+        '502': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+        '503': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+        '504': { $ref: '#/components/responses/ProcessingUpstreamFailure' }
+
 components:
   securitySchemes:
     ApiKey:
@@ -1190,6 +1318,27 @@ components:
     WebhookUnexpected:
       description: Unexpected failure. Safe to retry a read; retry a write with the same `Idempotency-Key`.
       content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    FraudForbidden:
+      description: |
+        Refused before anything ran, nothing charged. `fraud.not_enabled`: your tenant has
+        not enabled fraud detection; an administrator turns it on. `fraud.scope_required`:
+        the key lacks `fraud-verify.write` (or `fraud-verify.read` to read back). A sandbox
+        key gets `environment.sandbox_route_unavailable`.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    FraudNotFound:
+      description: |
+        No analysis with this `requestId` exists for your tenant (`fraud.not_found`, the
+        service envelope). Any other 404, such as an address nothing answers at, is a
+        problem document.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
     PortalUnavailable:
@@ -1980,6 +2129,91 @@ components:
             whatsapp_blocked means the recipient asked to stop and consent cannot override it;
             provider_error is transient and may be retried. The link exists even if sending
             was suppressed; use the returned url when present.
+
+    FraudVerificationEnvelope:
+      type: object
+      required: [data, meta, hasErrors]
+      properties:
+        data: { $ref: '#/components/schemas/FraudVerification' }
+        meta: { $ref: '#/components/schemas/ServiceResponseMeta' }
+        hasErrors: { type: boolean }
+
+    FraudVerification:
+      type: object
+      required: [requestId, verdict, riskScore, policyAction, reused, signals, checks, failedCoverage]
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          description: Id of the analysis. Read it back with `GET /api/v1/fraud-verify/{requestId}`.
+        verdict:
+          type: string
+          enum: [trusted, review, suspect]
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: The aggregated risk the verdict was taken from.
+        aiGeneratedLikelihood:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: How likely the text was machine-generated. Never decisive on its own.
+        policyAction:
+          type: string
+          enum: [allow, flag, block]
+          description: |
+            Your tenant's enforcement policy applied to the verdict. `block` means "do not
+            proceed without a person"; it is a routing decision, not a rejection.
+        pipelineVersion:
+          type: string
+          description: Version of the checks that produced this analysis.
+        reused:
+          type: boolean
+          description: True when an earlier analysis of the same file was returned, free of charge.
+        signals:
+          type: array
+          items: { $ref: '#/components/schemas/FraudSignal' }
+        checks:
+          type: array
+          description: Every check that ran, in order.
+          items: { $ref: '#/components/schemas/FraudCheck' }
+        failedCoverage:
+          type: array
+          description: Checks that could not run on this document.
+          items: { type: string }
+
+    FraudSignal:
+      type: object
+      required: [code, label, severity, score, evidence]
+      properties:
+        code:
+          type: string
+          description: Stable signal code, for example `pdf_incremental_updates` or `duplicate_document`.
+        label:
+          type: string
+          description: The signal in plain English, for example "PDF edited after it was created".
+        severity:
+          type: string
+          enum: [low, medium, high]
+        score: { type: number, minimum: 0, maximum: 1 }
+        evidence:
+          type: string
+          description: What was found, in a sentence.
+
+    FraudCheck:
+      type: object
+      required: [name, status, signals]
+      properties:
+        name:
+          type: string
+          description: The check, for example `pdf_structure`, `image_ela`, `c2pa_provenance`, `pdf_signature`, `semantic`.
+        status:
+          type: string
+          enum: [clear, flagged, failed]
+        signals:
+          type: array
+          items: { $ref: '#/components/schemas/FraudSignal' }
 
     ProblemDetails:
       type: object

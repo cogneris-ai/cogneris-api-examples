@@ -16,7 +16,7 @@ availability.
 
 Every generated SDK release is tied to a dated public OpenAPI contract. The
 current artifacts are generated from Cogneris Document AI OpenAPI version
-`2026-09-28` (the published `0.1.0` releases were generated from `2026-08-07`); [`sdks/manifest.json`](sdks/manifest.json) records the exact
+`2026-10-23` (the published `0.1.0` releases were generated from `2026-08-07`); [`sdks/manifest.json`](sdks/manifest.json) records the exact
 contract SHA-256 and generated file hashes. `npm run check:sdks` verifies that
 committed output still matches that input and the pinned generators.
 
@@ -44,7 +44,16 @@ job retains the version resolved at submission. These additions do not remove
 existing fields or change the pending release version; registry publication
 remains a separately authorized action.
 
-Generated from OpenAPI contract `2026-09-28`. This coordinated major release
+It also includes fraud verification from the canonical contract `2026-10-23`
+(WOR-202): `verifyDocumentFraud` (`POST /api/v1/fraud-verify`) analyses one
+document and returns a `trusted`, `review` or `suspect` verdict with the checks
+that ran, and `getDocumentFraudVerification`
+(`GET /api/v1/fraud-verify/{requestId}`) reads an analysis back. They are
+generated API operations, not `CognerisClient` helpers; they require a
+production key with `fraud-verify.write` (or `fraud-verify.read` to read back)
+and a tenant with fraud detection enabled. The addition does not remove or change existing fields.
+
+Generated from OpenAPI contract `2026-10-23`. This coordinated major release
 retains the compatibility change introduced in the generated outputs for 0.2.0:
 `DocumentJobSubmitStatus` was removed and `DocumentJobSubmission.status` now uses
 the existing broader `DocumentJobStatus`. Consumers that name the removed type

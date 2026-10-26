@@ -690,6 +690,77 @@ export type PortalMagicLink = {
     sendSuppressionReason?: string | null;
 };
 
+export type FraudVerificationEnvelope = {
+    data: FraudVerification;
+    meta: ServiceResponseMeta;
+    hasErrors: boolean;
+};
+
+export type FraudVerification = {
+    /**
+     * Id of the analysis. Read it back with `GET /api/v1/fraud-verify/{requestId}`.
+     */
+    requestId: string;
+    verdict: 'trusted' | 'review' | 'suspect';
+    /**
+     * The aggregated risk the verdict was taken from.
+     */
+    riskScore: number;
+    /**
+     * How likely the text was machine-generated. Never decisive on its own.
+     */
+    aiGeneratedLikelihood?: number;
+    /**
+     * Your tenant's enforcement policy applied to the verdict. `block` means "do not
+     * proceed without a person"; it is a routing decision, not a rejection.
+     *
+     */
+    policyAction: 'allow' | 'flag' | 'block';
+    /**
+     * Version of the checks that produced this analysis.
+     */
+    pipelineVersion?: string;
+    /**
+     * True when an earlier analysis of the same file was returned, free of charge.
+     */
+    reused: boolean;
+    signals: Array<FraudSignal>;
+    /**
+     * Every check that ran, in order.
+     */
+    checks: Array<FraudCheck>;
+    /**
+     * Checks that could not run on this document.
+     */
+    failedCoverage: Array<string>;
+};
+
+export type FraudSignal = {
+    /**
+     * Stable signal code, for example `pdf_incremental_updates` or `duplicate_document`.
+     */
+    code: string;
+    /**
+     * The signal in plain English, for example "PDF edited after it was created".
+     */
+    label: string;
+    severity: 'low' | 'medium' | 'high';
+    score: number;
+    /**
+     * What was found, in a sentence.
+     */
+    evidence: string;
+};
+
+export type FraudCheck = {
+    /**
+     * The check, for example `pdf_structure`, `image_ela`, `c2pa_provenance`, `pdf_signature`, `semantic`.
+     */
+    name: string;
+    status: 'clear' | 'flagged' | 'failed';
+    signals: Array<FraudSignal>;
+};
+
 /**
  * RFC 9457 problem document, sent as `application/problem+json`.
  */
@@ -2377,3 +2448,222 @@ export type CreatePortalMagicLinkResponses = {
 };
 
 export type CreatePortalMagicLinkResponse = CreatePortalMagicLinkResponses[keyof CreatePortalMagicLinkResponses];
+
+export type VerifyDocumentFraudData = {
+    body: {
+        /**
+         * The document, as received from its holder. PDF or image, up to 10 MB.
+         */
+        file: Blob | File;
+        /**
+         * How readily signals turn into `review` and `suspect`. Default: the
+         * sensitivity saved on `templateId`, otherwise `medium`.
+         *
+         */
+        sensitivity?: 'low' | 'medium' | 'high';
+        /**
+         * A template whose saved fraud settings supply the default sensitivity.
+         */
+        templateId?: string;
+        /**
+         * Return an earlier analysis of the same file instead of running a new one.
+         */
+        reuse?: boolean;
+        /**
+         * A JSON object of values already extracted from this document, for
+         * example `{"cpf":"123.456.789-09","issueDate":"2026-02-30"}`. Enables the
+         * checks on tax ids, dates and totals.
+         *
+         */
+        fields?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/fraud-verify';
+};
+
+export type VerifyDocumentFraudErrors = {
+    /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
+     */
+    401: ProblemDetails;
+    /**
+     * Refused before anything ran, nothing charged. `fraud.not_enabled`: your tenant has
+     * not enabled fraud detection; an administrator turns it on. `fraud.scope_required`:
+     * the key lacks `fraud-verify.write` (or `fraud-verify.read` to read back). A sandbox
+     * key gets `environment.sandbox_route_unavailable`.
+     *
+     */
+    403: ServiceErrorEnvelope;
+    /**
+     * Nothing answers at this address for this tenant.
+     */
+    404: ProblemDetails;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
+    /**
+     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     */
+    413: unknown;
+    /**
+     * Extension outside the supported list.
+     */
+    415: unknown;
+    /**
+     * The document was rejected by the security policy, or could not be
+     * converted safely. The `code` says which.
+     *
+     */
+    422: ServiceErrorEnvelope;
+    /**
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
+};
+
+export type VerifyDocumentFraudError = VerifyDocumentFraudErrors[keyof VerifyDocumentFraudErrors];
+
+export type VerifyDocumentFraudResponses = {
+    /**
+     * The analysis.
+     */
+    200: FraudVerificationEnvelope;
+};
+
+export type VerifyDocumentFraudResponse = VerifyDocumentFraudResponses[keyof VerifyDocumentFraudResponses];
+
+export type GetDocumentFraudVerificationData = {
+    body?: never;
+    path: {
+        requestId: string;
+    };
+    query?: never;
+    url: '/api/v1/fraud-verify/{requestId}';
+};
+
+export type GetDocumentFraudVerificationErrors = {
+    /**
+     * The request is invalid. Refused before processing — malformed or unsafe — it
+     * is a problem document; refused by processing itself, such as a missing file,
+     * it is the service envelope with the reason in `meta.errors`.
+     *
+     */
+    400: ProblemDetails;
+    /**
+     * Missing or invalid API key. Both `xtkt_live_` (production) and `xtkt_test_`
+     * (sandbox) prefixes are accepted, but the key must also be valid and active.
+     *
+     */
+    401: ProblemDetails;
+    /**
+     * Refused before anything ran, nothing charged. `fraud.not_enabled`: your tenant has
+     * not enabled fraud detection; an administrator turns it on. `fraud.scope_required`:
+     * the key lacks `fraud-verify.write` (or `fraud-verify.read` to read back). A sandbox
+     * key gets `environment.sandbox_route_unavailable`.
+     *
+     */
+    403: ServiceErrorEnvelope;
+    /**
+     * No analysis with this `requestId` exists for your tenant (`fraud.not_found`, the
+     * service envelope). Any other 404, such as an address nothing answers at, is a
+     * problem document.
+     *
+     */
+    404: ServiceErrorEnvelope;
+    /**
+     * The request conflicts with the current state of what it acts on.
+     */
+    409: ProblemDetails;
+    /**
+     * Over 50 requests in the current 1-minute window for this key, answered as a
+     * problem document; or the document admission quota is exhausted, answered as
+     * the service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.
+     *
+     */
+    429: ProblemDetails;
+    /**
+     * Unexpected failure. `correlationId` identifies the request — quote it when
+     * you contact support.
+     *
+     */
+    500: ProblemDetails;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    502: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    503: ServiceErrorEnvelope;
+    /**
+     * Document processing could not complete because an upstream service or its
+     * admission proof failed. The body is the service envelope. Read
+     * `meta.errors[].retryable` for the specific error; the HTTP status alone does
+     * not mean the operation is safe to repeat.
+     *
+     */
+    504: ServiceErrorEnvelope;
+};
+
+export type GetDocumentFraudVerificationError = GetDocumentFraudVerificationErrors[keyof GetDocumentFraudVerificationErrors];
+
+export type GetDocumentFraudVerificationResponses = {
+    /**
+     * The stored analysis. `reused` is always `false` here.
+     */
+    200: FraudVerificationEnvelope;
+};
+
+export type GetDocumentFraudVerificationResponse = GetDocumentFraudVerificationResponses[keyof GetDocumentFraudVerificationResponses];

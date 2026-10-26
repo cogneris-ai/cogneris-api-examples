@@ -25,7 +25,7 @@ async function readJson(filePath) {
 
 function run(command, argumentsList, options = {}) {
   const result = spawnSync(command, argumentsList, {
-    cwd: root,
+    cwd: options.cwd ?? root,
     encoding: "utf8",
     env: { ...process.env, ...options.env },
   });
@@ -104,6 +104,25 @@ async function appendOverlay(targetPath, overlayPath) {
   const current = await fs.readFile(targetPath, "utf8");
   const addition = await fs.readFile(overlayPath, "utf8");
   await fs.writeFile(targetPath, `${current.trimEnd()}\n${addition}`);
+}
+
+// openapi-python-client 0.26.2 renders an optional multipart uuid as
+// `(None, str(value), "text/plain"))`: one parenthesis short and not encoded.
+// It runs before ruff, which cannot parse the result, so the generator's ruff
+// hooks are deferred until this is repaired.
+async function repairPythonMultipartUuid(pythonOutput) {
+  const broken = /^(\s*files\.append\(\("[^"]+", \(None, str\([\w.]+\))(, "text\/plain"\)\))$/gm;
+  let repaired = 0;
+  for (const relativePath of await listFiles(pythonOutput)) {
+    if (!relativePath.endsWith(".py")) continue;
+    const filePath = path.join(pythonOutput, relativePath);
+    const source = await fs.readFile(filePath, "utf8");
+    const matches = [...source.matchAll(broken)].length;
+    if (matches === 0) continue;
+    repaired += matches;
+    await fs.writeFile(filePath, source.replace(broken, "$1.encode()$2)"));
+  }
+  if (repaired !== 1) throw new Error("generated Python multipart uuid template changed");
 }
 
 async function applyApprovedLicense(stagedOutput) {
@@ -292,7 +311,7 @@ async function normalizeOpenApiSdk(sdkName, outputPath, generators) {
 
 async function normalizeJavaNativeSources(outputPath) {
   const apiDirectory = path.join(outputPath, "src", "main", "java", "ai", "cogneris", "documentai", "api");
-  for (const [name, expectedDecoders] of [["DocumentsApi", 7], ["JobsApi", 5], ["PortalApi", 4]]) {
+  for (const [name, expectedDecoders] of [["DocumentsApi", 7], ["JobsApi", 5], ["PortalApi", 4], ["FraudVerificationApi", 3]]) {
     const filePath = path.join(apiDirectory, `${name}.java`);
     let source = await fs.readFile(filePath, "utf8");
     const decoder = /new String\(((?:localVarResponseBody|responseBody)\.readAllBytes\(\))\)/g;
@@ -300,6 +319,13 @@ async function normalizeJavaNativeSources(outputPath) {
       throw new Error(`generated Java ${name} response decoder template changed`);
     }
     source = source.replace(decoder, "new String($1, java.nio.charset.StandardCharsets.UTF_8)");
+    if (name === "FraudVerificationApi") {
+      // `fields` is caller JSON (names, addresses); the default text part is ISO-8859-1.
+      const fields = 'multiPartBuilder.addTextBody("fields", fields.toString());';
+      if (source.split(fields).length !== 2) throw new Error("generated Java multipart fields template changed");
+      source = source.replace(fields,
+        'multiPartBuilder.addTextBody("fields", fields.toString(), org.apache.http.entity.ContentType.TEXT_PLAIN.withCharset(java.nio.charset.StandardCharsets.UTF_8));');
+    }
     if (name === "DocumentsApi") {
       const prompt = 'multiPartBuilder.addTextBody("ComplementaryPrompt", complementaryPrompt.toString());';
       if (source.split(prompt).length !== 2) throw new Error("generated Java multipart prompt template changed");
@@ -514,6 +540,11 @@ async function main() {
       path.join(typescriptOutput, "tsconfig.json"),
     );
 
+    const pythonConfigPath = path.join(temporaryRoot, "python.json");
+    await fs.writeFile(
+      pythonConfigPath,
+      JSON.stringify({ ...(await readJson(path.join(configDirectory, "python.json"))), post_hooks: [] }),
+    );
     run(
       "uvx",
       [
@@ -526,7 +557,7 @@ async function main() {
         "--path",
         sourcePath,
         "--config",
-        path.join(configDirectory, "python.json"),
+        pythonConfigPath,
         "--meta",
         "uv",
         "--output-path",
@@ -537,6 +568,13 @@ async function main() {
       // Python hash seed normalizes only that known source-order instability.
       { env: { PYTHONHASHSEED: "0" } },
     );
+    await repairPythonMultipartUuid(path.join(pythonOutput, "cogneris_document_ai_sdk"));
+    // The generator's default post hooks for a non-"none" meta type.
+    for (const hook of [["check", "--fix", "."], ["format", "."]]) {
+      run("uvx", ["--from", `ruff==${generators.python.dependencies.ruff}`, "ruff", ...hook], {
+        cwd: pythonOutput,
+      });
+    }
 
     // Some generator environments initialize a nested repository. Its object
     // database and refs are nondeterministic metadata, never SDK source.
