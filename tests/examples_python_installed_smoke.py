@@ -19,6 +19,7 @@ DOCUMENT_MARKER = "document-content-must-not-be-logged"
 EXTRACTED_MARKER = "extracted-field-must-not-be-logged"
 RESPONSE_MARKER = "raw-response-must-not-be-logged"
 JOB_ID = "11111111-1111-4111-8111-111111111111"
+TEMPLATE_ID = "22222222-2222-4222-8222-222222222222"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -79,7 +80,13 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(
                     200,
                     {
-                        "data": {"metadata": {"secretField": EXTRACTED_MARKER}},
+                        "data": {
+                            "templateId": TEMPLATE_ID,
+                            "metadata": {
+                                "secretField": {"value": EXTRACTED_MARKER, "confidence": 97},
+                                "issueDate": {"value": "2026-01-01", "confidence": 88},
+                            },
+                        },
                         "meta": {"httpStatusCode": 200},
                         "hasErrors": False,
                     },
@@ -158,20 +165,62 @@ class InstalledPythonExampleTests(unittest.TestCase):
         )
         return exit_code, regions, stdout.getvalue(), stderr.getvalue()
 
-    def test_sync_upload_emits_only_a_safe_summary(self):
+    def test_sync_upload_emits_a_summary_with_field_names_but_no_values(self):
         Handler.requests = []
         exit_code, regions, stdout, stderr = self.invoke(["extract", "$FILE"])
         self.assertEqual(exit_code, 0, stderr)
         self.assertEqual(regions, ["eu"])
         self.assertEqual(
             json.loads(stdout),
-            {"operation": "extraction", "hasErrors": False, "httpStatusCode": 200},
+            {
+                "operation": "extraction",
+                "hasErrors": False,
+                "httpStatusCode": 200,
+                "templateId": TEMPLATE_ID,
+                "fields": ["issueDate", "secretField"],
+            },
         )
         self.assertEqual(stderr, "")
         self.assertEqual(Handler.requests[-1]["authorization"], f"Bearer {API_KEY}")
         self.assertIn(DOCUMENT_MARKER.encode(), Handler.requests[-1]["body"])
         for sensitive in (API_KEY, DOCUMENT_MARKER, EXTRACTED_MARKER, RESPONSE_MARKER):
             self.assertNotIn(sensitive, stdout + stderr)
+
+    def test_sync_upload_sends_the_file_with_its_mime_type(self):
+        Handler.requests = []
+        exit_code, _, _, stderr = self.invoke(["extract", "$FILE"])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertIn(b"Content-Type: application/pdf", Handler.requests[-1]["body"])
+
+    def test_show_values_prints_the_extracted_fields_on_request(self):
+        exit_code, _, stdout, stderr = self.invoke(["extract", "$FILE", "--show-values"])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(
+            json.loads(stdout)["fields"],
+            {
+                "secretField": {"value": EXTRACTED_MARKER, "confidence": 97},
+                "issueDate": {"value": "2026-01-01", "confidence": 88},
+            },
+        )
+        self.assertNotIn(API_KEY, stdout + stderr)
+
+    def test_an_unsupported_extension_is_a_usage_error_before_any_request(self):
+        Handler.requests = []
+        unsupported = Path(self.temporary.name) / "notes.txt"
+        unsupported.write_text(DOCUMENT_MARKER)
+        stdout, stderr = io.StringIO(), io.StringIO()
+        exit_code = self.example._run_example_for_testing(
+            arguments=["extract", str(unsupported)],
+            environment={"COGNERIS_API_KEY": API_KEY, "COGNERIS_REGION": "eu"},
+            stdout=stdout,
+            stderr=stderr,
+            _create_client_for_testing=lambda **options: sdk.CognerisClient(
+                **options, _base_url_for_testing=self.base_url
+            ),
+        )
+        self.assertEqual(exit_code, 2)
+        self.assertIn("MIME type", stderr.getvalue())
+        self.assertEqual(Handler.requests, [])
 
     def test_async_submission_and_polling_omit_output_reference(self):
         Handler.requests = []

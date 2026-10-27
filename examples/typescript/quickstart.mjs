@@ -5,10 +5,24 @@ import { fileURLToPath } from "node:url";
 import { CognerisClient, CognerisError } from "@cogneris-ai/document-ai-sdk";
 
 const USAGE = `Usage:
-  node quickstart.mjs extract <file>
+  node quickstart.mjs extract <file> [--show-values]
   node quickstart.mjs async-file <operation> <file>
   node quickstart.mjs async <operation> <input-reference>`;
 const OPERATIONS = new Set(["Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"]);
+const SHOW_VALUES = "--show-values";
+// Send every upload with its MIME type: a Blob without `type` goes out as a part the API
+// cannot always admit.
+const MEDIA_TYPES = new Map([
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".tif", "image/tiff"],
+  [".tiff", "image/tiff"],
+  [".bmp", "image/bmp"],
+  [".doc", "application/msword"],
+  [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+]);
 
 class UsageError extends Error {}
 
@@ -29,8 +43,9 @@ function configuration(environment) {
 }
 
 function command(argumentsList) {
-  if (argumentsList[0] === "extract" && argumentsList.length === 2 && required(argumentsList[1])) {
-    return { kind: "extract", filePath: argumentsList[1] };
+  if (argumentsList[0] === "extract" && (argumentsList.length === 2 || argumentsList.length === 3) &&
+      required(argumentsList[1]) && (argumentsList.length === 2 || argumentsList[2] === SHOW_VALUES)) {
+    return { kind: "extract", filePath: argumentsList[1], showValues: argumentsList.length === 3 };
   }
   if (
     argumentsList[0] === "async" &&
@@ -49,6 +64,26 @@ function command(argumentsList) {
 
 function writeJson(output, value) {
   output.write(`${JSON.stringify(value)}\n`);
+}
+
+function mediaType(filePath) {
+  const type = MEDIA_TYPES.get(path.extname(filePath).toLowerCase());
+  if (!type) {
+    throw new UsageError(
+      "Unsupported file type. Use PDF, PNG, JPEG, TIFF, BMP, DOC or DOCX, " +
+      "and send the file with its MIME type (for example application/pdf).",
+    );
+  }
+  return type;
+}
+
+// The fields extraction returned, keyed by your template's field names. By default only the
+// names are printed: the values are document content. --show-values prints each field entry
+// (value, confidence and, when located, page and bbox) on your own terminal.
+function extractedFields(data, showValues) {
+  const metadata = data?.metadata;
+  const fields = metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+  return showValues ? fields : Object.keys(fields).sort();
 }
 
 export async function _runExampleForTesting({
@@ -70,7 +105,7 @@ export async function _runExampleForTesting({
       } catch {
         throw new UsageError("Unable to read the input file.");
       }
-      const result = await client.extract(new Blob([new Uint8Array(contents)]), {
+      const result = await client.extract(new Blob([new Uint8Array(contents)], { type: mediaType(selected.filePath) }), {
         fileName: path.basename(selected.filePath),
       });
       if (result.hasErrors === true) {
@@ -82,6 +117,8 @@ export async function _runExampleForTesting({
         httpStatusCode: typeof result.meta?.httpStatusCode === "number"
           ? result.meta.httpStatusCode
           : null,
+        templateId: typeof result.data?.templateId === "string" ? result.data.templateId : null,
+        fields: extractedFields(result.data, selected.showValues),
       });
       return 0;
     }
@@ -90,7 +127,7 @@ export async function _runExampleForTesting({
     if (selected.kind === "async-file") {
       let contents;
       try { contents = await readFile(selected.filePath); } catch { throw new UsageError("Unable to read the input file."); }
-      const artifact = await client.uploadArtifact(new Blob([new Uint8Array(contents)]), {
+      const artifact = await client.uploadArtifact(new Blob([new Uint8Array(contents)], { type: mediaType(selected.filePath) }), {
         fileName: path.basename(selected.filePath),
       });
       inputReference = artifact.reference;
