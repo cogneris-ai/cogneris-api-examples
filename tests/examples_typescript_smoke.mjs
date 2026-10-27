@@ -13,7 +13,7 @@ const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "cogneris-ts-exa
 const sdkDirectory = path.join(temporaryDirectory, "sdk");
 const consumerDirectory = path.join(temporaryDirectory, "consumer");
 const documentMarker = "document-content-must-not-be-logged";
-const extractedMarker = "extracted-field-must-not-be-logged";
+const extractedMarker = "extracted-field-value";
 const responseMarker = "raw-response-must-not-be-logged";
 const apiKey = "xtkt_live_TEST_ONLY_NOT_A_SECRET-must-not-be-logged";
 const jobId = "11111111-1111-4111-8111-111111111111";
@@ -166,7 +166,8 @@ async function invoke(argumentsList, fileContents = documentMarker) {
   return { exitCode, regions, ...output.read() };
 }
 
-test("installed SDK quickstart runs sync upload and emits field names but no values", async () => {
+// Shows fields and values (partners' decision, WOR-207).
+test("installed SDK quickstart runs sync upload and shows fields and values", async () => {
   requests = [];
   const result = await invoke(["extract", "$FILE"]);
   assert.equal(result.exitCode, 0, result.stderr);
@@ -176,25 +177,27 @@ test("installed SDK quickstart runs sync upload and emits field names but no val
     hasErrors: false,
     httpStatusCode: 200,
     templateId,
-    fields: ["issueDate", "secretField"],
+    fields: {
+      secretField: { value: extractedMarker, confidence: 97 },
+      issueDate: { value: "2026-01-01", confidence: 88 },
+    },
   });
   assert.match(requests.at(-1).body, /Content-Type: application\/pdf/i);
   assert.equal(result.stderr, "");
   assert.equal(requests.at(-1).authorization, `Bearer ${apiKey}`);
   assert.match(requests.at(-1).body, new RegExp(documentMarker));
-  for (const sensitive of [apiKey, documentMarker, extractedMarker, responseMarker]) {
+  for (const sensitive of [apiKey, documentMarker, responseMarker]) {
     assert.equal((result.stdout + result.stderr).includes(sensitive), false);
   }
 });
 
-test("quickstart prints the extracted fields only when asked with --show-values", async () => {
-  const result = await invoke(["extract", "$FILE", "--show-values"]);
+test("quickstart prints only the field names with --hide-values", async () => {
+  const result = await invoke(["extract", "$FILE", "--hide-values"]);
   assert.equal(result.exitCode, 0, result.stderr);
-  assert.deepEqual(JSON.parse(result.stdout).fields, {
-    secretField: { value: extractedMarker, confidence: 97 },
-    issueDate: { value: "2026-01-01", confidence: 88 },
-  });
-  assert.equal((result.stdout + result.stderr).includes(apiKey), false);
+  assert.deepEqual(JSON.parse(result.stdout).fields, ["issueDate", "secretField"]);
+  for (const sensitive of [apiKey, extractedMarker]) {
+    assert.equal((result.stdout + result.stderr).includes(sensitive), false);
+  }
 });
 
 test("quickstart refuses an unsupported extension before any request", async () => {

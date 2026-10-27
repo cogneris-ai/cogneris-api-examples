@@ -11,11 +11,11 @@ from cogneris_document_ai_sdk import CognerisClient, CognerisError
 
 
 USAGE = """Usage:
-  python quickstart.py extract <file> [--show-values]
+  python quickstart.py extract <file> [--hide-values]
   python quickstart.py async-file <operation> <file>
   python quickstart.py async <operation> <input-reference>"""
 OPERATIONS = {"Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"}
-SHOW_VALUES = "--show-values"
+HIDE_VALUES = "--hide-values"
 # Send every upload with its MIME type. A multipart part without one (what a bare
 # open(path, "rb") produces in generic clients) is not something the API can always admit.
 MEDIA_TYPES = {
@@ -54,7 +54,7 @@ def _command(arguments: Sequence[str]):
         len(arguments) in (2, 3)
         and arguments[0] == "extract"
         and _required(arguments[1])
-        and (len(arguments) == 2 or arguments[2] == SHOW_VALUES)
+        and (len(arguments) == 2 or arguments[2] == HIDE_VALUES)
     ):
         return "extract", arguments[1], len(arguments) == 3
     if (
@@ -83,18 +83,18 @@ def _media_type(path: str) -> str:
     return media_type
 
 
-def _extracted_fields(data: object, show_values: bool) -> object:
+def _extracted_fields(data: object, hide_values: bool) -> object:
     """The fields extraction returned, keyed by your template's field names.
 
-    By default only the names are printed: the values are document content. Pass
-    --show-values to print each field entry (value, confidence and, when located,
-    page and bbox) on your own terminal.
+    Shows fields and values (partners' decision, WOR-207): each entry carries the
+    value, its confidence and, when located, page and bbox. Values are document
+    content, so pass --hide-values to print only the field names.
     """
     metadata = getattr(data, "metadata", None)
     fields = metadata.to_dict() if hasattr(metadata, "to_dict") else {}
     if not isinstance(fields, dict):
         fields = {}
-    return fields if show_values else sorted(fields)
+    return sorted(fields) if hide_values else fields
 
 
 def _run_example_for_testing(

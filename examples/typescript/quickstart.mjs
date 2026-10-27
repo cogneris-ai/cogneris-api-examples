@@ -5,11 +5,11 @@ import { fileURLToPath } from "node:url";
 import { CognerisClient, CognerisError } from "@cogneris-ai/document-ai-sdk";
 
 const USAGE = `Usage:
-  node quickstart.mjs extract <file> [--show-values]
+  node quickstart.mjs extract <file> [--hide-values]
   node quickstart.mjs async-file <operation> <file>
   node quickstart.mjs async <operation> <input-reference>`;
 const OPERATIONS = new Set(["Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"]);
-const SHOW_VALUES = "--show-values";
+const HIDE_VALUES = "--hide-values";
 // Send every upload with its MIME type: a Blob without `type` goes out as a part the API
 // cannot always admit.
 const MEDIA_TYPES = new Map([
@@ -44,8 +44,8 @@ function configuration(environment) {
 
 function command(argumentsList) {
   if (argumentsList[0] === "extract" && (argumentsList.length === 2 || argumentsList.length === 3) &&
-      required(argumentsList[1]) && (argumentsList.length === 2 || argumentsList[2] === SHOW_VALUES)) {
-    return { kind: "extract", filePath: argumentsList[1], showValues: argumentsList.length === 3 };
+      required(argumentsList[1]) && (argumentsList.length === 2 || argumentsList[2] === HIDE_VALUES)) {
+    return { kind: "extract", filePath: argumentsList[1], hideValues: argumentsList.length === 3 };
   }
   if (
     argumentsList[0] === "async" &&
@@ -77,13 +77,13 @@ function mediaType(filePath) {
   return type;
 }
 
-// The fields extraction returned, keyed by your template's field names. By default only the
-// names are printed: the values are document content. --show-values prints each field entry
-// (value, confidence and, when located, page and bbox) on your own terminal.
-function extractedFields(data, showValues) {
+// The fields extraction returned, keyed by your template's field names. Shows fields and values
+// (partners' decision, WOR-207): each entry carries the value, its confidence and, when located,
+// page and bbox. Values are document content, so --hide-values prints only the field names.
+function extractedFields(data, hideValues) {
   const metadata = data?.metadata;
   const fields = metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
-  return showValues ? fields : Object.keys(fields).sort();
+  return hideValues ? Object.keys(fields).sort() : fields;
 }
 
 export async function _runExampleForTesting({
@@ -118,7 +118,7 @@ export async function _runExampleForTesting({
           ? result.meta.httpStatusCode
           : null,
         templateId: typeof result.data?.templateId === "string" ? result.data.templateId : null,
-        fields: extractedFields(result.data, selected.showValues),
+        fields: extractedFields(result.data, selected.hideValues),
       });
       return 0;
     }
