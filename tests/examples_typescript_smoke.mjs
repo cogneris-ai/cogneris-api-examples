@@ -17,6 +17,7 @@ const extractedMarker = "extracted-field-must-not-be-logged";
 const responseMarker = "raw-response-must-not-be-logged";
 const apiKey = "xtkt_live_TEST_ONLY_NOT_A_SECRET-must-not-be-logged";
 const jobId = "11111111-1111-4111-8111-111111111111";
+const templateId = "22222222-2222-4222-8222-222222222222";
 
 let sdk;
 let example;
@@ -92,7 +93,13 @@ before(async () => {
         json(response, 500, { title: responseMarker, detail: extractedMarker });
       } else {
         json(response, 200, {
-          data: { metadata: { secretField: extractedMarker } },
+          data: {
+            templateId,
+            metadata: {
+              secretField: { value: extractedMarker, confidence: 97 },
+              issueDate: { value: "2026-01-01", confidence: 88 },
+            },
+          },
           meta: { httpStatusCode: 200 },
           hasErrors: false,
         });
@@ -159,7 +166,7 @@ async function invoke(argumentsList, fileContents = documentMarker) {
   return { exitCode, regions, ...output.read() };
 }
 
-test("installed SDK quickstart runs sync upload and emits only a safe summary", async () => {
+test("installed SDK quickstart runs sync upload and emits field names but no values", async () => {
   requests = [];
   const result = await invoke(["extract", "$FILE"]);
   assert.equal(result.exitCode, 0, result.stderr);
@@ -168,13 +175,42 @@ test("installed SDK quickstart runs sync upload and emits only a safe summary", 
     operation: "extraction",
     hasErrors: false,
     httpStatusCode: 200,
+    templateId,
+    fields: ["issueDate", "secretField"],
   });
+  assert.match(requests.at(-1).body, /Content-Type: application\/pdf/i);
   assert.equal(result.stderr, "");
   assert.equal(requests.at(-1).authorization, `Bearer ${apiKey}`);
   assert.match(requests.at(-1).body, new RegExp(documentMarker));
   for (const sensitive of [apiKey, documentMarker, extractedMarker, responseMarker]) {
     assert.equal((result.stdout + result.stderr).includes(sensitive), false);
   }
+});
+
+test("quickstart prints the extracted fields only when asked with --show-values", async () => {
+  const result = await invoke(["extract", "$FILE", "--show-values"]);
+  assert.equal(result.exitCode, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout).fields, {
+    secretField: { value: extractedMarker, confidence: 97 },
+    issueDate: { value: "2026-01-01", confidence: 88 },
+  });
+  assert.equal((result.stdout + result.stderr).includes(apiKey), false);
+});
+
+test("quickstart refuses an unsupported extension before any request", async () => {
+  requests = [];
+  const filePath = path.join(temporaryDirectory, "notes.txt");
+  await writeFile(filePath, documentMarker);
+  const output = capture();
+  const exitCode = await example._runExampleForTesting({
+    argumentsList: ["extract", filePath],
+    environment: { COGNERIS_API_KEY: apiKey, COGNERIS_REGION: "eu" },
+    io: output.io,
+    _createClientForTesting: (options) => new sdk.CognerisClient({ ...options, _baseUrlForTesting: baseUrl }),
+  });
+  assert.equal(exitCode, 2);
+  assert.match(output.read().stderr, /MIME type/);
+  assert.deepEqual(requests, []);
 });
 
 test("installed SDK quickstart submits and polls without printing output references", async () => {

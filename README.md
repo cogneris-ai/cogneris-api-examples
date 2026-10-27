@@ -164,7 +164,9 @@ uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai
 
 The runnable example imports `CognerisClient` from the official installed
 `@cogneris-ai/document-ai-sdk` package. Synchronous extraction sends the file as
-`multipart/form-data` and prints only envelope status:
+`multipart/form-data` with its MIME type (`application/pdf`, `image/png`, ...) and
+prints the envelope status, the applied `templateId` and the names of the
+extracted fields. Add `--show-values` to print each field's value and confidence:
 
 ```bash
 cd "$COGNERIS_CONSUMER"
@@ -347,8 +349,13 @@ Successful synchronous document calls return an `Envelope`: `data` is the
 operation payload, `meta` is the `ServiceResponseMeta` shared with the job
 endpoints (`httpStatusCode`, `messages`, structured `errors`, and the
 `creditsConsumed` charge for the call), and `hasErrors` is the fast
-failure indicator. Application code may inspect `data`, but the quickstart
-examples deliberately do not print extracted field values or raw bodies.
+failure indicator. Extracted fields live in `data.metadata`, keyed by your
+template's field names, each with its `value` and `confidence` (and `page`/`bbox`
+when located). The quickstart examples print only the field names by default and
+the values only with `--show-values`, because values are document content; they
+never print raw bodies. Always send each upload with its MIME type: a multipart
+part without one is refused with `415 ADMISSION_UNSUPPORTED_MEDIA_TYPE` when the
+API cannot infer the type.
 
 Asynchronous job endpoints use the same wire envelope. The maintained SDK
 helpers unwrap its `data` payload, so `submitJob`/`submit_job`, `getJob`/`get_job`,

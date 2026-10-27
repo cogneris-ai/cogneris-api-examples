@@ -5,15 +5,30 @@ import os
 import sys
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Sequence, TextIO
+from uuid import UUID
 
 from cogneris_document_ai_sdk import CognerisClient, CognerisError
 
 
 USAGE = """Usage:
-  python quickstart.py extract <file>
+  python quickstart.py extract <file> [--show-values]
   python quickstart.py async-file <operation> <file>
   python quickstart.py async <operation> <input-reference>"""
 OPERATIONS = {"Extraction", "Classification", "ZeroShot", "Crop", "Split", "Facematch"}
+SHOW_VALUES = "--show-values"
+# Send every upload with its MIME type. A multipart part without one (what a bare
+# open(path, "rb") produces in generic clients) is not something the API can always admit.
+MEDIA_TYPES = {
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
+    ".bmp": "image/bmp",
+    ".doc": "application/msword",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
 
 
 class UsageError(Exception):
@@ -35,8 +50,13 @@ def _configuration(environment: Mapping[str, str]) -> dict[str, str]:
 
 
 def _command(arguments: Sequence[str]):
-    if len(arguments) == 2 and arguments[0] == "extract" and _required(arguments[1]):
-        return "extract", arguments[1], None
+    if (
+        len(arguments) in (2, 3)
+        and arguments[0] == "extract"
+        and _required(arguments[1])
+        and (len(arguments) == 2 or arguments[2] == SHOW_VALUES)
+    ):
+        return "extract", arguments[1], len(arguments) == 3
     if (
         len(arguments) == 3
         and arguments[0] == "async"
@@ -51,6 +71,30 @@ def _command(arguments: Sequence[str]):
 
 def _write_json(output: TextIO, value: object) -> None:
     output.write(json.dumps(value, separators=(",", ":")) + "\n")
+
+
+def _media_type(path: str) -> str:
+    media_type = MEDIA_TYPES.get(Path(path).suffix.lower())
+    if media_type is None:
+        raise UsageError(
+            "Unsupported file type. Use PDF, PNG, JPEG, TIFF, BMP, DOC or DOCX, "
+            "and send the file with its MIME type (for example application/pdf)."
+        )
+    return media_type
+
+
+def _extracted_fields(data: object, show_values: bool) -> object:
+    """The fields extraction returned, keyed by your template's field names.
+
+    By default only the names are printed: the values are document content. Pass
+    --show-values to print each field entry (value, confidence and, when located,
+    page and bbox) on your own terminal.
+    """
+    metadata = getattr(data, "metadata", None)
+    fields = metadata.to_dict() if hasattr(metadata, "to_dict") else {}
+    if not isinstance(fields, dict):
+        fields = {}
+    return fields if show_values else sorted(fields)
 
 
 def _run_example_for_testing(
@@ -73,19 +117,24 @@ def _run_example_for_testing(
                 contents = Path(first).read_bytes()
             except OSError:
                 raise UsageError("Unable to read the input file.") from None
-            result = client.extract(contents, file_name=Path(first).name)
+            result = client.extract(
+                contents, file_name=Path(first).name, content_type=_media_type(first)
+            )
             if result.has_errors is True:
                 raise CognerisError("Cogneris extraction reported an application error.")
             has_errors = result.has_errors if isinstance(result.has_errors, bool) else None
             http_status_code = getattr(result.meta, "http_status_code", None)
             if not isinstance(http_status_code, int):
                 http_status_code = None
+            template_id = getattr(result.data, "template_id", None)
             _write_json(
                 stdout,
                 {
                     "operation": "extraction",
                     "hasErrors": has_errors,
                     "httpStatusCode": http_status_code,
+                    "templateId": str(template_id) if isinstance(template_id, UUID) else None,
+                    "fields": _extracted_fields(result.data, second),
                 },
             )
             return 0
@@ -96,6 +145,9 @@ def _run_example_for_testing(
                 contents = Path(second).read_bytes()
             except OSError:
                 raise UsageError("Unable to read the input file.") from None
+            # upload_artifact takes no content_type: the SDK sends the MIME type that matches
+            # the file name, so the name must keep a supported extension (checked here).
+            _media_type(second)
             input_reference = client.upload_artifact(contents, file_name=Path(second).name).reference
         submission = client.submit_job(first, input_reference)
         job_id = getattr(submission, "job_id", None)
