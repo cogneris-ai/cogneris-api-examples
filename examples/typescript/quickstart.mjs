@@ -21,7 +21,7 @@ function configuration(environment) {
   if (!required(apiKey)) {
     throw new UsageError("Set COGNERIS_API_KEY before running this example.");
   }
-  const region = environment.COGNERIS_REGION ?? "us";
+  const region = environment.COGNERIS_REGION ?? "eu";
   if (region !== "us" && region !== "eu") {
     throw new UsageError("COGNERIS_REGION must be either us or eu.");
   }

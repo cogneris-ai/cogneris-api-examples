@@ -22,7 +22,7 @@ public final class Quickstart {
         String apiKey = Objects.requireNonNull(
                 System.getenv("COGNERIS_API_KEY"),
                 "COGNERIS_API_KEY is required");
-        var region = switch (System.getenv().getOrDefault("COGNERIS_REGION", "us")) {
+        var region = switch (System.getenv().getOrDefault("COGNERIS_REGION", "eu")) {
             case "us" -> CognerisClient.Region.US;
             case "eu" -> CognerisClient.Region.EU;
             default -> throw new IllegalArgumentException("COGNERIS_REGION must be either us or eu.");

@@ -187,7 +187,7 @@ class CognerisClient:
         self,
         *,
         api_key: str,
-        region: str = "us",
+        region: str = "eu",
         _base_url_for_testing: Optional[str] = None,
     ) -> None:
         if not api_key or not api_key.strip():
