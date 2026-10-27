@@ -165,8 +165,9 @@ uv pip install --python .venv/bin/python "$COGNERIS_RELEASE/cogneris_document_ai
 The runnable example imports `CognerisClient` from the official installed
 `@cogneris-ai/document-ai-sdk` package. Synchronous extraction sends the file as
 `multipart/form-data` with its MIME type (`application/pdf`, `image/png`, ...) and
-prints the envelope status, the applied `templateId` and the names of the
-extracted fields. Add `--show-values` to print each field's value and confidence:
+prints the envelope status, the applied `templateId` and every extracted field
+with its value and confidence (shows fields and values: partners' decision,
+WOR-207). Add `--hide-values` to print only the field names:
 
 ```bash
 cd "$COGNERIS_CONSUMER"
@@ -351,9 +352,9 @@ endpoints (`httpStatusCode`, `messages`, structured `errors`, and the
 `creditsConsumed` charge for the call), and `hasErrors` is the fast
 failure indicator. Extracted fields live in `data.metadata`, keyed by your
 template's field names, each with its `value` and `confidence` (and `page`/`bbox`
-when located). The quickstart examples print only the field names by default and
-the values only with `--show-values`, because values are document content; they
-never print raw bodies. Always send each upload with its MIME type: a multipart
+when located). The quickstart examples show fields and values (partners'
+decision, WOR-207); values are document content, so use `--hide-values` to print
+only the field names before sharing the output. They never print raw bodies. Always send each upload with its MIME type: a multipart
 part without one is refused with `415 ADMISSION_UNSUPPORTED_MEDIA_TYPE` when the
 API cannot infer the type.
 
