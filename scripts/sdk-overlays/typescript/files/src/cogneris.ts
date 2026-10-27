@@ -160,7 +160,7 @@ export class CognerisClient {
     if (!options.apiKey || !options.apiKey.trim()) {
       throw new TypeError('apiKey must be a non-empty string.');
     }
-    const region = options.region ?? 'us';
+    const region = options.region ?? 'eu';
     const regionBaseUrl = cognerisBaseUrl(region);
     this.region = region;
     const baseUrl = options._baseUrlForTesting

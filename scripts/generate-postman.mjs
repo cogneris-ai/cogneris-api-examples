@@ -130,6 +130,12 @@ try {
     (variable) => variable.key !== "bearerToken",
   );
   collection.variable.push({ key: "bearerToken", value: "", type: "secret" });
+  // WOR-206: EU is the default region in public material. The converter takes
+  // baseUrl from the first `servers` entry, so pin it instead of inheriting
+  // whatever order the copied contract carries. US tenants change the variable.
+  const baseUrl = collection.variable.find((variable) => variable.key === "baseUrl");
+  if (!baseUrl) throw new Error("converter emitted no baseUrl collection variable");
+  baseUrl.value = "https://api-eu.cogneris.ai";
 
   const { required, optional } = deselectOptionalFormFields(collection.item);
   // Positive control. If the converter ever stops emitting the "(Required)"

@@ -15374,7 +15374,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://api-us.cogneris.ai"
+      "value": "https://api-eu.cogneris.ai"
     },
     {
       "key": "bearerToken",

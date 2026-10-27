@@ -30,7 +30,7 @@ public enum CognerisRegion
 /// <param name="BaseUriForTesting">An HTTP(S) URI restricted to localhost, 127.0.0.1, or ::1.</param>
 public sealed record CognerisClientOptions(
     string ApiKey,
-    CognerisRegion Region = CognerisRegion.Us,
+    CognerisRegion Region = CognerisRegion.Eu,
     Uri? BaseUriForTesting = null);
 
 /// <summary>Document workflows implemented through the generated operations and models.</summary>

@@ -62,7 +62,7 @@ class PublishedArtifactTests(unittest.TestCase):
         )
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("COGNERIS_KEY must start with xtkt_live_", result.stderr)
+        self.assertIn("COGNERIS_API_KEY must start with xtkt_live_", result.stderr)
 
     def run_smoke_against(self, status: int, payload: bytes):
         """Run the live smoke against a stub returning the given response."""
@@ -86,7 +86,7 @@ class PublishedArtifactTests(unittest.TestCase):
                 document.write(b"xtrak-954 smoke document")
                 document.flush()
                 environment = os.environ.copy()
-                environment["COGNERIS_KEY"] = "xtkt_" + "live_test_only_not_a_secret"
+                environment["COGNERIS_API_KEY"] = "xtkt_" + "live_test_only_not_a_secret"
                 return subprocess.run(
                     [
                         "npm",
@@ -168,7 +168,7 @@ class PublishedArtifactTests(unittest.TestCase):
                 document.write(b"xtrak-954 smoke document")
                 document.flush()
                 environment = os.environ.copy()
-                environment["COGNERIS_KEY"] = "xtkt_" + "live_test_only_not_a_secret"
+                environment["COGNERIS_API_KEY"] = "xtkt_" + "live_test_only_not_a_secret"
                 result = subprocess.run(
                     [
                         "npm",
@@ -220,7 +220,7 @@ class PostmanCollectionTests(unittest.TestCase):
             variable["key"]: variable
             for variable in self.collection.get("variable", [])
         }
-        self.assertEqual(variables["baseUrl"]["value"], "https://api-us.cogneris.ai")
+        self.assertEqual(variables["baseUrl"]["value"], "https://api-eu.cogneris.ai")
         self.assertEqual(variables["bearerToken"]["value"], "")
         self.assertEqual(variables["bearerToken"]["type"], "secret")
         self.assertEqual(self.collection["auth"]["type"], "bearer")

@@ -48,18 +48,20 @@ a full JDK 17 to compile the Java SDK or an application.
 
 Use a tenant-scoped API key and select exactly `us` and `eu` as the region. The
 SDK examples and CLI read credentials only from `COGNERIS_API_KEY`; they never
-accept the key as an argument. `COGNERIS_REGION` defaults to `us`.
+accept the key as an argument. `COGNERIS_REGION` defaults to `eu`, the region
+new tenants are created in; set it to `us` only for a tenant hosted in the US.
 The CLI accepts `xtkt_live_` (production) and `xtkt_test_` (sandbox). Both require
 a non-empty suffix with visible ASCII characters, without whitespace or control
 characters. The key selects the application environment; the region is separate.
 
 ```bash
 export COGNERIS_API_KEY='xtkt_live_...'
-export COGNERIS_REGION='us' # or eu
+export COGNERIS_REGION='eu' # or us, for a US-hosted tenant
 ```
 
-The region maps to `https://api-us.cogneris.ai` or
-`https://api-eu.cogneris.ai`. Do not log the key, file contents, extracted
+The region maps to `https://api-eu.cogneris.ai` or
+`https://api-us.cogneris.ai`. An API key works only in the region of the tenant
+that created it. Do not log the key, file contents, extracted
 fields, input/output references, or raw response bodies. The examples print
 only controlled status summaries and identifiers.
 
@@ -185,7 +187,7 @@ node ./examples/typescript/quickstart.mjs async-file Extraction /path/to/documen
 The maintained interface used by the example is:
 
 ```js
-const client = new CognerisClient({ apiKey: process.env.COGNERIS_API_KEY, region: "us" });
+const client = new CognerisClient({ apiKey: process.env.COGNERIS_API_KEY, region: "eu" });
 const envelope = await client.extract(file, { fileName: "document.pdf" });
 const artifact = await client.uploadArtifact(file, { fileName: "document.pdf" });
 const submission = await client.submitJob("Extraction", artifact.reference);
@@ -207,7 +209,7 @@ cd "$COGNERIS_CONSUMER"
 The equivalent maintained interface is:
 
 ```python
-client = CognerisClient(api_key=os.environ["COGNERIS_API_KEY"], region="us")
+client = CognerisClient(api_key=os.environ["COGNERIS_API_KEY"], region="eu")
 envelope = client.extract(contents, file_name="document.pdf")
 artifact = client.upload_artifact(contents, file_name="document.pdf")
 submission = client.submit_job("Extraction", artifact.reference)
@@ -234,8 +236,8 @@ dotnet restore --source "$COGNERIS_RELEASE" --source https://api.nuget.org/v3/in
 dotnet run -- extract /path/to/document.pdf
 ```
 
-The example maps `COGNERIS_REGION=us|eu` to `CognerisRegion.Us` or
-`CognerisRegion.Eu`. It demonstrates `ExtractAsync`, `SubmitJobAsync`,
+The example maps `COGNERIS_REGION=eu|us` to `CognerisRegion.Eu` or
+`CognerisRegion.Us`. It demonstrates `ExtractAsync`, `SubmitJobAsync`,
 `GetJobAsync`, `WaitForJobAsync`, and `CancelJobAsync`; choose the command shown
 by `dotnet run` usage. The facade sends bearer authentication and multipart
 uploads, honors `Retry-After`, and supports `CancellationToken`. It reports
@@ -311,8 +313,8 @@ The command is a package-only first-result path: the consumer has no reference
 to `sdks/java` and Maven resolves the Cogneris coordinate from the explicit
 local repository. To use the verified public release instead, use the Maven
 Central dependency shown under Package availability. The
-example maps `COGNERIS_REGION=us|eu` to `CognerisClient.Region.US` or
-`CognerisClient.Region.EU` and demonstrates `extract`, `submitJob`, `getJob`,
+example maps `COGNERIS_REGION=eu|us` to `CognerisClient.Region.EU` or
+`CognerisClient.Region.US` and demonstrates `extract`, `submitJob`, `getJob`,
 `waitForJob`, and `cancelJob`. The facade sends bearer authentication and
 multipart uploads, honors `Retry-After`, bounds waits by attempts and a total
 timeout, preserves caller interruption for `waitForJob`, and exposes only safe
@@ -432,21 +434,20 @@ The existing Postman workflow remains supported:
 4. Keep optional form-data fields deselected unless needed.
 
 `ComplementaryPrompt` is appended verbatim to the model prompt. Classifier and
-facematch accept multiple files. The collection defaults to the US endpoint;
-set `baseUrl` to `https://api-eu.cogneris.ai` for an EU-hosted tenant.
+facematch accept multiple files. The collection defaults to the EU endpoint;
+set `baseUrl` to `https://api-us.cogneris.ai` for a US-hosted tenant.
 
-The existing opt-in live smoke uses its historical `COGNERIS_KEY` input and a
+The opt-in live smoke reads the same `COGNERIS_API_KEY` (a live key) and a
 non-sensitive local file. It reports response shape, not extracted values:
 
 ```bash
-COGNERIS_KEY=xtkt_live_... npm run smoke:live -- --file /path/to/document.pdf
+COGNERIS_API_KEY=xtkt_live_... npm run smoke:live -- --file /path/to/document.pdf
 ```
 
-For an EU-hosted tenant, add `--base-url https://api-eu.cogneris.ai` to this
-legacy live-smoke command.
+It calls the EU endpoint by default. For a US-hosted tenant, add
+`--base-url https://api-us.cogneris.ai` to this live-smoke command.
 
-This live-smoke compatibility path is separate from the SDK examples and CLI,
-which use only `COGNERIS_API_KEY` and `COGNERIS_REGION`.
+The SDK examples and CLI read only `COGNERIS_API_KEY` and `COGNERIS_REGION`.
 
 ## Integrate from your editor with the MCP server
 
@@ -466,7 +467,7 @@ Full guide: [Connect your editor to the MCP server](https://docs.cogneris.ai/doc
 
 | Region | MCP server URL |
 | --- | --- |
-| Europe | `https://mcp-eu.cogneris.ai/` |
+| Europe (default) | `https://mcp-eu.cogneris.ai/` |
 | United States | `https://mcp-us.cogneris.ai/` |
 
 The endpoint is the root path `/`. A URL with a `/mcp` sub-path answers `404`.

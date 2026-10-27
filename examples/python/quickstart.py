@@ -43,7 +43,7 @@ def _configuration(environment: Mapping[str, str]) -> dict[str, str]:
     api_key = environment.get("COGNERIS_API_KEY")
     if not _required(api_key):
         raise UsageError("Set COGNERIS_API_KEY before running this example.")
-    region = environment.get("COGNERIS_REGION", "us")
+    region = environment.get("COGNERIS_REGION", "eu")
     if region not in {"us", "eu"}:
         raise UsageError("COGNERIS_REGION must be either us or eu.")
     return {"api_key": api_key, "region": region}

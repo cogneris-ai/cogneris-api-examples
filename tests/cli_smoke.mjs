@@ -273,10 +273,10 @@ test("installed CLI delegates every public command to CognerisClient", async () 
     assert.deepEqual(calls.at(-1), expectedCall);
     assert.equal(calls[0][0], "constructor");
   }
-  assert.deepEqual(calls[0][1], { apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET", region: "us" });
+  assert.deepEqual(calls[0][1], { apiKey: "xtkt_live_TEST_ONLY_NOT_A_SECRET", region: "eu" });
 });
 
-test("region precedence is option, environment, then us and rejects all other values", async () => {
+test("region precedence is option, environment, then eu and rejects all other values", async () => {
   const constructed = [];
   const clientFactory = (options) => {
     constructed.push(options);
@@ -295,7 +295,7 @@ test("region precedence is option, environment, then us and rejects all other va
     env: { COGNERIS_API_KEY: "xtkt_live_TEST_ONLY_NOT_A_SECRET" },
     clientFactory,
   })).code, 0);
-  assert.deepEqual(constructed.map(({ region }) => region), ["eu", "us", "us"]);
+  assert.deepEqual(constructed.map(({ region }) => region), ["eu", "us", "eu"]);
 
   for (const [argumentsList, env] of [
     [["--region", "apac", "jobs", "get", "job"], { COGNERIS_API_KEY: "xtkt_live_TEST_ONLY_NOT_A_SECRET" }],

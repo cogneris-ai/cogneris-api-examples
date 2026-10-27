@@ -75,7 +75,7 @@ function parseRegion(argumentsList: string[], environmentRegion: string | undefi
       remaining.push(argument);
     }
   }
-  const region = optionRegion ?? environmentRegion ?? 'us';
+  const region = optionRegion ?? environmentRegion ?? 'eu';
   if (region !== 'us' && region !== 'eu') {
     throw new UsageError('Region must be either us or eu.');
   }

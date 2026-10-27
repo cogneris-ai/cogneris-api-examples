@@ -14,7 +14,7 @@ var apiKey = Environment.GetEnvironmentVariable("COGNERIS_API_KEY");
 if (string.IsNullOrWhiteSpace(apiKey))
     throw new InvalidOperationException("COGNERIS_API_KEY is required.");
 
-var region = (Environment.GetEnvironmentVariable("COGNERIS_REGION") ?? "us") switch
+var region = (Environment.GetEnvironmentVariable("COGNERIS_REGION") ?? "eu") switch
 {
     "us" => CognerisRegion.Us,
     "eu" => CognerisRegion.Eu,

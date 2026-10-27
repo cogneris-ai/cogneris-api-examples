@@ -14,9 +14,9 @@ function argument(name) {
   return index === -1 ? undefined : process.argv[index + 1];
 }
 
-const key = process.env.COGNERIS_KEY ?? "";
+const key = process.env.COGNERIS_API_KEY ?? "";
 if (!key.startsWith("xtkt_live_")) {
-  console.error("COGNERIS_KEY must start with xtkt_live_");
+  console.error("COGNERIS_API_KEY must start with xtkt_live_");
   process.exit(2);
 }
 
@@ -60,7 +60,7 @@ for (const field of extraction.body.formdata) {
   }
 }
 
-const baseUrl = new URL(argument("--base-url") ?? "https://api-us.cogneris.ai");
+const baseUrl = new URL(argument("--base-url") ?? "https://api-eu.cogneris.ai");
 const allowedHosts = new Set([
   "api-us.cogneris.ai",
   "api-eu.cogneris.ai",
