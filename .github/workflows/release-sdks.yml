@@ -187,7 +187,7 @@ jobs:
         run: |
           mkdir "$RUNNER_TEMP/pypi"
           cp "$RUNNER_TEMP/sdk-release/cogneris_document_ai_sdk-$RELEASE_VERSION-py3-none-any.whl" "$RUNNER_TEMP/pypi/"
-      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           packages-dir: ${{ runner.temp }}/pypi/
           attestations: true
