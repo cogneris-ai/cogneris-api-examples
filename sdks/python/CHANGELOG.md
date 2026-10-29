@@ -23,7 +23,10 @@ artifacts are source outputs only; publication is a separate release action.
   (`POST /api/v1/fraud-verify`, multipart) returns a `trusted`, `review` or `suspect` verdict with
   the checks that ran, and `get_document_fraud_verification` (`GET /api/v1/fraud-verify/{requestId}`)
   reads it back. Production keys with `fraud-verify.write` (`fraud-verify.read` to read back) only;
-  additive, no existing field changes (WOR-202).
+  additive, no existing field changes (WOR-202, #69).
+
+- `CognerisClient` defaults `region` to `"eu"` instead of `"us"`. A caller on a US-hosted
+  tenant that omitted `region` must now pass `region="us"` (WOR-206, #73).
 
 - Document sandbox key scope: only artifact and asynchronous job routes are available; job submission accepts `Extraction` without `templateId`, `Classification`, `ZeroShot`, `Crop` and `Split`. Sandbox jobs debit no credits or production quota; unsupported routes or operations return `403` with `environment.sandbox_route_unavailable`. Documentation only; no API behavior or SDK version change. XTRAK-2373. Main PR: [#54](https://github.com/cogneris-ai/cogneris-api-examples/pull/54).
 
