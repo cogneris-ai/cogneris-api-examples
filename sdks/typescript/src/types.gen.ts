@@ -876,8 +876,9 @@ export type ExtractDocumentErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -890,7 +891,7 @@ export type ExtractDocumentErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -993,8 +994,9 @@ export type ClassifyDocumentsErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1007,7 +1009,7 @@ export type ClassifyDocumentsErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -1105,8 +1107,9 @@ export type ZeroShotDocumentErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1119,7 +1122,7 @@ export type ZeroShotDocumentErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -1217,8 +1220,9 @@ export type CropDocumentErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1231,7 +1235,7 @@ export type CropDocumentErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -1329,8 +1333,9 @@ export type SplitDocumentErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1343,7 +1348,7 @@ export type SplitDocumentErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -1450,8 +1455,9 @@ export type FaceMatchDocumentErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1464,7 +1470,7 @@ export type FaceMatchDocumentErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * Over 50 requests in the current 1-minute window for this key, answered as a
      * problem document; or the document admission quota is exhausted, answered as
@@ -1569,8 +1575,9 @@ export type UploadArtifactErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1583,7 +1590,7 @@ export type UploadArtifactErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * The document was rejected by the security policy, or could not be
      * converted safely. The `code` says which.
@@ -2608,8 +2615,9 @@ export type VerifyDocumentFraudErrors = {
      */
     413: unknown;
     /**
-     * The file's type is not accepted. The body is the service envelope; read
-     * `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+     * The file's type is not accepted. The body is the service envelope
+     * (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+     * as is — fix the upload first.
      *
      * - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
      * `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -2622,7 +2630,7 @@ export type VerifyDocumentFraudErrors = {
      * - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
      *
      */
-    415: ServiceErrorEnvelope;
+    415: unknown;
     /**
      * The document was rejected by the security policy, or could not be
      * converted safely. The `code` says which.

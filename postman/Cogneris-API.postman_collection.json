@@ -531,7 +531,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -548,10 +548,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -588,15 +584,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -1417,7 +1407,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -1434,10 +1424,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -1466,15 +1452,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -2247,7 +2227,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -2264,10 +2244,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -2295,15 +2271,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -3071,7 +3041,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -3088,10 +3058,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -3119,15 +3085,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -3895,7 +3855,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -3912,10 +3872,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -3943,15 +3899,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -4788,7 +4738,7 @@
                   "_postman_previewlanguage": "text"
                 },
                 {
-                  "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                  "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                   "originalRequest": {
                     "url": {
                       "path": [
@@ -4805,10 +4755,6 @@
                       {
                         "key": "Content-Type",
                         "value": "multipart/form-data"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
                       },
                       {
                         "description": {
@@ -4845,15 +4791,9 @@
                   },
                   "status": "Unsupported Media Type",
                   "code": 415,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    }
-                  ],
-                  "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                  "header": [],
                   "cookie": [],
-                  "_postman_previewlanguage": "json"
+                  "_postman_previewlanguage": "text"
                 },
                 {
                   "name": "Over 50 requests in the current 1-minute window for this key, answered as a\nproblem document; or the document admission quota is exhausted, answered as\nthe service envelope with `ADMISSION_QUOTA_EXCEEDED`. Both are retryable.",
@@ -5684,7 +5624,7 @@
                       "_postman_previewlanguage": "text"
                     },
                     {
-                      "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                      "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                       "originalRequest": {
                         "url": {
                           "path": [
@@ -5702,10 +5642,6 @@
                           {
                             "key": "Content-Type",
                             "value": "multipart/form-data"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
                           },
                           {
                             "description": {
@@ -5733,15 +5669,9 @@
                       },
                       "status": "Unsupported Media Type",
                       "code": 415,
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "header": [],
                       "cookie": [],
-                      "_postman_previewlanguage": "json"
+                      "_postman_previewlanguage": "text"
                     },
                     {
                       "name": "The document was rejected by the security policy, or could not be\nconverted safely. The `code` says which.",
@@ -14067,7 +13997,7 @@
                       "_postman_previewlanguage": "text"
                     },
                     {
-                      "name": "The file's type is not accepted. The body is the service envelope; read\n`meta.errors[].code`. None of these is retryable as is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
+                      "name": "The file's type is not accepted. The body is the service envelope\n(`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable\nas is — fix the upload first.\n\n- `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable\n  `Content-Type` (none at all, or a generic `application/octet-stream`) and the\n  type could not be determined from the file's content or its name either.\n  Send the part with its MIME type, for example `application/pdf`, `image/png`\n  or `image/jpeg`. Some multipart clients leave it out unless you set it —\n  Python `requests` with a bare `open()`, for one.\n- `document.unsupported_media_type` — the file's extension or content is outside\n  the accepted types listed under **Uploads**.\n- `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.",
                       "originalRequest": {
                         "url": {
                           "path": [
@@ -14085,10 +14015,6 @@
                           {
                             "key": "Content-Type",
                             "value": "multipart/form-data"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
                           },
                           {
                             "description": {
@@ -14152,15 +14078,9 @@
                       },
                       "status": "Unsupported Media Type",
                       "code": 415,
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "body": "{\n  \"data\": {\n    \"key_0\": \"string\",\n    \"key_1\": 8935,\n    \"key_2\": 7067.274549044669,\n    \"key_3\": 6605.237934272736\n  },\n  \"meta\": {\n    \"httpStatusCode\": \"<integer>\",\n    \"messages\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"errors\": [\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\",\n          \"key_1\": \"<string>\",\n          \"key_2\": \"<string>\",\n          \"key_3\": \"<string>\"\n        }\n      },\n      {\n        \"code\": \"<string>\",\n        \"message\": \"<string>\",\n        \"retryable\": \"<boolean>\",\n        \"field\": \"<string,null>\",\n        \"details\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    ],\n    \"creditsConsumed\": \"<number,null>\"\n  },\n  \"hasErrors\": \"<boolean>\"\n}",
+                      "header": [],
                       "cookie": [],
-                      "_postman_previewlanguage": "json"
+                      "_postman_previewlanguage": "text"
                     },
                     {
                       "name": "The document was rejected by the security policy, or could not be\nconverted safely. The `code` says which.",

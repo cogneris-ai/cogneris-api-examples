@@ -53,13 +53,14 @@ generated API operations, not `CognerisClient` helpers; they require a
 production key with `fraud-verify.write` (or `fraud-verify.read` to read back)
 and a tenant with fraud detection enabled. The addition does not remove or change existing fields.
 
-Contract `2026-10-30` (WOR-224) types the `415` response of the upload and
-`/Document/*` operations as the service envelope, with `ADMISSION_UNSUPPORTED_MEDIA_TYPE`
-for a file part sent without a usable `Content-Type`; documents a list field in
-`data.metadata` as a direct array of rows, as the API returns it; and lists the
-Europe server first, so the generated clients default to `https://api-eu.cogneris.ai`
-like `CognerisClient`. Code that relied on a generated client's implicit
-`https://api-us.cogneris.ai` default must set the base URL or region explicitly.
+Contract `2026-10-30` (WOR-224) describes the `415` response of the upload and
+`/Document/*` operations — the service envelope, with `ADMISSION_UNSUPPORTED_MEDIA_TYPE`
+for a file part sent without a usable `Content-Type` — and documents a list field in
+`data.metadata` as a direct array of rows, as the API returns it. Neither changes a
+generated type. It also lists the Europe server first, so the generated TypeScript,
+C# and Java clients default to `https://api-eu.cogneris.ai` like `CognerisClient`.
+Code that relied on a generated client's implicit `https://api-us.cogneris.ai` default
+must set the base URL or region explicitly.
 
 Generated from OpenAPI contract `2026-10-30`. This coordinated major release
 retains the compatibility change introduced in the generated outputs for 0.2.0:

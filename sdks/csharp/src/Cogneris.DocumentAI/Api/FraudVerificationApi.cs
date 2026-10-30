@@ -168,7 +168,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IVerifyDocumentFraudApiResponse"/>
     /// </summary>
-    public interface IVerifyDocumentFraudApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.FraudVerificationEnvelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IVerifyDocumentFraudApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.FraudVerificationEnvelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnprocessableContent<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -1671,50 +1671,6 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
-
-            /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
 
             /// <summary>
             /// Returns true if the response is 422 UnprocessableContent

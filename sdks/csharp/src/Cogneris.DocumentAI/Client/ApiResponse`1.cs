@@ -241,26 +241,6 @@ namespace Cogneris.DocumentAI.Client
     /// An interface for responses of type
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public interface IUnsupportedMediaType<TType> : IApiResponse
-    {
-        /// <summary>
-        /// Deserializes the response if the response is UnsupportedMediaType
-        /// </summary>
-        /// <returns></returns>
-        TType UnsupportedMediaType();
-
-        /// <summary>
-        /// Returns true if the response is UnsupportedMediaType and the deserialized response is not null
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        bool TryUnsupportedMediaType([NotNullWhen(true)]out TType? result);
-    }
-
-    /// <summary>
-    /// An interface for responses of type
-    /// </summary>
-    /// <typeparam name="TType"></typeparam>
     public interface IInternalServerError<TType> : IApiResponse
     {
         /// <summary>

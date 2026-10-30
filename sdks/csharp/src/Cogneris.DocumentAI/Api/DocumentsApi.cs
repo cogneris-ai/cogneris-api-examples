@@ -184,7 +184,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IClassifyDocumentsApiResponse"/>
     /// </summary>
-    public interface IClassifyDocumentsApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IClassifyDocumentsApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -268,7 +268,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="ICropDocumentApiResponse"/>
     /// </summary>
-    public interface ICropDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface ICropDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -352,7 +352,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IExtractDocumentApiResponse"/>
     /// </summary>
-    public interface IExtractDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IExtractDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -436,7 +436,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IFaceMatchDocumentApiResponse"/>
     /// </summary>
-    public interface IFaceMatchDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IFaceMatchDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -520,7 +520,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="ISplitDocumentApiResponse"/>
     /// </summary>
-    public interface ISplitDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface ISplitDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -604,7 +604,7 @@ namespace Cogneris.DocumentAI.Api
     /// <summary>
     /// The <see cref="IZeroShotDocumentApiResponse"/>
     /// </summary>
-    public interface IZeroShotDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnsupportedMediaType<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
+    public interface IZeroShotDocumentApiResponse : Cogneris.DocumentAI.Client.IApiResponse, IOk<Cogneris.DocumentAI.Model.Envelope?>, IBadRequest<Cogneris.DocumentAI.Model.ProblemDetails?>, IUnauthorized<Cogneris.DocumentAI.Model.ProblemDetails?>, IForbidden<Cogneris.DocumentAI.Model.ProblemDetails?>, INotFound<Cogneris.DocumentAI.Model.ProblemDetails?>, IConflict<Cogneris.DocumentAI.Model.ProblemDetails?>, ITooManyRequests<Cogneris.DocumentAI.Model.ProblemDetails?>, IInternalServerError<Cogneris.DocumentAI.Model.ProblemDetails?>, IBadGateway<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IServiceUnavailable<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>, IGatewayTimeout<Cogneris.DocumentAI.Model.ServiceErrorEnvelope?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
@@ -1386,50 +1386,6 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
-
-            /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
 
             /// <summary>
             /// Returns true if the response is 429 TooManyRequests
@@ -2225,50 +2181,6 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
-
-            /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
 
             /// <summary>
             /// Returns true if the response is 429 TooManyRequests
@@ -3077,50 +2989,6 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
-
-            /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
 
             /// <summary>
             /// Returns true if the response is 429 TooManyRequests
@@ -3935,50 +3803,6 @@ namespace Cogneris.DocumentAI.Api
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
 
             /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
-
-            /// <summary>
             /// Returns true if the response is 429 TooManyRequests
             /// </summary>
             /// <returns></returns>
@@ -4774,50 +4598,6 @@ namespace Cogneris.DocumentAI.Api
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
 
             /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
-
-            /// <summary>
             /// Returns true if the response is 429 TooManyRequests
             /// </summary>
             /// <returns></returns>
@@ -5611,50 +5391,6 @@ namespace Cogneris.DocumentAI.Api
             /// </summary>
             /// <returns></returns>
             public bool IsUnsupportedMediaType => 415 == (int)StatusCode;
-
-            /// <summary>
-            /// Deserializes the response if the response is 415 UnsupportedMediaType
-            /// </summary>
-            /// <returns></returns>
-            public Cogneris.DocumentAI.Model.ServiceErrorEnvelope? UnsupportedMediaType()
-            {
-                bool suppressDefault = false;
-                Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result = null;
-                OnUnsupportedMediaType(ref suppressDefault, ref result);
-                if (!suppressDefault)
-                    result = DefaultUnsupportedMediaType();
-                return result;
-            }
-
-            private Cogneris.DocumentAI.Model.ServiceErrorEnvelope? DefaultUnsupportedMediaType()
-            {
-                // NOTICE: Consider this AsModel template deprecated. Implement the appropriate partial method instead
-                return IsUnsupportedMediaType
-                    ? System.Text.Json.JsonSerializer.Deserialize<Cogneris.DocumentAI.Model.ServiceErrorEnvelope>(RawContent, _jsonSerializerOptions)
-                    : null;
-            }
-
-            partial void OnUnsupportedMediaType(ref bool suppressDefault, ref Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result);
-
-            /// <summary>
-            /// Returns true if the response is 415 UnsupportedMediaType and the deserialized response is not null
-            /// </summary>
-            /// <param name="result"></param>
-            /// <returns></returns>
-            public bool TryUnsupportedMediaType([NotNullWhen(true)]out Cogneris.DocumentAI.Model.ServiceErrorEnvelope? result)
-            {
-                result = null;
-
-                try
-                {
-                    result = UnsupportedMediaType();
-                } catch (Exception e)
-                {
-                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)415);
-                }
-
-                return result != null;
-            }
 
             /// <summary>
             /// Returns true if the response is 429 TooManyRequests

@@ -1193,8 +1193,9 @@ components:
       description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
     UnsupportedMediaType:
       description: |
-        The file's type is not accepted. The body is the service envelope; read
-        `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+        The file's type is not accepted. The body is the service envelope
+        (`ServiceErrorEnvelope`); read `meta.errors[].code`. None of these is retryable
+        as is — fix the upload first.
 
         - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
           `Content-Type` (none at all, or a generic `application/octet-stream`) and the
@@ -1205,9 +1206,6 @@ components:
         - `document.unsupported_media_type` — the file's extension or content is outside
           the accepted types listed under **Uploads**.
         - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
     RateLimited:
       description: Over 50 requests in the current 1-minute window for this key.
       headers:

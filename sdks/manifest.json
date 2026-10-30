@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "path": "openapi/cogneris-openapi.yaml",
-    "sha256": "bf4a3e89117daedf323e9a6ef862dc5448db909fa7311a262071ba77c4ba6e3f"
+    "sha256": "455c165fbdcd3cdd24ac0d33aac18b2b5ae25ff1acce038285b6b39a7f104943"
   },
   "generators": {
     "python": {
@@ -46,9 +46,9 @@
         "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "NOTICE": "f4b0c660565750ae4eeaaee38603f2874dc0bb3dd438af203148c937e7519cf9",
         "README.md": "4371404e1ff44945fc68a0a8a17632d7ac8da6cc54ef78240e659234acbfc477",
-        "src/Cogneris.DocumentAI/Api/ArtifactsApi.cs": "c7a5f12739e79971ab53cad7a5c55f99b0997d3e108d6435b4ca803309ef58bc",
-        "src/Cogneris.DocumentAI/Api/DocumentsApi.cs": "aa6ea33e729be7e4fef3329b294d949cf2f8f2c153e93055da55eb9c7d057e04",
-        "src/Cogneris.DocumentAI/Api/FraudVerificationApi.cs": "e2da5a829fcd405f2e7135a85fe17bc22ec3bfe4c9e0463df348cc41c644a9e9",
+        "src/Cogneris.DocumentAI/Api/ArtifactsApi.cs": "a8ab9d88eb146bc5b8a89d9b7627484db39ab946559f4a7044d2dc7deab121c0",
+        "src/Cogneris.DocumentAI/Api/DocumentsApi.cs": "7b67e61e2ede30dc9e7107da1fde1b7ecfeb7ef801b9ad7c1297fd6378d904e4",
+        "src/Cogneris.DocumentAI/Api/FraudVerificationApi.cs": "c09ae945328b79da4dff28d3f2df0219ee576032a63bf7bce8d3aebe04ecb7fc",
         "src/Cogneris.DocumentAI/Api/IApi.cs": "96edc67ed76d2d09b6c9031016c2fa12284dfbae55e7d91d918366df22b49e16",
         "src/Cogneris.DocumentAI/Api/JobsApi.cs": "35a22d375ee339bc01889477ee5666b0071a244cc0afd916dee8fe98c9d859aa",
         "src/Cogneris.DocumentAI/Api/PortalApi.cs": "6dbeaeab6458b6870d8613ee9187d6f62e3119e0dbad24e7c5c320b0cc0322d9",
@@ -56,7 +56,7 @@
         "src/Cogneris.DocumentAI/Api/WebhooksApi.cs": "531b2dab41f474642a5a6630b52c9664c6e10b40f949046b940d7bc8cad1906b",
         "src/Cogneris.DocumentAI/Client/ApiException.cs": "af8bd3fd0f6804c28f18b7974e8ae5a78feb930d4305188c3d4abad282e0e85d",
         "src/Cogneris.DocumentAI/Client/ApiFactory.cs": "faf487c19bcd605c1898724a5c5211d817b29037928e06f8de8085e75f02daf0",
-        "src/Cogneris.DocumentAI/Client/ApiResponse`1.cs": "8f01fe31793f281673a7ad0ecfe720339a5781e719f5e5bbd884c661cf979f22",
+        "src/Cogneris.DocumentAI/Client/ApiResponse`1.cs": "f361012dff7ba48f8666631a8c39341e4077de24076b324f1afa30b839ba7c7f",
         "src/Cogneris.DocumentAI/Client/ApiResponseEventArgs.cs": "2417741cd4bda3fcbdc656a7476e0ef2013d5c67eb0b7a0ec890ec0038e3591e",
         "src/Cogneris.DocumentAI/Client/BearerToken.cs": "48e47f02da82d70ab059bd15847347bae32543e5fa4f52019b5178e08d9cc83c",
         "src/Cogneris.DocumentAI/Client/ClientUtils.cs": "7c952641a848f021f10d8445d7f4609a7423ca9c853fc27ba46433afeb255972",
@@ -240,22 +240,22 @@
       "version": "1.0.0",
       "files": {
         ".gitignore": "4b066f97dab229a1cdf588f0690ac1b26a40725375d6eb1ff46a21cf5485560f",
-        "CHANGELOG.md": "480af1951ca72c8e85fe2f933847bd2d3f17c80e22c9f5fbfea7458d3c9d9742",
+        "CHANGELOG.md": "a1e01759f2056ee96de4facfd29833381986afc1761e266b2ad35289673d75b5",
         "cogneris_document_ai_sdk/__init__.py": "d85a26ae6befac88d8273a4091dd77b2c5a4e774685b8d04c9784ac0ed2e66a4",
         "cogneris_document_ai_sdk/api/__init__.py": "cd34a21bfba34a302a58fc9ce37e585da5fd5d39693238895816d5f9ff98b5d0",
         "cogneris_document_ai_sdk/api/artifacts/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
         "cogneris_document_ai_sdk/api/artifacts/download_artifact.py": "77e2461a0317dc89cf074ab811123afc8cf9e69ecf0b4c66f7c7eecf191029ef",
-        "cogneris_document_ai_sdk/api/artifacts/upload_artifact.py": "b432c66981da067c8fd113b0980462a50a619e095d500695be73d5394188db8a",
+        "cogneris_document_ai_sdk/api/artifacts/upload_artifact.py": "9a27507ea30090055724ffa1e56416aed3a8b044792f2c92da56a392e79dd0c0",
         "cogneris_document_ai_sdk/api/documents/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
-        "cogneris_document_ai_sdk/api/documents/classify_documents.py": "e224528b73844111da8e49a64b1921484547cb29227c2b31c35a88193c54edd0",
-        "cogneris_document_ai_sdk/api/documents/crop_document.py": "f73fce23698d91d2d2bf9c9c9fd10d34c11092b81c32590cf379917a25855c33",
-        "cogneris_document_ai_sdk/api/documents/extract_document.py": "e411d8a59c9a80c4df8637226a6db12c534ea6be6de79f1fa9d9fc85ae82283d",
-        "cogneris_document_ai_sdk/api/documents/face_match_document.py": "9008c3c354557ca7ae2b94830522c311ce137c06b62addb616ef1f22e42e0bed",
-        "cogneris_document_ai_sdk/api/documents/split_document.py": "d5e2afa2f6d30faf5e07bd754968032c444a809d4f555fe50c38a43d19b18692",
-        "cogneris_document_ai_sdk/api/documents/zero_shot_document.py": "4a61f6bafa4383fd46efbbc15c96dc92979244fe8924fc52f270fbe408afe5a4",
+        "cogneris_document_ai_sdk/api/documents/classify_documents.py": "dfe1f13ce75b7d398b83d90b82361aa2b5777ab5b9a98b1b527cb719c593fe0b",
+        "cogneris_document_ai_sdk/api/documents/crop_document.py": "d059c2b3d39c0412647ca03023881945c600072a7025ba70f1ed8898e73d78a6",
+        "cogneris_document_ai_sdk/api/documents/extract_document.py": "6bdd188eeae865c55f5e28c743ce3a7e24de5c5a7ac7579fb53688e329bc125d",
+        "cogneris_document_ai_sdk/api/documents/face_match_document.py": "1c32ffe9fc0f165abd0b205c4c7cdb040c6d9665ff4992f972292efd5f062f39",
+        "cogneris_document_ai_sdk/api/documents/split_document.py": "bf8af7a006a48117ea52ba250ff34b3cc9c3dccc9333d76b2a6b8c2dc44d0dd0",
+        "cogneris_document_ai_sdk/api/documents/zero_shot_document.py": "54a0c87c5566b6533a75c1b3a84937fa7b0ce5546d9dbae999b6311ed6378412",
         "cogneris_document_ai_sdk/api/fraud_verification/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
         "cogneris_document_ai_sdk/api/fraud_verification/get_document_fraud_verification.py": "ae44a9be5fea088c3b3d822d794ad1c3f57c687ea450b4bfb6f96bf4ad92c431",
-        "cogneris_document_ai_sdk/api/fraud_verification/verify_document_fraud.py": "cef14c10bbe73b0989e9ec1c46244b63287b867d31df427051cccb14ef38e488",
+        "cogneris_document_ai_sdk/api/fraud_verification/verify_document_fraud.py": "467501fd719ec39c94dd702bf0c32246907bcc5a1d65983b9a846fc70a9b11af",
         "cogneris_document_ai_sdk/api/jobs/__init__.py": "e6f77db895808d1a9af71cf1cd890b0f5ca8675d8b77f6c068d079597e1f6c4f",
         "cogneris_document_ai_sdk/api/jobs/cancel_document_job.py": "36b1e058a3884b088d0e36474fddada40a5305c6fcb917cf04177e8515d3ee9a",
         "cogneris_document_ai_sdk/api/jobs/get_document_job.py": "d6720237b1c97d3a6bca840cb2be9bc8df3c6292b168d8f09d95a9353eb008eb",
@@ -383,7 +383,7 @@
         "src/core/utils.gen.ts": "1b637c521d8136dfdbf8dfc4fcc8bb73e0c554466e4d2ca9c9086d4c712983c4",
         "src/index.ts": "2fc398d0def4df5e09fb106d0d33a02be3bdae3f3d2a807be23c6d44e7be2f32",
         "src/sdk.gen.ts": "d344ce225e89bab6e34ab891cd531043c6e063f1bc6185b3a3140daf0fd0105d",
-        "src/types.gen.ts": "662c1aacc405df93c3e75f61a1185418c0e449e21e2b714612dcda30cb9448be",
+        "src/types.gen.ts": "c5669fe5f037cff4c006449d7c755dfd12a98bf23235ca363f76937d73eca960",
         "tsconfig.json": "b205457704859986569141833ad81d29d6dfc4be6d0962bf9f1eceb9555092f7"
       }
     }

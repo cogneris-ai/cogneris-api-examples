@@ -67,8 +67,7 @@ def _parse_response(
         return response_413
 
     if response.status_code == 415:
-        response_415 = ServiceErrorEnvelope.from_dict(response.json())
-
+        response_415 = cast(Any, None)
         return response_415
 
     if response.status_code == 429:
