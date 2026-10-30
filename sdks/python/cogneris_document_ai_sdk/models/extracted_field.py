@@ -13,7 +13,8 @@ T = TypeVar("T", bound="ExtractedField")
 class ExtractedField:
     """One extracted field: the value, how certain the model is of it, and where on the
     document it was read from. These are the objects that fill `data.metadata`, and
-    the cells inside a table-shaped field's `items` rows.
+    the cells of each row of a list field, which is an array of rows keyed by column
+    name — see `data.metadata`.
 
     The three location keys are present or absent together — see `data.metadata` for
     the coordinate convention they follow.

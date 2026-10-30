@@ -34,7 +34,7 @@ the versions linked above unless you are building the repository source locally.
 
 ## Artifact upload and download helpers
 
-The OpenAPI contract in this repository is dated `2026-10-23`. It defines
+The OpenAPI contract in this repository is dated `2026-10-30`. It defines
 `POST /api/v1/artifacts` as a multipart upload that returns an `artifact://`
 reference, and `GET /api/v1/artifacts/content?reference=...` as a byte download.
 An uploaded reference can be reused and expires after seven days. SDK convenience
