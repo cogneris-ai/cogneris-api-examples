@@ -38,8 +38,14 @@ class EnvelopeData:
             Extraction and zero-shot fill it with one entry per extracted field, and
             each entry is an `ExtractedField`: the value, how certain the model is of
             it, and — when the value was visually located on the page — where it was
-            read from. A table-shaped field carries an `items` array instead, whose
-            rows hold `ExtractedField` cells under the same keys.
+            read from.
+
+            A list field — a table such as the lines of an invoice or the movements of
+            a bank statement — is an **array** of rows, not an `ExtractedField`. Each
+            row is an object keyed by the list's column names, and each cell is an
+            `ExtractedField` with the same value, confidence and source coordinates as
+            any other field. The array is the field's value itself: there is no
+            wrapping object and no `items` key.
 
             Source coordinates follow one convention, the same on every engine:
 
@@ -61,7 +67,11 @@ class EnvelopeData:
             synchronous one for the same document. It wraps them differently — see
             `outputReference`.
              Example: {'policyNumber': {'value': '254H089SJ425', 'confidence': 98, 'page': 1, 'bbox': [0.62, 0.11, 0.83,
-            0.14], 'bbox_confidence': 92}, 'totalPremium': {'value': '1840.00', 'confidence': 95}}.
+            0.14], 'bbox_confidence': 92}, 'totalPremium': {'value': '1840.00', 'confidence': 95}, 'movements': [{'date':
+            {'value': '2026-01-05', 'confidence': 97, 'page': 2, 'bbox': [0.08, 0.31, 0.19, 0.33], 'bbox_confidence': 90},
+            'amount': {'value': '-120.50', 'confidence': 96, 'page': 2, 'bbox': [0.78, 0.31, 0.92, 0.33], 'bbox_confidence':
+            88}}, {'date': {'value': '2026-01-06', 'confidence': 98, 'page': 2, 'bbox': [0.08, 0.34, 0.19, 0.36],
+            'bbox_confidence': 91}, 'amount': {'value': '2300.00', 'confidence': 95}}]}.
         created_date (Union[Unset, datetime.datetime]):
         results (Union[Unset, list['ClassificationResult']]): `/Document/classifier` only: one entry per uploaded file.
         document_type (Union[Unset, str]): `/Document/zero-shot` only: the document type the model recognized.

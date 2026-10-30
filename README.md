@@ -4,7 +4,7 @@ This repository is the canonical first-result path for the public Cogneris
 Document AI API: TypeScript, Python, C#/.NET, Java, the `cogneris` CLI, and
 Postman. All of them are built from
 [`openapi/cogneris-openapi.yaml`](openapi/cogneris-openapi.yaml),
-OpenAPI contract version `2026-10-23`.
+OpenAPI contract version `2026-10-30`.
 
 The full documentation lives at [docs.cogneris.ai](https://docs.cogneris.ai/):
 start with [Build with Cogneris](https://docs.cogneris.ai/docs/developers) and
@@ -109,7 +109,7 @@ consumer result above remains the latest Java install evidence; a Java runtime
 was unavailable for a repeat install on this host.
 
 The committed source for all five SDK/CLI package families is version
-`1.0.0`, generated from OpenAPI contract `2026-10-23`. Source metadata does not
+`1.0.0`, generated from OpenAPI contract `2026-10-30`. Source metadata does not
 mean the version has been published. This coordinated major release removes the
 public `DocumentJobSubmitStatus` type and uses `DocumentJobStatus` for job
 submission status; see [VERSIONING.md](VERSIONING.md) for the migration and
@@ -411,7 +411,7 @@ response, exception context, document, or credential.
   `data.metadata` is an `ExtractedField` carrying `value`, `confidence`, and,
   when the value was located on the page, `page`, `bbox`, and `bbox_confidence`.
   Separate evidence, cost, destination, and webhook-signature APIs are absent
-  from OpenAPI contract `2026-10-23`. Do not fabricate calls or infer private
+  from OpenAPI contract `2026-10-30`. Do not fabricate calls or infer private
   service behavior for those capabilities.
 - Fraud verification (`POST /api/v1/fraud-verify` and
   `GET /api/v1/fraud-verify/{requestId}`) is a generated API operation in every

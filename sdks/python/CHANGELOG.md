@@ -2,7 +2,7 @@
 
 ## 1.0.0
 
-Generated from OpenAPI contract `2026-10-23`. Compatibility impact: **major**.
+Generated from OpenAPI contract `2026-10-30`. Compatibility impact: **major**.
 The public `DocumentJobSubmitStatus` type, which only represented `Queued`, was
 removed and replaced in `DocumentJobSubmission.status` by the existing broader
 `DocumentJobStatus` type. Source code that names `DocumentJobSubmitStatus` must
@@ -24,6 +24,15 @@ artifacts are source outputs only; publication is a separate release action.
   the checks that ran, and `get_document_fraud_verification` (`GET /api/v1/fraud-verify/{requestId}`)
   reads it back. Production keys with `fraud-verify.write` (`fraud-verify.read` to read back) only;
   additive, no existing field changes (WOR-202, #69).
+
+- Regenerated from contract `2026-10-30` (WOR-224). A `415` on the upload and
+  `/Document/*` operations is now parsed as `ServiceErrorEnvelope` instead of `None`;
+  read `meta.errors[].code` — `ADMISSION_UNSUPPORTED_MEDIA_TYPE` when the file part had
+  no usable `Content-Type` and its type could not be inferred, `document.unsupported_media_type`
+  for a type outside the accepted list. The `data.metadata` description now documents a
+  list field as a direct array of rows of `ExtractedField` cells, which is what the API
+  returns; no field or type changes. The generated clients' default server is
+  `https://api-eu.cogneris.ai`, matching the `CognerisClient` default.
 
 - `CognerisClient` defaults `region` to `"eu"` instead of `"us"`. A caller on a US-hosted
   tenant that omitted `region` must now pass `region="us"` (WOR-206, #73).

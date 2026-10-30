@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Cogneris Document AI API
-  version: '2026-10-23'
+  version: '2026-10-30'
   summary: Turn documents into structured data.
   description: |
     The Cogneris Document AI API turns unstructured documents — PDFs, images, scans —
@@ -18,8 +18,8 @@ info:
     (sandbox); either prefix is accepted before the key is looked up for validation.
     The key selects the application environment. A recognized prefix alone does
     not authenticate a request: the key must also be valid and active. Keys are
-    tenant-scoped and cannot cross tenant boundaries. Mint them in the dashboard
-    under **Settings → API keys**.
+    tenant-scoped and cannot cross tenant boundaries. Mint them in the console
+    under **Vision → Developers → API Keys**.
 
     ## Sandbox
 
@@ -190,10 +190,10 @@ info:
     an operation with nothing to miss or conflict with — a `409` on a read, say — is
     part of that uniform model and not something the operation returns in practice.
 servers:
-  - url: https://api-us.cogneris.ai
-    description: Production — United States (us-central1)
   - url: https://api-eu.cogneris.ai
     description: Production — Europe (europe-west1)
+  - url: https://api-us.cogneris.ai
+    description: Production — United States (us-central1)
 
 security:
   - ApiKey: []
@@ -1192,7 +1192,22 @@ components:
     PayloadTooLarge:
       description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
     UnsupportedMediaType:
-      description: Extension outside the supported list.
+      description: |
+        The file's type is not accepted. The body is the service envelope; read
+        `meta.errors[].code`. None of these is retryable as is — fix the upload first.
+
+        - `ADMISSION_UNSUPPORTED_MEDIA_TYPE` — the file part carried no usable
+          `Content-Type` (none at all, or a generic `application/octet-stream`) and the
+          type could not be determined from the file's content or its name either.
+          Send the part with its MIME type, for example `application/pdf`, `image/png`
+          or `image/jpeg`. Some multipart clients leave it out unless you set it —
+          Python `requests` with a bare `open()`, for one.
+        - `document.unsupported_media_type` — the file's extension or content is outside
+          the accepted types listed under **Uploads**.
+        - `ADMISSION_TYPE_REJECTED` — the file's content was refused as a document type.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ServiceErrorEnvelope' }
     RateLimited:
       description: Over 50 requests in the current 1-minute window for this key.
       headers:
@@ -1373,8 +1388,14 @@ components:
                 Extraction and zero-shot fill it with one entry per extracted field, and
                 each entry is an `ExtractedField`: the value, how certain the model is of
                 it, and — when the value was visually located on the page — where it was
-                read from. A table-shaped field carries an `items` array instead, whose
-                rows hold `ExtractedField` cells under the same keys.
+                read from.
+
+                A list field — a table such as the lines of an invoice or the movements of
+                a bank statement — is an **array** of rows, not an `ExtractedField`. Each
+                row is an object keyed by the list's column names, and each cell is an
+                `ExtractedField` with the same value, confidence and source coordinates as
+                any other field. The array is the field's value itself: there is no
+                wrapping object and no `items` key.
 
                 Source coordinates follow one convention, the same on every engine:
 
@@ -1406,6 +1427,28 @@ components:
                 totalPremium:
                   value: '1840.00'
                   confidence: 95
+                movements:
+                  - date:
+                      value: '2026-01-05'
+                      confidence: 97
+                      page: 2
+                      bbox: [0.08, 0.31, 0.19, 0.33]
+                      bbox_confidence: 90
+                    amount:
+                      value: '-120.50'
+                      confidence: 96
+                      page: 2
+                      bbox: [0.78, 0.31, 0.92, 0.33]
+                      bbox_confidence: 88
+                  - date:
+                      value: '2026-01-06'
+                      confidence: 98
+                      page: 2
+                      bbox: [0.08, 0.34, 0.19, 0.36]
+                      bbox_confidence: 91
+                    amount:
+                      value: '2300.00'
+                      confidence: 95
             createdDate: { type: string, format: date-time }
             results:
               type: array
@@ -1469,7 +1512,8 @@ components:
       description: |
         One extracted field: the value, how certain the model is of it, and where on the
         document it was read from. These are the objects that fill `data.metadata`, and
-        the cells inside a table-shaped field's `items` rows.
+        the cells of each row of a list field, which is an array of rows keyed by column
+        name — see `data.metadata`.
 
         The three location keys are present or absent together — see `data.metadata` for
         the coordinate convention they follow.
