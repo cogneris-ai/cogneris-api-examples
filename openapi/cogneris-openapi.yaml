@@ -115,10 +115,12 @@ info:
     it subscribes to, and events from sandbox jobs are never delivered, so a sandbox
     key is refused.
 
-    Each delivery carries three headers:
+    Each delivery carries four headers:
 
     - `X-Xtrakt-Event` — the event name, such as `extract.processed`.
-    - `X-Xtrakt-Delivery` — a fresh id per send. It is not a deduplication key.
+    - `X-Xtrakt-Delivery` — one id shared by every attempt of the same event at the
+      same endpoint. Deduplicate on it.
+    - `X-Xtrakt-Delivery-Attempt` — the attempt number, `1` on the first send.
     - `X-Xtrakt-Signature` — `t=<unix seconds>,v1=<hex>`, where `v1` is the
       HMAC-SHA256 of `<t>.<raw body>` keyed with the endpoint's `whsec_` secret.
       Recompute it over the raw bytes, compare in constant time, and reject a `t`
@@ -146,10 +148,14 @@ info:
     - **A job's outcome never depends on its webhook.** A job that succeeded stays
       succeeded when the delivery fails; `GET /api/v1/document-jobs/{jobId}` is the
       source of truth.
-    - **One attempt per endpoint, no retry.** A timeout or a non-2xx answer is
-      recorded and not sent again. Answer `2xx` fast and do the work afterwards, and
-      reconcile periodically with `GET /api/v1/document-jobs`.
-    - **Duplicates are rare but possible.** Deduplicate on `JobId` plus the event.
+    - **Up to 5 attempts per endpoint, the first one included.** A timeout, a
+      transport failure, or a `5xx`, `408` or `429` answer is retried with exponential
+      backoff (10 s to 600 s between attempts); any other `4xx` is final. The attempt
+      that reaches the ceiling is recorded as `webhook_retries_exhausted`. Answer `2xx`
+      fast and do the work afterwards, and reconcile periodically with
+      `GET /api/v1/document-jobs`.
+    - **Duplicates are possible.** Deduplicate on `X-Xtrakt-Delivery`, or on `JobId`
+      plus the event.
     - Every delivery attempt is metered as webhook usage, successful or not.
 
     ## Rate limits
@@ -193,7 +199,7 @@ servers:
   - url: https://api-eu.cogneris.ai
     description: Production — Europe (europe-west1)
   - url: https://api-us.cogneris.ai
-    description: Production — United States (us-central1)
+    description: United States (us-central1) — region paused since 2026-10-27; new accounts are created in Europe
 
 security:
   - ApiKey: []
