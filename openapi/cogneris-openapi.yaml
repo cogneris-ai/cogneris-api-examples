@@ -47,7 +47,7 @@ info:
 
     - Accepted extensions: `.pdf`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`,
       `.bmp`, `.doc`, `.docx`
-    - Maximum size: 10 MB per file, except `/Document/split`, which accepts 500 MB
+    - Maximum size: 10 MB per file, except `/Document/split`, which accepts 32 MB
 
     The asynchronous job endpoints do not take a file. Upload it first to
     `POST /api/v1/artifacts` — same extensions, same 10 MB limit — and submit the
@@ -358,8 +358,8 @@ paths:
       summary: Split a bundle into its documents
       description: |
         Breaks one file into the documents it contains, returning a detected type and
-        page range per segment. Accepts files up to 500 MB — well above the 10 MB
-        limit that applies to the other document endpoints. PDFs work best; other
+        page range per segment. Accepts files up to 32 MB (the other document
+        endpoints accept up to 10 MB). PDFs work best; other
         supported formats are accepted but usually return a single segment.
       operationId: splitDocument
       requestBody:
@@ -1196,7 +1196,7 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
     PayloadTooLarge:
-      description: Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+      description: Over the size limit — 10 MB, or 32 MB on `/Document/split`.
     UnsupportedMediaType:
       description: |
         The file's type is not accepted. The body is the service envelope

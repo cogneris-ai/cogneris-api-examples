@@ -102,7 +102,7 @@ class DocumentationContractTests(unittest.TestCase):
             "multipart/form-data",
             "50 requests",
             "10 mb",
-            "500 mb",
+            "32 mb",
             "tenant configuration",
             "evidence",
             "cost",

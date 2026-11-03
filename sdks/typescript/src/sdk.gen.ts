@@ -95,8 +95,8 @@ export const cropDocument = <ThrowOnError extends boolean = false>(options: Opti
  * Split a bundle into its documents
  *
  * Breaks one file into the documents it contains, returning a detected type and
- * page range per segment. Accepts files up to 500 MB — well above the 10 MB
- * limit that applies to the other document endpoints. PDFs work best; other
+ * page range per segment. Accepts files up to 32 MB (the other document
+ * endpoints accept up to 10 MB). PDFs work best; other
  * supported formats are accepted but usually return a single segment.
  *
  */
