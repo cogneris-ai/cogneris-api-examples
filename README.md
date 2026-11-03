@@ -397,7 +397,7 @@ response, exception context, document, or credential.
 
 - Uploads use `multipart/form-data`. Accepted extensions are `.pdf`, `.png`,
   `.jpg`, `.jpeg`, `.tiff`, `.tif`, `.bmp`, `.doc`, and `.docx`.
-- The maximum is 10 MB per file except `/Document/split`, which accepts 500 MB.
+- The maximum is 10 MB per file except `/Document/split`, which accepts 32 MB.
 - There is no fetch-by-URL upload: synchronous documents travel in the request
   body. Asynchronous submission takes the `artifact://` reference that
   `POST /api/v1/artifacts` returns; the generated SDKs expose it as the

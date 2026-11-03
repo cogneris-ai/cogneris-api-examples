@@ -872,7 +872,7 @@ export type ExtractDocumentErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -990,7 +990,7 @@ export type ClassifyDocumentsErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -1103,7 +1103,7 @@ export type ZeroShotDocumentErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -1216,7 +1216,7 @@ export type CropDocumentErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -1329,7 +1329,7 @@ export type SplitDocumentErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -1451,7 +1451,7 @@ export type FaceMatchDocumentErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -1571,7 +1571,7 @@ export type UploadArtifactErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
@@ -2611,7 +2611,7 @@ export type VerifyDocumentFraudErrors = {
      */
     409: ProblemDetails;
     /**
-     * Over the size limit — 10 MB, or 500 MB on `/Document/split`.
+     * Over the size limit — 10 MB, or 32 MB on `/Document/split`.
      */
     413: unknown;
     /**
