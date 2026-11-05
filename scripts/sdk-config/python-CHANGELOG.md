@@ -25,7 +25,7 @@ artifacts are source outputs only; publication is a separate release action.
   reads it back. Production keys with `fraud-verify.write` (`fraud-verify.read` to read back) only;
   additive, no existing field changes (WOR-202, #69).
 
-- Regenerated from contract `2026-10-30` (WOR-224). Documentation only in the
+- Regenerated from contract `2026-10-30` (WOR-224, #76). Documentation only in the
   generated code: the `415` description names the envelope codes
   (`ADMISSION_UNSUPPORTED_MEDIA_TYPE` when the file part had no usable `Content-Type`
   and its type could not be inferred, `document.unsupported_media_type` for a type
@@ -33,6 +33,10 @@ artifacts are source outputs only; publication is a separate release action.
   array of rows of `ExtractedField` cells, which is what the API returns. No field,
   type or parsing change. The contract lists the Europe server first, so the other
   generated SDKs default to `https://api-eu.cogneris.ai`, matching `CognerisClient`.
+
+- The `split_document` docstrings state the 32 MB limit of `/Document/split` (was 500 MB);
+  the other document endpoints stay at 10 MB. Documentation only in the generated code; no
+  field, type or parsing change (XTRAK-2877, #79).
 
 - `CognerisClient` defaults `region` to `"eu"` instead of `"us"`. A caller on a US-hosted
   tenant that omitted `region` must now pass `region="us"` (WOR-206, #73).
