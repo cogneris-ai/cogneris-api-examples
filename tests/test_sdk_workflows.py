@@ -18,7 +18,7 @@ ALLOWED_ACTIONS = {"actions/checkout", "actions/setup-node", "actions/setup-pyth
                    "pypa/gh-action-pypi-publish"}
 REQUIRED_ACTION_PINS = {
     "actions/setup-dotnet": "a98b56852c35b8e3190ac28c8c2271da59106c68",
-    "actions/setup-java": "b843ebf9b913146b38da2eaa7aeddf76074ae1ad",
+    "actions/setup-java": "77dd5b2ce225ea11469928ac317850245a74ae78",
 }
 
 
