@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 .worktrees/
 cli/dist/
+examples/http-*/dotnet/bin/
+examples/http-*/dotnet/obj/

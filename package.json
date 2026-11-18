@@ -20,7 +20,7 @@
     "verify:artifacts": "python3 scripts/sdk-release.py verify",
     "verify:sdks": "npm run check:sdks && npm run test:sdk:typescript && npm run test:sdk:python && npm run test:sdk:csharp && npm run test:sdk:java",
     "smoke:live": "node scripts/smoke-live.mjs",
-    "test": "PYTHONDONTWRITEBYTECODE=1 uv run --with PyYAML==6.0.3 --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' python -m unittest discover -s tests -p 'test_*.py'"
+    "test": "PYTHONDONTWRITEBYTECODE=1 uv run --with PyYAML==6.0.3 --with 'httpx>=0.23,<0.29' --with 'attrs>=22.2' --with 'python-dateutil>=2.8,<3' --with 'requests==2.32.5' python -m unittest discover -s tests -p 'test_*.py'"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
