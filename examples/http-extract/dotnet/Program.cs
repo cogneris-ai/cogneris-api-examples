@@ -1,0 +1,32 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+
+if (args.Length != 2 || !Guid.TryParse(args[1], out var template)) throw new ArgumentException("Usage: dotnet run -- DOCUMENT.pdf TEMPLATE_ID");
+var key = Environment.GetEnvironmentVariable("COGNERIS_API_KEY");
+if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("Set COGNERIS_API_KEY in the environment.");
+var baseUrl = (Environment.GetEnvironmentVariable("COGNERIS_API_BASE") ?? "https://api-eu.cogneris.ai").TrimEnd('/');
+var baseUri = new Uri(baseUrl);
+if (baseUri.Scheme != Uri.UriSchemeHttps && !(baseUri.Scheme == Uri.UriSchemeHttp && (baseUri.Host == "127.0.0.1" || baseUri.Host == "localhost")))
+    throw new InvalidOperationException("Use HTTPS for the API; HTTP is allowed only for a local test server.");
+using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
+client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
+await using var input = File.OpenRead(args[0]);
+using var file = new StreamContent(input);
+file.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+using var form = new MultipartFormDataContent();
+form.Add(file, "file", Path.GetFileName(args[0]));
+using var upload = await client.PostAsync(baseUrl + "/api/v1/artifacts", form);
+upload.EnsureSuccessStatusCode();
+using var envelope = JsonDocument.Parse(await upload.Content.ReadAsStringAsync());
+if (envelope.RootElement.GetProperty("hasErrors").GetBoolean()) throw new InvalidOperationException("Artifact upload reported an error.");
+var reference = envelope.RootElement.GetProperty("data").GetProperty("reference").GetString() ?? throw new InvalidOperationException("Missing artifact reference.");
+using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/api/v1/document-jobs");
+request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+request.Content = new StringContent(JsonSerializer.Serialize(new { operation = "Extraction", inputReference = reference, templateId = template }), Encoding.UTF8, "application/json");
+using var job = await client.SendAsync(request);
+job.EnsureSuccessStatusCode();
+var body = await job.Content.ReadAsStringAsync();
+using var result = JsonDocument.Parse(body);
+if (result.RootElement.GetProperty("hasErrors").GetBoolean()) throw new InvalidOperationException("Job submission reported an error.");
+Console.WriteLine(body);
