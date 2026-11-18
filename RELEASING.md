@@ -12,6 +12,10 @@ Actions provenance; future automated releases require the trusted publishers bel
 [cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
 was published to PyPI through trusted publishing on 2026-09-21; its public wheel
 matched the CI artifact and passed all seven installed SDK checks.
+Version `1.0.0` of both npm packages and the Python SDK was published by
+[release run 41255908905](https://github.com/cogneris-ai/cogneris-api-examples/actions/runs/41255908905)
+from commit `9dc8b41ccc59045d3c3d6f2f8da98386f510e93f`; both publication jobs
+succeeded. Public registry readback on 2026-11-17 confirmed all three versions.
 [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
 was published to NuGet.org and verified by public installation on 2026-09-21.
 [ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
@@ -107,13 +111,14 @@ An owner must complete these steps outside this workflow:
 
 The `registry` input selects `all` (default), `npm`, or `pypi`. Select only a
 registry where the exact release version is not yet published and its prerequisites
-are complete. Version `1.0.0` (OpenAPI contract `2026-10-30`) is committed and
-not yet published to any registry; the owner gates below, including confirming
-that the Apache-2.0 release authorization covers the `1.0.0` source commit,
-apply before a real release. Both npm packages and PyPI `0.1.0` are already published: do not
-dispatch a real release (`dry_run: false`) for that version with any registry
-selection. Dry-run validation remains supported. Use a single-registry
-selection for an owner-reviewed partial-release recovery. Every selection
+are complete. Version `1.0.0` (OpenAPI contract `2026-10-30`) is already published
+to npm and PyPI: do not dispatch a real release (`dry_run: false`) for `0.1.0`
+or `1.0.0` to those registries. On 2026-11-17 the NuGet and Maven Central paths
+for `1.0.0` returned 404; their publication is separate and requires the owner
+gates above, including confirming Apache-2.0 authorization for the exact source
+commit and verifying the artifacts to be published. Dry-run validation remains
+supported. Use a single-registry selection for an owner-reviewed partial-release
+recovery. Every selection
 still builds and verifies all package families and runs the full Python matrix;
 unselected publication jobs are skipped before requesting environment approval.
 
