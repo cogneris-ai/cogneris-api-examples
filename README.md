@@ -67,14 +67,13 @@ only controlled status summaries and identifiers.
 
 ## Package availability
 
-The TypeScript SDK [@cogneris-ai/document-ai-sdk 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/0.1.0)
-and CLI [@cogneris-ai/document-ai-cli 0.1.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/0.1.0)
-are available on npm. Both public tarballs matched the approved release artifacts;
-five SDK and twelve CLI consumer tests passed on 2026-09-21. Install them in your
-consumer project with Node.js >=20.0.0:
+The TypeScript SDK [@cogneris-ai/document-ai-sdk 1.0.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-sdk/v/1.0.0)
+and CLI [@cogneris-ai/document-ai-cli 1.0.0](https://www.npmjs.com/package/@cogneris-ai/document-ai-cli/v/1.0.0)
+are available on npm. Install them in your consumer project with Node.js
+>=20.0.0:
 
 ```bash
-npm install @cogneris-ai/document-ai-sdk@0.1.0 @cogneris-ai/document-ai-cli@0.1.0
+npm install @cogneris-ai/document-ai-sdk@1.0.0 @cogneris-ai/document-ai-cli@1.0.0
 ```
 
 The Java SDK [ai.cogneris:cogneris-document-ai-sdk:0.1.0](https://repo.maven.apache.org/maven2/ai/cogneris/cogneris-document-ai-sdk/0.1.0/)
@@ -91,10 +90,12 @@ on 2026-09-21. Add this dependency to your Maven project:
 </dependency>
 ```
 
-The Python SDK [cogneris-document-ai-sdk 0.1.0](https://pypi.org/project/cogneris-document-ai-sdk/0.1.0/)
-is available on PyPI. Its public wheel matched the verified CI artifact and
-passed all seven installed SDK checks on 2026-09-21. The local wheel instructions
-below remain an alternative for inspecting release artifacts.
+The Python SDK [cogneris-document-ai-sdk 1.0.0](https://pypi.org/project/cogneris-document-ai-sdk/1.0.0/)
+is available on PyPI for Python 3.9 and later, up to but excluding Python 4:
+
+```bash
+python -m pip install cogneris-document-ai-sdk==1.0.0
+```
 
 The C# SDK [Cogneris.DocumentAI 0.1.0](https://www.nuget.org/packages/Cogneris.DocumentAI/0.1.0)
 is available on NuGet.org. Its public package was installed and passed all nine
@@ -102,18 +103,18 @@ is available on NuGet.org. Its public package was installed and passed all nine
 an alternative for inspecting owner-provided artifacts. No repository workflow
 publishes to NuGet or Maven Central.
 
-On 2026-09-25, fresh consumer directories successfully installed npm SDK/CLI
+On 2026-09-25, fresh consumer directories successfully installed the npm SDK/CLI
 0.1.0, the PyPI SDK 0.1.0, and the NuGet package 0.1.0. The NuGet restore used
 a .NET 10 consumer because this host has only the .NET 10 SDK. The Java 17
 consumer result above remains the latest Java install evidence; a Java runtime
 was unavailable for a repeat install on this host.
 
-The committed source for all five SDK/CLI package families is version
-`1.0.0`, generated from OpenAPI contract `2026-10-30`. Source metadata does not
-mean the version has been published. This coordinated major release removes the
-public `DocumentJobSubmitStatus` type and uses `DocumentJobStatus` for job
-submission status; see [VERSIONING.md](VERSIONING.md) for the migration and
-compatibility details. The local release instructions below build `1.0.0`.
+The committed source and the local build instructions below use version
+`1.0.0`, generated from OpenAPI contract `2026-10-30`. The
+[release workflow record](RELEASING.md) tracks npm and PyPI publication. NuGet
+and Maven Central currently provide version `0.1.0`. Version `1.0.0` uses
+`DocumentJobStatus` for job submission status. See [VERSIONING.md](VERSIONING.md)
+for the migration from `DocumentJobSubmitStatus` and compatibility details.
 
 ## Install local release artifacts
 
